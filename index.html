@@ -1,34 +1,792 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-    <title>Mijn Dropbox App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://unpkg.com"></script>
-    <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        button { padding: 15px 25px; font-size: 16px; cursor: pointer; background: #0061ff; color: white; border: none; border-radius: 5px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Werkorder — RJ Oppervlakteherstel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f1ec;
+  --surface: #ffffff;
+  --surface2: #f9f7f4;
+  --border: #e2ddd7;
+  --border2: #ccc7bf;
+  --text: #1c1916;
+  --text2: #6b6560;
+  --text3: #9c9790;
+  --accent: #b5820c;
+  --accent-bg: #fef8e7;
+  --green: #2a7a4e;
+  --green-bg: #edf7f2;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --blue: #2055a4;
+  --blue-bg: #edf2fc;
+  --r: 10px;
+  --rlg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; min-height: 100vh; }
+
+/* HEADER */
+.hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: .06em; font-weight: 500; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.sync-status { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.sync-status.ok { color: var(--green); }
+.sync-status.err { color: var(--red); }
+
+/* TABS */
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 18px; gap: 2px; overflow-x: auto; }
+.tab { padding: 11px 14px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* PANELS */
+.panel { display: none; padding: 18px; padding-bottom: 60px; }
+.panel.active { display: block; }
+
+/* FORM FIELDS */
+.slbl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .12em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; margin-top: 22px; }
+.slbl:first-child { margin-top: 0; }
+.field { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 13px; margin-bottom: 7px; transition: border-color .2s; }
+.field:focus-within { border-color: var(--accent); }
+.field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; font-weight: 500; }
+.field input, .field textarea, .field select { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; -webkit-appearance: none; }
+.field textarea { resize: none; min-height: 80px; line-height: 1.6; }
+.field select option { background: var(--surface); }
+::placeholder { color: var(--text3); }
+
+/* TYPE GRID */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.tbtn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: 'DM Sans', sans-serif; line-height: 1.4; transition: all .15s; }
+.tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
+.tbtn.sel { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+/* BUTTONS */
+.btn { width: 100%; padding: 13px; border-radius: var(--r); border: none; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s; margin-top: 7px; }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid #e8c0bc; font-size: 13px; padding: 9px; }
+.btn-edit { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); margin-bottom: 7px; font-size: 14px; }
+.btn-print { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; margin-bottom: 7px; font-size: 14px; }
+.btn-sm { width: auto; padding: 7px 14px; font-size: 13px; margin-top: 0; }
+
+/* SIGNATURE */
+.sig-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 7px; }
+.sig-top { padding: 9px 13px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.sig-top span { font-size: 12px; color: var(--text3); }
+.sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: 'DM Sans', sans-serif; }
+.sig-clr:hover { border-color: var(--red); color: var(--red); }
+canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; cursor: crosshair; background: #fafaf8; }
+.sig-hint { padding: 7px 13px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
+.sig-preview { width: 100%; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.b-nieuw { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; }
+.b-bezig { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
+.b-klaar { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 18px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 10px; text-align: center; }
+.stat-n { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; margin-bottom: 2px; }
+.stat-l { font-size: 11px; color: var(--text3); }
+
+/* ORDER CARDS */
+.ocard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); padding: 14px; margin-bottom: 9px; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.ocard:hover { border-color: var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.ocard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 7px; }
+.onr { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.oname { font-size: 15px; font-weight: 600; }
+.ometa { font-size: 12px; color: var(--text2); display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+.otype { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 11px; color: var(--text2); margin-top: 5px; }
+.sig-ok { font-size: 11px; color: var(--green); margin-top: 3px; }
+
+/* DETAIL */
+.det-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.back { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; color: var(--text2); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.drow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 13px; margin-bottom: 7px; }
+.drow-l { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.drow-v { font-size: 14px; color: var(--text); line-height: 1.5; }
+.status-row { display: flex; gap: 7px; margin-bottom: 14px; }
+.sopt { flex: 1; padding: 9px 4px; border-radius: var(--r); border: 1px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
+.sopt.a-nieuw { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
+.sopt.a-bezig { background: var(--accent-bg); color: var(--accent); border-color: #e8d090; }
+.sopt.a-klaar { background: var(--green-bg); color: var(--green); border-color: #b0ddc0; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+/* MODAL */
+.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; }
+.modal-ov.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--rlg) var(--rlg) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 18px; padding-bottom: 40px; }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-ttl { font-size: 16px; font-weight: 600; }
+.mclose { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text2); }
+
+/* DROPBOX LOGIN SCREEN */
+.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; }
+.login-icon { font-size: 48px; margin-bottom: 16px; }
+.login-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 28px; max-width: 320px; }
+.btn-dropbox { background: #0061FF; color: #fff; border: none; border-radius: var(--r); padding: 14px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 10px; transition: background .2s; }
+.btn-dropbox:hover { background: #004ecc; }
+.login-note { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.6; }
+
+/* EMPTY */
+.empty { text-align: center; padding: 40px 18px; color: var(--text3); }
+.empty-icon { font-size: 30px; margin-bottom: 10px; }
+.empty-txt { font-size: 14px; line-height: 1.6; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 11px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* LOADING */
+.loading { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+
+/* PRINT STYLES */
+@media print {
+  body { background: #fff; }
+  .hdr, .tabs, .no-print { display: none !important; }
+  .panel { display: block !important; padding: 0; }
+  .print-only { display: block !important; }
+  .werkbon { page-break-after: always; padding: 24px; font-family: 'DM Sans', sans-serif; }
+  .werkbon-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #1c1916; padding-bottom: 14px; }
+  .werkbon-logo { font-size: 18px; font-weight: 700; }
+  .werkbon-nr { font-size: 13px; color: #666; font-family: 'DM Mono', monospace; }
+  .werkbon table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .werkbon td { padding: 7px 10px; border: 1px solid #ddd; font-size: 13px; vertical-align: top; }
+  .werkbon td:first-child { font-weight: 500; width: 34%; background: #f9f9f9; }
+  .werkbon-sig { margin-top: 24px; border-top: 1px solid #ddd; padding-top: 14px; }
+  .werkbon-sig img { max-height: 80px; border: 1px solid #ddd; border-radius: 6px; }
+  .print-list table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .print-list th { background: #f0ede8; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #ddd; }
+  .print-list td { padding: 7px 10px; border: 1px solid #ddd; vertical-align: top; }
+  .print-list tr:nth-child(even) td { background: #fafafa; }
+}
+.print-only { display: none; }
+</style>
 </head>
 <body>
-    <h2>Mijn Dropbox App</h2>
-    <button id="auth-button">Inloggen bij Dropbox</button>
-    <div id="content"></div>
 
-    <script>
-        const DBX_APP_KEY = 'w0f0jvrhd3q50vo'; // Jouw sleutel staat hier al goed
-        const dbx = new Dropbox.Dropbox({ clientId: DBX_APP_KEY });
+<div class="hdr">
+  <div class="logo">RJ / WERKORDER</div>
+  <div class="hdr-right">
+    <span class="sync-status" id="syncStatus">niet verbonden</span>
+    <button class="btn btn-sm btn-secondary no-print" id="logoutBtn" style="display:none;font-size:12px;padding:5px 10px" onclick="logout()">Uitloggen</button>
+  </div>
+</div>
 
-        document.getElementById('auth-button').addEventListener('click', () => {
-            const authUrl = dbx.auth.getAuthenticationUrl(window.location.href);
-            window.location.href = authUrl;
-        });
+<div class="tabs no-print">
+  <div class="tab active" onclick="switchTab('nieuw')">+ Nieuw</div>
+  <div class="tab" onclick="switchTab('overzicht')">Opdrachten</div>
+  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab('detail')">Detail</div>
+  <div class="tab" onclick="switchTab('print')">Printen</div>
+</div>
 
-        // Check of we terugkomen van Dropbox login
-        const accessToken = new URLSearchParams(window.location.hash.substring(1)).get('access_token');
-        if (accessToken) {
-            document.getElementById('auth-button').style.display = 'none';
-            document.getElementById('content').innerText = 'Je bent ingelogd!';
-        }
-    </script>
+<!-- NIEUW -->
+<div class="panel active" id="panel-nieuw">
+  <div id="loginScreen" class="login-screen">
+    <div class="login-icon">📦</div>
+    <div class="login-title">Verbinden met Dropbox</div>
+    <div class="login-sub">Koppel je Dropbox-account zodat opdrachten automatisch synchroniseren tussen je PC, telefoon en tablet.</div>
+    <button class="btn-dropbox" onclick="startDropboxAuth()">
+      <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+      Inloggen met Dropbox
+    </button>
+    <div class="login-note">Je gegevens blijven in je eigen Dropbox.<br>De app heeft alleen toegang tot één map.</div>
+  </div>
+
+  <div id="newForm" style="display:none">
+    <div class="slbl">Type werkzaamheden</div>
+    <div class="type-grid">
+      <button class="tbtn" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+    </div>
+
+    <div class="slbl">Klantgegevens</div>
+    <div class="field"><label>Naam klant / bedrijf</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
+    <div class="field"><label>Adres</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
+    <div class="field"><label>Telefoon (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres klant (optioneel)</label><input type="email" id="f_email" placeholder="klant@email.nl"></div>
+
+    <div class="slbl">Opdracht</div>
+    <div class="field"><label>Datum afspraak</label><input type="date" id="f_datum"></div>
+    <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden, materiaal, bijzonderheden..."></textarea></div>
+
+    <div class="slbl">Handtekening klant voor akkoord</div>
+    <div class="sig-wrap">
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
+      <canvas id="sigCanvas" class="sigpad"></canvas>
+      <div class="sig-hint">Klant tekent voor akkoord reparatie</div>
+    </div>
+    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
+  </div>
+</div>
+
+<!-- OVERZICHT -->
+<div class="panel" id="panel-overzicht">
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nieuw</div></div>
+    <div class="stat"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Bezig</div></div>
+    <div class="stat"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar</div></div>
+  </div>
+  <div id="orderList"><div class="loading">Laden...</div></div>
+</div>
+
+<!-- DETAIL -->
+<div class="panel" id="panel-detail">
+  <div id="detailContent"></div>
+</div>
+
+<!-- PRINTEN -->
+<div class="panel" id="panel-print">
+  <div class="slbl" style="margin-top:0">Werkbon (één opdracht)</div>
+  <div class="field"><label>Opdrachtnummer</label>
+    <select id="printSelect"><option value="">— Kies opdracht —</option></select>
+  </div>
+  <button class="btn btn-print no-print" onclick="printWerkbon()">🖨️ Werkbon afdrukken</button>
+
+  <div class="slbl">Opdrachtenlijst</div>
+  <div class="field"><label>Status filteren</label>
+    <select id="listFilter">
+      <option value="alle">Alle opdrachten</option>
+      <option value="nieuw">Alleen nieuw</option>
+      <option value="bezig">Alleen bezig</option>
+      <option value="klaar">Alleen klaar</option>
+    </select>
+  </div>
+  <button class="btn btn-print no-print" onclick="printList()">🖨️ Lijst afdrukken</button>
+</div>
+
+<!-- PRINT OUTPUT (verborgen, alleen voor printen) -->
+<div class="print-only" id="printOutput"></div>
+
+<!-- BEWERK MODAL -->
+<div class="modal-ov" id="editModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-ttl">Opdracht bewerken</div>
+      <button class="mclose" onclick="closeEdit()">Sluiten</button>
+    </div>
+    <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
+    <div class="type-grid">
+      <button class="tbtn" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+    </div>
+    <div class="slbl">Klantgegevens</div>
+    <div class="field"><label>Naam klant / bedrijf</label><input type="text" id="e_naam"></div>
+    <div class="field"><label>Adres</label><input type="text" id="e_adres"></div>
+    <div class="field"><label>Telefoon</label><input type="tel" id="e_tel"></div>
+    <div class="field"><label>E-mailadres klant</label><input type="email" id="e_email"></div>
+    <div class="slbl">Opdracht</div>
+    <div class="field"><label>Datum afspraak</label><input type="date" id="e_datum"></div>
+    <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
+    <div class="slbl">Handtekening</div>
+    <div id="e_sig_existing" style="display:none;margin-bottom:8px">
+      <img id="e_sig_img" class="sig-preview" alt="Handtekening">
+      <button class="btn btn-secondary" style="margin-top:7px;font-size:13px;padding:9px" onclick="replaceEditSig()">Handtekening vervangen</button>
+    </div>
+    <div id="e_sig_new">
+      <div class="sig-wrap">
+        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
+        <canvas id="editSigCanvas" class="sigpad"></canvas>
+        <div class="sig-hint">Laat leeg om bestaande te behouden</div>
+      </div>
+    </div>
+    <input type="hidden" id="e_id">
+    <button class="btn btn-primary" onclick="saveEdit()">Wijzigingen opslaan</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DROPBOX CONFIG
+// ============================================================
+// Gebruik je eigen App Key van https://www.dropbox.com/developers
+// Maak een app aan: Apps > Create app > Scoped access > App folder
+// Voeg bij Redirect URIs toe: het adres waarop je dit bestand host
+// Verander dan 'JOUW_APP_KEY_HIER' naar je eigen key
+const DBX_APP_KEY = 'w0f0jvrhd3q50vo';
+const DBX_REDIRECT = 'https://rj-werkorder.netlify.app';
+const DBX_FILE = '/werkorders.json';
+
+// ============================================================
+// STATE
+// ============================================================
+let token = localStorage.getItem('dbx_token') || null;
+let orders = [];
+let selTypeVal = '';
+let editSelType = '';
+let editHasSig = false;
+let editSigCtx = null;
+
+// ============================================================
+// DROPBOX AUTH
+// ============================================================
+function startDropboxAuth() {
+  const state = Math.random().toString(36).slice(2);
+  localStorage.setItem('dbx_state', state);
+  const url = `https://www.dropbox.com/oauth2/authorize?client_id=${DBX_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DBX_REDIRECT)}&state=${state}`;
+  window.location.href = url;
+}
+
+function handleAuthCallback() {
+  const hash = window.location.hash;
+  if (!hash) return false;
+  const params = new URLSearchParams(hash.slice(1));
+  const at = params.get('access_token');
+  const state = params.get('state');
+  if (at && state === localStorage.getItem('dbx_state')) {
+    token = at;
+    localStorage.setItem('dbx_token', at);
+    window.location.hash = '';
+    return true;
+  }
+  return false;
+}
+
+function logout() {
+  localStorage.removeItem('dbx_token');
+  localStorage.removeItem('dbx_state');
+  token = null;
+  orders = [];
+  showLoginScreen();
+}
+
+// ============================================================
+// DROPBOX API
+// ============================================================
+async function dbxRead() {
+  setSyncStatus('laden...', '');
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE })
+      }
+    });
+    if (r.status === 409) { orders = []; setSyncStatus('verbonden', 'ok'); return; }
+    if (!r.ok) throw new Error('read ' + r.status);
+    const text = await r.text();
+    orders = JSON.parse(text);
+    setSyncStatus('gesynchroniseerd', 'ok');
+  } catch(e) {
+    setSyncStatus('fout bij laden', 'err');
+    orders = JSON.parse(localStorage.getItem('rj_orders_backup') || '[]');
+  }
+}
+
+async function dbxWrite() {
+  setSyncStatus('opslaan...', '');
+  const body = JSON.stringify(orders, null, 2);
+  localStorage.setItem('rj_orders_backup', body);
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE, mode: 'overwrite', autorename: false }),
+        'Content-Type': 'application/octet-stream'
+      },
+      body
+    });
+    if (!r.ok) throw new Error('write ' + r.status);
+    setSyncStatus('gesynchroniseerd', 'ok');
+  } catch(e) {
+    setSyncStatus('offline — lokaal opgeslagen', 'err');
+  }
+}
+
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = msg;
+  el.className = 'sync-status' + (cls ? ' ' + cls : '');
+}
+
+// ============================================================
+// UI INIT
+// ============================================================
+async function init() {
+  const gotToken = handleAuthCallback();
+  document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
+
+  if (token) {
+    showAppScreen();
+    await dbxRead();
+    renderAll();
+  } else {
+    showLoginScreen();
+  }
+  initSigPad('sigCanvas');
+}
+
+function showLoginScreen() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('newForm').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+}
+
+function showAppScreen() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('newForm').style.display = 'block';
+  document.getElementById('logoutBtn').style.display = 'inline-block';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['nieuw','overzicht','detail','print'];
+  const idx = tabs.indexOf(tab);
+  if (idx >= 0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'overzicht') renderList();
+  if (tab === 'print') renderPrintSelect();
+}
+
+function renderAll() { renderList(); renderPrintSelect(); }
+
+// ============================================================
+// SIGNATURE PADS
+// ============================================================
+const sigStates = {};
+
+function initSigPad(id) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  c.width = (rect.width || 320) * dpr;
+  c.height = 150 * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#1c1916';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  sigStates[id] = { ctx, drawing: false, hasSig: false };
+
+  const pos = (e) => {
+    const r = c.getBoundingClientRect();
+    const s = e.touches ? e.touches[0] : e;
+    return { x: s.clientX - r.left, y: s.clientY - r.top };
+  };
+  c.addEventListener('mousedown', e => { sigStates[id].drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+  c.addEventListener('mousemove', e => { if(!sigStates[id].drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); sigStates[id].hasSig=true; });
+  c.addEventListener('mouseup', () => sigStates[id].drawing=false);
+  c.addEventListener('mouseleave', () => sigStates[id].drawing=false);
+  c.addEventListener('touchstart', e=>{e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove', e=>{e.preventDefault();if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
+  c.addEventListener('touchend', ()=>sigStates[id].drawing=false);
+}
+
+function clearSig(id) {
+  const s = sigStates[id];
+  if (!s) return;
+  const c = document.getElementById(id);
+  s.ctx.clearRect(0, 0, c.width, c.height);
+  s.hasSig = false;
+}
+
+function getSigData(id) {
+  const s = sigStates[id];
+  if (!s || !s.hasSig) return null;
+  return document.getElementById(id).toDataURL('image/png');
+}
+
+// ============================================================
+// NEW ORDER
+// ============================================================
+function selType(btn, type) {
+  document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selTypeVal = type;
+}
+
+async function saveOrder() {
+  if (!token) { showToast('Verbind eerst met Dropbox', true); return; }
+  const naam = document.getElementById('f_naam').value.trim();
+  if (!naam) { showToast('Vul een klantnaam in', true); return; }
+  if (!selTypeVal) { showToast('Kies een type werkzaamheden', true); return; }
+
+  const nr = 'RJ-' + String(orders.length + 1).padStart(4, '0');
+  orders.unshift({
+    id: Date.now(), nr, status: 'nieuw',
+    naam, type: selTypeVal,
+    adres: document.getElementById('f_adres').value.trim(),
+    tel: document.getElementById('f_tel').value.trim(),
+    email: document.getElementById('f_email').value.trim(),
+    datum: document.getElementById('f_datum').value,
+    omschr: document.getElementById('f_omschr').value.trim(),
+    sig: getSigData('sigCanvas'),
+    aangemaakt: new Date().toISOString()
+  });
+
+  await dbxWrite();
+
+  // Reset
+  ['f_naam','f_adres','f_tel','f_email','f_omschr'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
+  selTypeVal = '';
+  clearSig('sigCanvas');
+
+  showToast('✓ Opdracht ' + nr + ' opgeslagen in Dropbox');
+  switchTab('overzicht');
+}
+
+// ============================================================
+// LIST
+// ============================================================
+function renderList() {
+  const counts = { nieuw: 0, bezig: 0, klaar: 0 };
+  orders.forEach(o => { if(counts[o.status]!==undefined) counts[o.status]++; });
+  document.getElementById('s-nieuw').textContent = counts.nieuw;
+  document.getElementById('s-bezig').textContent = counts.bezig;
+  document.getElementById('s-klaar').textContent = counts.klaar;
+
+  const el = document.getElementById('orderList');
+  if (!orders.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';
+    return;
+  }
+  el.innerHTML = orders.map(o => `
+    <div class="ocard" onclick="showDetail(${o.id})">
+      <div class="ocard-top">
+        <div><div class="onr">${o.nr}</div><div class="oname">${o.naam}</div></div>
+        <span class="badge b-${o.status}">${o.status}</span>
+      </div>
+      <div class="ometa">
+        ${o.datum ? '<span>📅 ' + fmtDate(o.datum) + '</span>' : ''}
+        ${o.adres ? '<span>📍 ' + o.adres + '</span>' : ''}
+      </div>
+      <div class="otype">${o.type}</div>
+      ${o.sig ? '<div class="sig-ok">✓ Handtekening aanwezig</div>' : ''}
+    </div>`).join('');
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T12:00:00').toLocaleDateString('nl-NL', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ============================================================
+// DETAIL
+// ============================================================
+function showDetail(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('detailTabBtn').style.display = 'block';
+  const sopts = ['nieuw','bezig','klaar'].map(s =>
+    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`
+  ).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="det-hdr">
+      <button class="back" onclick="switchTab('overzicht')">← Terug</button>
+      <div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
+      <div style="font-size:16px;font-weight:600">${o.naam}</div></div>
+    </div>
+    <div class="slbl" style="margin-top:0">Status</div>
+    <div class="status-row">${sopts}</div>
+    <div class="slbl">Opdracht</div>
+    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
+    ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
+    ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
+    <div class="slbl">Klant</div>
+    <div class="drow"><div class="drow-l">Naam</div><div class="drow-v">${o.naam}</div></div>
+    ${o.adres?`<div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres}</div></div>`:''}
+    ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.tel}" style="color:var(--blue)">${o.tel}</a></div></div>`:''}
+    ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
+    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`
+    :`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
+    <div class="divider"></div>
+    <button class="btn btn-print no-print" onclick="printSingle(${id})">🖨️ Werkbon afdrukken</button>
+    <button class="btn btn-edit no-print" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
+    <button class="btn btn-danger no-print" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
+
+  switchTab('detail');
+}
+
+async function changeStatus(id, status) {
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  orders[idx].status = status;
+  await dbxWrite();
+  showDetail(id);
+  renderList();
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Opdracht verwijderen?')) return;
+  orders = orders.filter(x => x.id !== id);
+  await dbxWrite();
+  document.getElementById('detailTabBtn').style.display = 'none';
+  switchTab('overzicht');
+  showToast('Opdracht verwijderd');
+}
+
+// ============================================================
+// EDIT
+// ============================================================
+function openEdit(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('e_id').value = id;
+  document.getElementById('e_naam').value = o.naam || '';
+  document.getElementById('e_adres').value = o.adres || '';
+  document.getElementById('e_tel').value = o.tel || '';
+  document.getElementById('e_email').value = o.email || '';
+  document.getElementById('e_datum').value = o.datum || '';
+  document.getElementById('e_omschr').value = o.omschr || '';
+  editSelType = o.type || '';
+  document.querySelectorAll('#editModal .tbtn').forEach(b => {
+    b.classList.toggle('sel', b.getAttribute('onclick').includes("'" + editSelType + "'"));
+  });
+  if (o.sig) {
+    document.getElementById('e_sig_existing').style.display = 'block';
+    document.getElementById('e_sig_img').src = o.sig;
+    document.getElementById('e_sig_new').style.display = 'none';
+  } else {
+    document.getElementById('e_sig_existing').style.display = 'none';
+    document.getElementById('e_sig_new').style.display = 'block';
+  }
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(() => initSigPad('editSigCanvas'), 120);
+}
+
+function replaceEditSig() {
+  document.getElementById('e_sig_existing').style.display = 'none';
+  document.getElementById('e_sig_new').style.display = 'block';
+  setTimeout(() => initSigPad('editSigCanvas'), 120);
+}
+
+function selEditType(btn, type) {
+  document.querySelectorAll('#editModal .tbtn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  editSelType = type;
+}
+
+function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+
+async function saveEdit() {
+  const id = parseInt(document.getElementById('e_id').value);
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const naam = document.getElementById('e_naam').value.trim();
+  if (!naam) { showToast('Vul een klantnaam in', true); return; }
+  orders[idx].naam = naam;
+  orders[idx].adres = document.getElementById('e_adres').value.trim();
+  orders[idx].tel = document.getElementById('e_tel').value.trim();
+  orders[idx].email = document.getElementById('e_email').value.trim();
+  orders[idx].datum = document.getElementById('e_datum').value;
+  orders[idx].omschr = document.getElementById('e_omschr').value.trim();
+  if (editSelType) orders[idx].type = editSelType;
+  const newSig = getSigData('editSigCanvas');
+  if (newSig) orders[idx].sig = newSig;
+  await dbxWrite();
+  closeEdit();
+  showToast('✓ Wijzigingen opgeslagen in Dropbox');
+  showDetail(id);
+}
+
+// ============================================================
+// PRINT
+// ============================================================
+function renderPrintSelect() {
+  const sel = document.getElementById('printSelect');
+  sel.innerHTML = '<option value="">— Kies opdracht —</option>';
+  orders.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.id;
+    opt.textContent = o.nr + ' — ' + o.naam + (o.datum ? ' (' + fmtDate(o.datum) + ')' : '');
+    sel.appendChild(opt);
+  });
+}
+
+function werkbonHTML(o) {
+  return `<div class="werkbon">
+    <div class="werkbon-hdr">
+      <div><div class="werkbon-logo">RJ Oppervlakteherstel</div><div style="font-size:12px;color:#666;margin-top:3px">Rolfjurgen.nl</div></div>
+      <div class="werkbon-nr">${o.nr}<br><span style="font-size:11px">${new Date().toLocaleDateString('nl-NL')}</span></div>
+    </div>
+    <table>
+      <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
+      ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+      <tr><td>Klant</td><td>${o.naam}</td></tr>
+      ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
+      ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
+      ${o.email?`<tr><td>E-mail</td><td>${o.email}</td></tr>`:''}
+      <tr><td>Status</td><td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td></tr>
+      ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
+    </table>
+    ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:6px"></div>`:''}
+  </div>`;
+}
+
+function printSingle(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('printOutput').innerHTML = werkbonHTML(o);
+  window.print();
+}
+
+function printWerkbon() {
+  const id = parseInt(document.getElementById('printSelect').value);
+  if (!id) { showToast('Kies eerst een opdracht', true); return; }
+  printSingle(id);
+}
+
+function printList() {
+  const filter = document.getElementById('listFilter').value;
+  const filtered = filter === 'alle' ? orders : orders.filter(o => o.status === filter);
+  if (!filtered.length) { showToast('Geen opdrachten gevonden', true); return; }
+  const rows = filtered.map(o => `
+    <tr>
+      <td>${o.nr}</td>
+      <td>${o.naam}</td>
+      <td>${o.adres || ''}</td>
+      <td>${o.type}</td>
+      <td>${o.datum ? fmtDate(o.datum) : ''}</td>
+      <td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td>
+    </tr>`).join('');
+  document.getElementById('printOutput').innerHTML = `
+    <div class="print-list">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;border-bottom:2px solid #1c1916;padding-bottom:10px">
+        <div><div style="font-size:18px;font-weight:700">RJ Oppervlakteherstel</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
+        <div style="font-size:12px;color:#666">${filtered.length} opdrachten</div>
+      </div>
+      <table><thead><tr><th>Nr</th><th>Klant</th><th>Adres</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+  window.print();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isErr ? 'var(--red)' : 'var(--green)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// START
+// ============================================================
+window.addEventListener('load', init);
+</script>
 </body>
 </html>
