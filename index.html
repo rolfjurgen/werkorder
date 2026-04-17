@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0097)file:///C:/Users/Gebruiker/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-dropbox_2.html -->
-<html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Werkorder — RJ Oppervlakteherstel</title>
-<link href="./Werkorder — RJ Oppervlakteherstel_files/css2" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #f4f1ec;
@@ -181,20 +181,20 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 </div>
 
 <div class="tabs no-print">
-  <div class="tab active" onclick="switchTab(&#39;nieuw&#39;)">+ Nieuw</div>
-  <div class="tab" onclick="switchTab(&#39;overzicht&#39;)">Opdrachten</div>
-  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab(&#39;detail&#39;)">Detail</div>
-  <div class="tab" onclick="switchTab(&#39;print&#39;)">Printen</div>
+  <div class="tab active" onclick="switchTab('nieuw')">+ Nieuw</div>
+  <div class="tab" onclick="switchTab('overzicht')">Opdrachten</div>
+  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab('detail')">Detail</div>
+  <div class="tab" onclick="switchTab('print')">Printen</div>
 </div>
 
 <!-- NIEUW -->
 <div class="panel active" id="panel-nieuw">
-  <div id="loginScreen" class="login-screen" style="display: flex;">
+  <div id="loginScreen" class="login-screen">
     <div class="login-icon">📦</div>
     <div class="login-title">Verbinden met Dropbox</div>
     <div class="login-sub">Koppel je Dropbox-account zodat opdrachten automatisch synchroniseren tussen je PC, telefoon en tablet.</div>
     <button class="btn-dropbox" onclick="startDropboxAuth()">
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"></path><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"></path><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"></path></svg>
+      <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
       Inloggen met Dropbox
     </button>
     <div class="login-note">Je gegevens blijven in je eigen Dropbox.<br>De app heeft alleen toegang tot één map.</div>
@@ -203,17 +203,33 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
 
-    <div class="slbl">Klantgegevens</div>
-    <div class="field"><label>Naam klant / bedrijf</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
-    <div class="field"><label>Adres</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
-    <div class="field"><label>Telefoon (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
-    <div class="field"><label>E-mailadres klant (optioneel)</label><input type="email" id="f_email" placeholder="klant@email.nl"></div>
+    <div class="slbl">Opdrachtgever</div>
+    <div class="field">
+      <label>Type</label>
+      <select id="f_og_type" onchange="toggleOGFields()">
+        <option value="particulier">Particulier (opdrachtgever = bewoner)</option>
+        <option value="aannemer">Via aannemer / bedrijf</option>
+      </select>
+    </div>
+    <div id="f_og_extra" style="display:none">
+      <div class="field"><label>Naam aannemer / bedrijf</label><input type="text" id="f_og_naam" placeholder="Bouwbedrijf Janssen BV" autocomplete="off"></div>
+      <div class="field"><label>Contactpersoon aannemer</label><input type="text" id="f_og_contact" placeholder="Peter Janssen" autocomplete="off"></div>
+      <div class="field"><label>Telefoon aannemer</label><input type="tel" id="f_og_tel" placeholder="043 1234567"></div>
+      <div class="field"><label>Email aannemer</label><input type="email" id="f_og_email" placeholder="info@bouwbedrijf.nl"></div>
+      <div class="field"><label>Referentie / opdrachtnummer aannemer</label><input type="text" id="f_og_ref" placeholder="Werkopdracht nr. 2024-123" autocomplete="off"></div>
+    </div>
+
+    <div class="slbl">Locatie & bewoner</div>
+    <div class="field"><label>Naam bewoner</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
+    <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
+    <div class="field"><label>Telefoon bewoner (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres bewoner (optioneel)</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak</label><input type="date" id="f_datum"></div>
@@ -221,11 +237,11 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div class="sig-wrap">
-      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig(&#39;sigCanvas&#39;)">Wissen</button></div>
-      <canvas id="sigCanvas" class="sigpad" width="320" height="150"></canvas>
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
+      <canvas id="sigCanvas" class="sigpad"></canvas>
       <div class="sig-hint">Klant tekent voor akkoord reparatie</div>
     </div>
-    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan &amp; synchroniseren</button>
+    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
   </div>
 </div>
 
@@ -276,10 +292,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selEditType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div class="slbl">Klantgegevens</div>
     <div class="field"><label>Naam klant / bedrijf</label><input type="text" id="e_naam"></div>
@@ -296,7 +312,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div id="e_sig_new">
       <div class="sig-wrap">
-        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig(&#39;editSigCanvas&#39;)">Wissen</button></div>
+        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
         <canvas id="editSigCanvas" class="sigpad"></canvas>
         <div class="sig-hint">Laat leeg om bestaande te behouden</div>
       </div>
@@ -513,6 +529,11 @@ function selType(btn, type) {
   selTypeVal = type;
 }
 
+function toggleOGFields() {
+  const type = document.getElementById('f_og_type').value;
+  document.getElementById('f_og_extra').style.display = type === 'aannemer' ? 'block' : 'none';
+}
+
 async function saveOrder() {
   if (!token) { showToast('Verbind eerst met Dropbox', true); return; }
   const naam = document.getElementById('f_naam').value.trim();
@@ -523,6 +544,12 @@ async function saveOrder() {
   orders.unshift({
     id: Date.now(), nr, status: 'nieuw',
     naam, type: selTypeVal,
+    og_type: document.getElementById('f_og_type').value,
+    og_naam: document.getElementById('f_og_naam').value.trim(),
+    og_contact: document.getElementById('f_og_contact').value.trim(),
+    og_tel: document.getElementById('f_og_tel').value.trim(),
+    og_email: document.getElementById('f_og_email').value.trim(),
+    og_ref: document.getElementById('f_og_ref').value.trim(),
     adres: document.getElementById('f_adres').value.trim(),
     tel: document.getElementById('f_tel').value.trim(),
     email: document.getElementById('f_email').value.trim(),
@@ -535,7 +562,9 @@ async function saveOrder() {
   await dbxWrite();
 
   // Reset
-  ['f_naam','f_adres','f_tel','f_email','f_omschr'].forEach(id => document.getElementById(id).value = '');
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_og_type').value = 'particulier';
+  toggleOGFields();
   document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
   document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
   selTypeVal = '';
@@ -603,7 +632,16 @@ function showDetail(id) {
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
-    <div class="slbl">Klant</div>
+    <div class="slbl">Opdrachtgever</div>
+    ${o.og_type === 'aannemer' ? `
+    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">Via aannemer / bedrijf</div></div>
+    ${o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}</div></div>`:''}
+    ${o.og_contact?`<div class="drow"><div class="drow-l">Contactpersoon</div><div class="drow-v">${o.og_contact}</div></div>`:''}
+    ${o.og_tel?`<div class="drow"><div class="drow-l">Tel. aannemer</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
+    ${o.og_email?`<div class="drow"><div class="drow-l">Email aannemer</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
+    ${o.og_ref?`<div class="drow"><div class="drow-l">Referentie</div><div class="drow-v">${o.og_ref}</div></div>`:''}
+    ` : `<div class="drow"><div class="drow-l">Type</div><div class="drow-v">Particulier</div></div>`}
+    <div class="slbl">Locatie & bewoner</div>
     <div class="drow"><div class="drow-l">Naam</div><div class="drow-v">${o.naam}</div></div>
     ${o.adres?`<div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres}</div></div>`:''}
     ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.tel}" style="color:var(--blue)">${o.tel}</a></div></div>`:''}
@@ -721,7 +759,9 @@ function werkbonHTML(o) {
       <div class="werkbon-nr">${o.nr}<br><span style="font-size:11px">${new Date().toLocaleDateString('nl-NL')}</span></div>
     </div>
     <table>
-      <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
+      ${o.og_type === 'aannemer' && o.og_naam ? `<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>` : ''}
+    ${o.og_ref ? `<tr><td>Referentie</td><td>${o.og_ref}</td></tr>` : ''}
+    <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
       ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
       <tr><td>Klant</td><td>${o.naam}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
@@ -788,6 +828,5 @@ function showToast(msg, isErr) {
 // ============================================================
 window.addEventListener('load', init);
 </script>
-
-
-</body></html>
+</body>
+</html>
