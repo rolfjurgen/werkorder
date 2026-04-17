@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="nl">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0097)file:///C:/Users/Gebruiker/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-dropbox_2.html -->
+<html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Werkorder — RJ Oppervlakteherstel</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="./Werkorder — RJ Oppervlakteherstel_files/css2" rel="stylesheet">
 <style>
 :root {
   --bg: #f4f1ec;
@@ -181,20 +181,20 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 </div>
 
 <div class="tabs no-print">
-  <div class="tab active" onclick="switchTab('nieuw')">+ Nieuw</div>
-  <div class="tab" onclick="switchTab('overzicht')">Opdrachten</div>
-  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab('detail')">Detail</div>
-  <div class="tab" onclick="switchTab('print')">Printen</div>
+  <div class="tab active" onclick="switchTab(&#39;nieuw&#39;)">+ Nieuw</div>
+  <div class="tab" onclick="switchTab(&#39;overzicht&#39;)">Opdrachten</div>
+  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab(&#39;detail&#39;)">Detail</div>
+  <div class="tab" onclick="switchTab(&#39;print&#39;)">Printen</div>
 </div>
 
 <!-- NIEUW -->
 <div class="panel active" id="panel-nieuw">
-  <div id="loginScreen" class="login-screen">
+  <div id="loginScreen" class="login-screen" style="display: flex;">
     <div class="login-icon">📦</div>
     <div class="login-title">Verbinden met Dropbox</div>
     <div class="login-sub">Koppel je Dropbox-account zodat opdrachten automatisch synchroniseren tussen je PC, telefoon en tablet.</div>
     <button class="btn-dropbox" onclick="startDropboxAuth()">
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+      <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"></path><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"></path><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"></path></svg>
       Inloggen met Dropbox
     </button>
     <div class="login-note">Je gegevens blijven in je eigen Dropbox.<br>De app heeft alleen toegang tot één map.</div>
@@ -203,10 +203,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
     </div>
 
     <div class="slbl">Klantgegevens</div>
@@ -221,11 +221,11 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div class="sig-wrap">
-      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
-      <canvas id="sigCanvas" class="sigpad"></canvas>
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig(&#39;sigCanvas&#39;)">Wissen</button></div>
+      <canvas id="sigCanvas" class="sigpad" width="320" height="150"></canvas>
       <div class="sig-hint">Klant tekent voor akkoord reparatie</div>
     </div>
-    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
+    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan &amp; synchroniseren</button>
   </div>
 </div>
 
@@ -276,10 +276,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selEditType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selEditType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
     </div>
     <div class="slbl">Klantgegevens</div>
     <div class="field"><label>Naam klant / bedrijf</label><input type="text" id="e_naam"></div>
@@ -296,7 +296,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div id="e_sig_new">
       <div class="sig-wrap">
-        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
+        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig(&#39;editSigCanvas&#39;)">Wissen</button></div>
         <canvas id="editSigCanvas" class="sigpad"></canvas>
         <div class="sig-hint">Laat leeg om bestaande te behouden</div>
       </div>
@@ -788,5 +788,6 @@ function showToast(msg, isErr) {
 // ============================================================
 window.addEventListener('load', init);
 </script>
-</body>
-</html>
+
+
+</body></html>
