@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_2.html -->
+<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_3.html -->
 <html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -231,6 +231,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <button class="tbtn" onclick="selType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
       <button class="tbtn" onclick="selType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
     </div>
+    <div id="f_overig_wrap" style="display:none">
+      <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair, tegel..." autocomplete="off"></div>
+    </div>
 
     <div class="slbl">Opdrachtgever</div>
     <div class="field">
@@ -338,6 +341,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <button class="tbtn" onclick="selEditType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
       <button class="tbtn" onclick="selEditType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
     </div>
+    <div id="e_overig_wrap" style="display:none">
+      <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="e_overig" placeholder="bijv. garagepoort, sanitair, tegel..."></div>
+    </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="field">
       <label>Type</label>
@@ -399,7 +405,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_2.html" alt="">
+  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_3.html" alt="">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -579,8 +585,20 @@ async function init() {
   if (token) {
     showAppScreen();
     await dbxRead();
+    // Als token verlopen is probeer opnieuw in te loggen
+    if (document.getElementById('syncStatus').classList.contains('err')) {
+      const stored = localStorage.getItem('dbx_token');
+      if (!stored) { showLoginScreen(); return; }
+    }
     renderAll();
     renderQueueBanner();
+    // Elke 45 minuten automatisch opnieuw verbinden
+    setInterval(async () => {
+      if (token) {
+        await dbxRead();
+        renderAll();
+      }
+    }, 45 * 60 * 1000);
   } else {
     showLoginScreen();
   }
@@ -729,6 +747,8 @@ function selType(btn, type) {
   document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
   selTypeVal = type;
+  document.getElementById('f_overig_wrap').style.display = type === 'Overig' ? 'block' : 'none';
+  if (type !== 'Overig') document.getElementById('f_overig').value = '';
 }
 
 function toggleOGFields() {
@@ -747,6 +767,9 @@ async function saveOrder() {
   if (!naam) { showToast('Vul een bewonernaam in', true); return; }
   if (!selTypeVal) { showToast('Kies een type werkzaamheden', true); return; }
 
+  const overigOmschr = document.getElementById('f_overig').value.trim();
+  const typeLabel = selTypeVal === 'Overig' && overigOmschr ? `Overig: ${overigOmschr}` : selTypeVal;
+
   const nr = 'RJ-' + String(orders.length + 1).padStart(4, '0');
   const mapPad = `/Fotos/${nr}`;
 
@@ -759,7 +782,7 @@ async function saveOrder() {
 
   orders.unshift({
     id: Date.now(), nr, status: 'nieuw',
-    naam, type: selTypeVal,
+    naam, type: typeLabel,
     og_type: document.getElementById('f_og_type').value,
     og_naam: document.getElementById('f_og_naam').value.trim(),
     og_contact: document.getElementById('f_og_contact').value.trim(),
@@ -779,7 +802,8 @@ async function saveOrder() {
 
   await dbxWrite();
 
-  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref'].forEach(id => document.getElementById(id).value = '');
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_overig_wrap').style.display = 'none';
   document.getElementById('f_og_type').value = 'particulier';
   toggleOGFields();
   document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
@@ -1042,8 +1066,12 @@ function openEdit(id) {
   document.getElementById('e_og_ref').value = o.og_ref || '';
   toggleEditOGFields();
   editSelType = o.type || '';
+  const isOverig = editSelType.startsWith('Overig');
+  document.getElementById('e_overig_wrap').style.display = isOverig ? 'block' : 'none';
+  if (isOverig) document.getElementById('e_overig').value = editSelType.replace('Overig: ','').replace('Overig','');
   document.querySelectorAll('#editModal .tbtn').forEach(b => {
-    b.classList.toggle('sel', b.getAttribute('onclick').includes("'"+editSelType+"'"));
+    const bType = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    b.classList.toggle('sel', isOverig ? bType === 'Overig' : bType === editSelType);
   });
   if (o.sig) {
     document.getElementById('e_sig_existing').style.display = 'block';
@@ -1067,6 +1095,7 @@ function selEditType(btn, type) {
   document.querySelectorAll('#editModal .tbtn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
   editSelType = type;
+  document.getElementById('e_overig_wrap').style.display = type === 'Overig' ? 'block' : 'none';
 }
 
 function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
@@ -1089,7 +1118,8 @@ async function saveEdit() {
   orders[idx].og_tel = document.getElementById('e_og_tel').value.trim();
   orders[idx].og_email = document.getElementById('e_og_email').value.trim();
   orders[idx].og_ref = document.getElementById('e_og_ref').value.trim();
-  if (editSelType) orders[idx].type = editSelType;
+  const eOverig = document.getElementById('e_overig').value.trim();
+  if (editSelType) orders[idx].type = (editSelType === 'Overig' && eOverig) ? `Overig: ${eOverig}` : editSelType;
   const newSig = getSigData('editSigCanvas');
   if (newSig) orders[idx].sig = newSig;
 
