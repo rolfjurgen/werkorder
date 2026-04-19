@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_1.html -->
+<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_2.html -->
 <html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -361,6 +361,24 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak</label><input type="date" id="e_datum"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
+    <div class="slbl">Foto's voor werkzaamheden</div>
+    <div id="e_fotos_voor_existing" style="margin-bottom:7px"></div>
+    <div class="foto-grid">
+      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoVoor0&#39;)" id="eSlotVoor0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoVoor1&#39;)" id="eSlotVoor1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
+    </div>
+    <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor0&#39;,&#39;voor&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor1&#39;,&#39;voor&#39;,1)">
+
+    <div class="slbl">Foto's na werkzaamheden</div>
+    <div id="e_fotos_na_existing" style="margin-bottom:7px"></div>
+    <div class="foto-grid">
+      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoNa0&#39;)" id="eSlotNa0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoNa1&#39;)" id="eSlotNa1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
+    </div>
+    <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa0&#39;,&#39;na&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa1&#39;,&#39;na&#39;,1)">
+
     <div class="slbl">Handtekening</div>
     <div id="e_sig_existing" style="display:none;margin-bottom:8px">
       <img id="e_sig_img" class="sig-preview" alt="Handtekening">
@@ -381,7 +399,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_1.html" alt="">
+  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_2.html" alt="">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -948,9 +966,67 @@ function closeLightbox() {
 // ============================================================
 // EDIT
 // ============================================================
+let editFotos = { voor: [null, null], na: [null, null] };
+
+function handleEditFoto(input, slotId, type, idx) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    compressImage(e.target.result, (compressed) => {
+      editFotos[type][idx] = compressed;
+      const slot = document.getElementById(slotId);
+      slot.classList.add('has-foto');
+      slot.innerHTML = `<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeEditFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeEditFoto(event, slotId, type, idx) {
+  event.stopPropagation();
+  editFotos[type][idx] = null;
+  const slot = document.getElementById(slotId);
+  slot.classList.remove('has-foto');
+  const label = type === 'voor' ? `Voor ${idx+1}` : `Na ${idx+1}`;
+  slot.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${label}</span>`;
+  slot.onclick = () => triggerFoto(type==='voor'?`eFotoVoor${idx}`:`eFotoNa${idx}`);
+}
+
+function resetEditFotoSlots() {
+  editFotos = { voor: [null,null], na: [null,null] };
+  ['Voor 1','Voor 2'].forEach((lbl,i) => {
+    const s = document.getElementById(`eSlotVoor${i}`);
+    s.classList.remove('has-foto');
+    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
+    s.onclick = () => triggerFoto(`eFotoVoor${i}`);
+  });
+  ['Na 1','Na 2'].forEach((lbl,i) => {
+    const s = document.getElementById(`eSlotNa${i}`);
+    s.classList.remove('has-foto');
+    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
+    s.onclick = () => triggerFoto(`eFotoNa${i}`);
+  });
+  ['eFotoVoor0','eFotoVoor1','eFotoNa0','eFotoNa1'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+
 function openEdit(id) {
+  resetEditFotoSlots();
   const o = orders.find(x => x.id === id);
   if (!o) return;
+
+  // Toon bestaande foto's
+  ['voor','na'].forEach(type => {
+    const el = document.getElementById(`e_fotos_${type}_existing`);
+    if (o.fotos && o.fotos[type] && o.fotos[type].some(f=>f)) {
+      el.innerHTML = `<div class="foto-detail-grid">${[0,1].map(i => o.fotos[type][i]
+        ? `<div class="foto-detail-item"><img src="${o.fotos[type][i]}" onclick="openLightbox('${o.fotos[type][i]}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`
+        : '').join('')}</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's hieronder toevoegen ter vervanging</div>`;
+    } else {
+      el.innerHTML = '';
+    }
+  });
   document.getElementById('e_id').value = id;
   document.getElementById('e_naam').value = o.naam || '';
   document.getElementById('e_adres').value = o.adres || '';
@@ -1016,6 +1092,20 @@ async function saveEdit() {
   if (editSelType) orders[idx].type = editSelType;
   const newSig = getSigData('editSigCanvas');
   if (newSig) orders[idx].sig = newSig;
+
+  // Nieuwe foto's uploaden
+  if (!orders[idx].fotos) orders[idx].fotos = { voor:[null,null], na:[null,null] };
+  if (!orders[idx].fotoMap) orders[idx].fotoMap = `/Fotos/${orders[idx].nr}`;
+  for (let i = 0; i < 2; i++) {
+    if (editFotos.voor[i]) {
+      const pad = await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`, editFotos.voor[i]);
+      if (pad) orders[idx].fotos.voor[i] = editFotos.voor[i];
+    }
+    if (editFotos.na[i]) {
+      const pad = await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`, editFotos.na[i]);
+      if (pad) orders[idx].fotos.na[i] = editFotos.na[i];
+    }
+  }
   await dbxWrite();
   closeEdit();
   showToast('✓ Wijzigingen opgeslagen');
