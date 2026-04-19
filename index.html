@@ -1095,31 +1095,42 @@ async function mailOrder(id) {
   let fotoTekst = '';
   if (o.fotoMap && token) {
     const link = await dbxGetShareLink(o.fotoMap);
-    if (link) fotoTekst = `\n\nFoto's voor en na:\n${link}`;
+    if (link) fotoTekst = `\n\nFoto's voor en na de werkzaamheden:\n${link}`;
   }
 
-  const onderwerp = `Werkorder ${o.nr} — ${o.naam}${o.adres ? ' — ' + o.adres : ''}`;
-  const aanhef = o.og_type === 'aannemer' ? `Beste ${o.og_contact || o.og_naam || 'opdrachtgever'}` : `Beste ${o.naam}`;
+  const onderwerp = `Herstelopdracht — ${o.adres || o.naam}`;
+  const aanhef = o.og_type === 'aannemer'
+    ? `Beste ${o.og_contact || o.og_naam || 'opdrachtgever'}`
+    : `Beste ${o.naam}`;
+
+  const refRegel = o.og_type === 'aannemer' && o.og_ref ? `Uw referentie:      ${o.og_ref}\n` : '';
+  const ogRegel = o.og_type === 'aannemer' && o.og_naam ? `Opdrachtgever:      ${o.og_naam}\n` : '';
 
   const body = `${aanhef},
 
 Hierbij de bevestiging van de uitgevoerde werkzaamheden.
 
-Opdrachtnummer: ${o.nr}
-Type werkzaamheden: ${o.type}
-Locatie: ${o.adres || 'niet opgegeven'}
-Bewoner: ${o.naam}
-${o.og_type === 'aannemer' && o.og_naam ? 'Opdrachtgever: ' + o.og_naam + (o.og_ref ? ' (ref: ' + o.og_ref + ')' : '') : ''}
-Datum: ${o.datum ? fmtDate(o.datum) : 'niet opgegeven'}
-${o.omschr ? '\nOmschrijving:\n' + o.omschr : ''}
+Opdrachtnummer:     ${o.nr}
+${ogRegel}${refRegel}Type werkzaamheden: ${o.type}
+Locatie:            ${o.adres || 'niet opgegeven'}
+Bewoner:            ${o.naam}
+Datum uitvoering:   ${o.datum ? fmtDate(o.datum) : 'niet opgegeven'}
+${o.omschr ? '\nOmschrijving:\n' + o.omschr + '\n' : ''}
 De werkzaamheden zijn conform opdracht uitgevoerd en door de bewoner voor akkoord ondertekend.${fotoTekst}
 
-Met vriendelijke groet,
-Rolf Jurgen
-RJ Oppervlakteherstel
-mail@rolfjurgen.nl`;
 
-  const mailto = `mailto:${emailTo}${emailCC?'?cc='+encodeURIComponent(emailCC):''}${emailTo?'&':'?'}subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(body)}`;
+Met vriendelijke groet,
+
+R. Jurgen
+
+Rolf Jurgen Schadeservice & Laktechniek
+Langheckweg 38-A
+6468 EL Kerkrade (NL)
+T  +31 (0)45-5350200
+M  mail@rolfjurgen.nl
+W  www.rolfjurgen.nl`;
+
+  const mailto = `mailto:${emailTo}${emailCC ? '?cc=' + encodeURIComponent(emailCC) : ''}${emailTo ? '&' : '?'}subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailto;
   setSyncStatus('gesynchroniseerd', 'ok');
 }
