@@ -1181,7 +1181,8 @@ async function mailOrder(id) {
     if (link) fotoTekst = `\n\nFoto's voor en na de werkzaamheden:\n${link}`;
   }
 
-  const onderwerp = `Herstelopdracht — ${o.type} — ${o.adres || o.naam}`;
+  const typeKort = o.type.replace('Overig: ','').replace('Overig','');
+  const onderwerp = `Herstelopdracht — ${typeKort || o.type}`;
   const aanhef = o.og_type === 'aannemer'
     ? `Beste ${o.og_contact || o.og_naam || 'opdrachtgever'}`
     : `Beste ${o.naam}`;
