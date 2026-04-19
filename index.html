@@ -1217,7 +1217,10 @@ W  www.rolfjurgen.nl`;
   try { await navigator.clipboard.writeText(body); } catch(e) {}
 
   // Open Outlook met alleen emailadres en onderwerp — geen body
-  const mailto = `mailto:${emailTo}${emailCC ? '?cc=' + encodeURIComponent(emailCC) : ''}${emailTo ? '&' : '?'}subject=${encodeURIComponent(onderwerp)}`;
+  const params = new URLSearchParams();
+  params.set('subject', onderwerp);
+  if (emailCC) params.set('cc', emailCC);
+  const mailto = `mailto:${emailTo}?${params.toString()}`;
   window.location.href = mailto;
   showToast('✓ Emailtekst gekopieerd — plak in Outlook');
   setSyncStatus('gesynchroniseerd', 'ok');
