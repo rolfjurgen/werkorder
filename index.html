@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0077)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_11.html -->
-<html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RJ Werkorder</title>
-<link rel="manifest" href="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/manifest.json">
-<link rel="icon" type="image/png" href="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/icon-192.png">
-<link rel="apple-touch-icon" href="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root {
   --bg: #f4f1ec;
@@ -113,7 +113,11 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 .stat-l { font-size: 11px; color: var(--text3); }
 
 /* WACHTRIJ BANNER */
-.queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 13px; margin-bottom: 12px; display: none; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
+.filter-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-bar select { flex: 1; min-width: 100px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 12px; color: var(--text); font-family: inherit; -webkit-appearance: none; }
+.prio-spoed { background: #fdf0ee; color: var(--red); border: 1px solid #e8c0bc; }
+.prio-normaal { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
+.queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 13px; margin-bottom: 12px; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
 .queue-banner.hidden { display: none !important; }
 
 /* ORDER CARDS */
@@ -210,20 +214,20 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 </div>
 
 <div class="tabs no-print">
-  <div class="tab active" onclick="switchTab(&#39;nieuw&#39;)">+ Nieuw</div>
-  <div class="tab" onclick="switchTab(&#39;overzicht&#39;)">Opdrachten</div>
-  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab(&#39;detail&#39;)">Detail</div>
-  <div class="tab" onclick="switchTab(&#39;print&#39;)">Printen</div>
+  <div class="tab active" onclick="switchTab('nieuw')">+ Nieuw</div>
+  <div class="tab" onclick="switchTab('overzicht')">Opdrachten</div>
+  <div class="tab" id="detailTabBtn" style="display:none" onclick="switchTab('detail')">Detail</div>
+  <div class="tab" onclick="switchTab('print')">Printen</div>
 </div>
 
 <!-- NIEUW -->
 <div class="panel active" id="panel-nieuw">
-  <div id="loginScreen" class="login-screen" style="display: flex;">
+  <div id="loginScreen" class="login-screen">
     <div class="login-icon">RJ</div>
     <div class="login-title">RJ Oppervlakteherstel</div>
     <div class="login-sub">Verbind je Dropbox-account om te starten. Je gegevens worden veilig opgeslagen in je eigen Dropbox.</div>
     <button class="btn-dropbox" onclick="startDropboxAuth()">
-      <svg width="18" height="18" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"></path><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"></path><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"></path></svg>
+      <svg width="18" height="18" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
       Inloggen met Dropbox
     </button>
     <div class="login-note">Je gegevens blijven in je eigen Dropbox.<br>Alleen de map Apps/RJ-Werkorder wordt gebruikt.</div>
@@ -232,13 +236,20 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair, tegel..." autocomplete="off"></div>
+    </div>
+
+    <div class="slbl">Prioriteit</div>
+    <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+      <button class="tbtn" id="prioWacht" onclick="selPrio(this,'wacht')"><span class="ti">🟢</span>Wacht</button>
     </div>
 
     <div class="slbl">Opdrachtgever</div>
@@ -257,7 +268,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" placeholder="Werkopdracht 2024-123" autocomplete="off"></div>
     </div>
 
-    <div class="slbl">Locatie &amp; bewoner</div>
+    <div class="slbl">Locatie & bewoner</div>
     <div class="field"><label>Naam bewoner</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
     <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
     <div class="field"><label>Telefoon bewoner (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
@@ -271,39 +282,39 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotVoor0" onclick="document.getElementById(&#39;fotoVoor0&#39;).click()">
+      <div class="foto-slot" id="slotVoor0" onclick="document.getElementById('fotoVoor0').click()">
         <span class="foto-slot-icon">📷</span>
         <span class="foto-slot-label">Voor 1 — tik om toe te voegen</span>
       </div>
-      <div class="foto-slot" id="slotVoor1" onclick="document.getElementById(&#39;fotoVoor1&#39;).click()">
+      <div class="foto-slot" id="slotVoor1" onclick="document.getElementById('fotoVoor1').click()">
         <span class="foto-slot-icon">📷</span>
         <span class="foto-slot-label">Voor 2 — tik om toe te voegen</span>
       </div>
     </div>
-    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,&#39;slotVoor0&#39;,&#39;voor&#39;,0)">
-    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,&#39;slotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotNa0" onclick="document.getElementById(&#39;fotoNa0&#39;).click()">
+      <div class="foto-slot" id="slotNa0" onclick="document.getElementById('fotoNa0').click()">
         <span class="foto-slot-icon">📷</span>
         <span class="foto-slot-label">Na 1 — tik om toe te voegen</span>
       </div>
-      <div class="foto-slot" id="slotNa1" onclick="document.getElementById(&#39;fotoNa1&#39;).click()">
+      <div class="foto-slot" id="slotNa1" onclick="document.getElementById('fotoNa1').click()">
         <span class="foto-slot-icon">📷</span>
         <span class="foto-slot-label">Na 2 — tik om toe te voegen</span>
       </div>
     </div>
-    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,&#39;slotNa0&#39;,&#39;na&#39;,0)">
-    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,&#39;slotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div class="sig-wrap">
-      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig(&#39;sigCanvas&#39;)">Wissen</button></div>
-      <canvas id="sigCanvas" class="sigpad" width="400" height="187"></canvas>
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
+      <canvas id="sigCanvas" class="sigpad"></canvas>
       <div class="sig-hint">Klant tekent voor akkoord reparatie</div>
     </div>
-    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan &amp; synchroniseren</button>
+    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
   </div>
 </div>
 
@@ -318,11 +329,28 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="stat"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Bezig</div></div>
     <div class="stat"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar</div></div>
   </div>
+  <div class="filter-bar">
+    <select id="filterStatus" onchange="renderList()">
+      <option value="alle">Alle statussen</option>
+      <option value="nieuw">Nieuw</option>
+      <option value="bezig">Bezig</option>
+      <option value="klaar">Klaar</option>
+    </select>
+    <select id="filterPrio" onchange="renderList()">
+      <option value="alle">Alle prioriteiten</option>
+      <option value="spoed">🔴 Spoed</option>
+      <option value="normaal">🟡 Normaal</option>
+      <option value="wacht">🟢 Wacht</option>
+    </select>
+    <select id="sortOrder" onchange="renderList()">
+      <option value="prio">Prioriteit eerst</option>
+      <option value="deadline">Deadline eerst</option>
+      <option value="datum">Datum afspraak</option>
+      <option value="aangemaakt">Nieuwste eerst</option>
+    </select>
+  </div>
   <div id="orderList"><div class="loading">Laden...</div></div>
 </div>
-
-<!-- DETAIL -->
-<div class="panel" id="panel-detail">
   <div id="detailContent"></div>
 </div>
 
@@ -356,13 +384,19 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn" onclick="selEditType(this,&#39;Inbraakschade kozijn/deur&#39;)"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Keukenblad herstellen&#39;)"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Opleverpunten herstellen&#39;)"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn" onclick="selEditType(this,&#39;Overig&#39;)"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="e_overig" placeholder="bijv. garagepoort, sanitair, tegel..."></div>
+    </div>
+    <div class="slbl">Prioriteit</div>
+    <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+      <button class="tbtn" id="eprioWacht" onclick="selEditPrio(this,'wacht')"><span class="ti">🟢</span>Wacht</button>
     </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="field">
@@ -379,7 +413,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <div class="field"><label>Email aannemer</label><input type="email" id="e_og_email"></div>
       <div class="field"><label>Referentie</label><input type="text" id="e_og_ref"></div>
     </div>
-    <div class="slbl">Locatie &amp; bewoner</div>
+    <div class="slbl">Locatie & bewoner</div>
     <div class="field"><label>Naam bewoner</label><input type="text" id="e_naam"></div>
     <div class="field"><label>Adres</label><input type="text" id="e_adres"></div>
     <div class="field"><label>Telefoon</label><input type="tel" id="e_tel"></div>
@@ -392,28 +426,28 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing" style="margin-bottom:7px"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById(&#39;eFotoVoor0&#39;).click()">
+      <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById('eFotoVoor0').click()">
         <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1 — tik om toe te voegen</span>
       </div>
-      <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById(&#39;eFotoVoor1&#39;).click()">
+      <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById('eFotoVoor1').click()">
         <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2 — tik om toe te voegen</span>
       </div>
     </div>
-    <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotVoor0&#39;,&#39;voor&#39;,0)">
-    <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div id="e_fotos_na_existing" style="margin-bottom:7px"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById(&#39;eFotoNa0&#39;).click()">
+      <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById('eFotoNa0').click()">
         <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1 — tik om toe te voegen</span>
       </div>
-      <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById(&#39;eFotoNa1&#39;).click()">
+      <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById('eFotoNa1').click()">
         <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2 — tik om toe te voegen</span>
       </div>
     </div>
-    <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotNa0&#39;,&#39;na&#39;,0)">
-    <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
+    <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
 
     <div class="slbl">Handtekening</div>
     <div id="e_sig_existing" style="display:none;margin-bottom:8px">
@@ -422,7 +456,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
     <div id="e_sig_new">
       <div class="sig-wrap">
-        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig(&#39;editSigCanvas&#39;)">Wissen</button></div>
+        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
         <canvas id="editSigCanvas" class="sigpad"></canvas>
         <div class="sig-hint">Laat leeg om bestaande te behouden</div>
       </div>
@@ -435,7 +469,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_11.html" alt="">
+  <img id="lightboxImg" src="" alt="">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -776,6 +810,23 @@ function resetFotoSlots() {
 // ============================================================
 // NEW ORDER
 // ============================================================
+let selPrioVal = 'normaal';
+let editPrioVal = 'normaal';
+
+function selPrio(btn, prio) {
+  document.querySelectorAll('#newForm #prioSpoed, #newForm #prioNormaal, #newForm #prioWacht').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selPrioVal = prio;
+}
+
+function selEditPrio(btn, prio) {
+  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal, #editModal #eprioWacht').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  editPrioVal = prio;
+}
+
+function prioRank(p) { return p === 'spoed' ? 0 : p === 'normaal' ? 1 : 2; }
+
 function selType(btn, type) {
   document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
@@ -815,6 +866,7 @@ async function saveOrder() {
 
   orders.unshift({
     id: Date.now(), nr, status: 'nieuw',
+    prioriteit: selPrioVal,
     naam, type: typeLabel,
     og_type: document.getElementById('f_og_type').value,
     og_naam: document.getElementById('f_og_naam').value.trim(),
@@ -846,7 +898,8 @@ async function saveOrder() {
   document.getElementById('f_datum_deadline').value = '';
   document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
   selTypeVal = '';
-  clearSig('sigCanvas');
+  selPrioVal = 'normaal';
+  document.getElementById('prioNormaal').classList.add('sel');
   resetFotoSlots();
 
   showToast('✓ Opdracht ' + nr + ' opgeslagen');
@@ -863,17 +916,61 @@ function renderList() {
   document.getElementById('s-bezig').textContent = counts.bezig;
   document.getElementById('s-klaar').textContent = counts.klaar;
 
+  const filterStatus = document.getElementById('filterStatus')?.value || 'alle';
+  const filterPrio = document.getElementById('filterPrio')?.value || 'alle';
+  const sortOrder = document.getElementById('sortOrder')?.value || 'prio';
+
+  let filtered = [...orders];
+  if (filterStatus !== 'alle') filtered = filtered.filter(o => o.status === filterStatus);
+  if (filterPrio !== 'alle') filtered = filtered.filter(o => (o.prioriteit || 'normaal') === filterPrio);
+
+  filtered.sort((a, b) => {
+    if (sortOrder === 'prio') {
+      const pd = prioRank(a.prioriteit||'normaal') - prioRank(b.prioriteit||'normaal');
+      if (pd !== 0) return pd;
+      return new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0);
+    }
+    if (sortOrder === 'deadline') {
+      if (!a.datum_deadline && !b.datum_deadline) return 0;
+      if (!a.datum_deadline) return 1;
+      if (!b.datum_deadline) return -1;
+      return new Date(a.datum_deadline) - new Date(b.datum_deadline);
+    }
+    if (sortOrder === 'datum') {
+      if (!a.datum && !b.datum) return 0;
+      if (!a.datum) return 1;
+      if (!b.datum) return -1;
+      return new Date(a.datum) - new Date(b.datum);
+    }
+    return new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0);
+  });
+
   const el = document.getElementById('orderList');
   if (!orders.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';
     return;
   }
-  el.innerHTML = orders.map(o => {
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';
+    return;
+  }
+
+  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal', wacht:'🟢 Wacht' };
+  const prioCls = { spoed:'prio-spoed', normaal:'prio-normaal', wacht:'prio-wacht' };
+
+  el.innerHTML = filtered.map(o => {
+    const prio = o.prioriteit || 'normaal';
     const hasFotos = o.fotos && (o.fotos.voor.some(f=>f) || o.fotos.na.some(f=>f));
     return `<div class="ocard" onclick="showDetail(${o.id})">
       <div class="ocard-top">
-        <div><div class="onr">${o.nr}</div><div class="oname">${o.naam}</div></div>
-        <span class="badge b-${o.status}">${o.status}</span>
+        <div>
+          <div class="onr">${o.nr}</div>
+          <div class="oname">${o.naam}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="badge b-${o.status}">${o.status}</span>
+          <span class="badge ${prioCls[prio]}">${prioLabel[prio]}</span>
+        </div>
       </div>
       <div class="ometa">
         ${o.datum?'<span>📅 '+fmtDate(o.datum)+'</span>':''}
@@ -919,8 +1016,11 @@ function showDetail(id) {
       <div><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:16px;font-weight:600">${o.naam}</div></div>
     </div>
-    <div class="slbl" style="margin-top:0">Status</div>
+    <div class="slbl" style="margin-top:0">Status & prioriteit</div>
     <div class="status-row">${sopts}</div>
+    <div class="status-row">
+      ${['spoed','normaal','wacht'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':p==='wacht'?'background:var(--green-bg);color:var(--green);border-color:#b0ddc0':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='normaal'?'🟡 Normaal':'🟢 Wacht'}</div>`).join('')}
+    </div>
     <div class="slbl">Opdrachtgever</div>
     ${o.og_type==='aannemer'?`
       <div class="drow"><div class="drow-l">Type</div><div class="drow-v">Via aannemer / bedrijf</div></div>
@@ -952,6 +1052,14 @@ function showDetail(id) {
     <button class="btn btn-danger no-print" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
 
   switchTab('detail');
+}
+
+async function changePrio(id, prio) {
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  orders[idx].prioriteit = prio;
+  await dbxWrite();
+  showDetail(id);
 }
 
 async function changeStatus(id, status) {
@@ -1106,6 +1214,11 @@ function openEdit(id) {
   document.getElementById('e_og_tel').value = o.og_tel || '';
   document.getElementById('e_og_email').value = o.og_email || '';
   document.getElementById('e_og_ref').value = o.og_ref || '';
+  editPrioVal = o.prioriteit || 'normaal';
+  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal, #editModal #eprioWacht').forEach(b => b.classList.remove('sel'));
+  const prioMap = { spoed:'eprioSpoed', normaal:'eprioNormaal', wacht:'eprioWacht' };
+  document.getElementById(prioMap[editPrioVal])?.classList.add('sel');
+
   toggleEditOGFields();
   editSelType = o.type || '';
   const isOverig = editSelType.startsWith('Overig');
@@ -1162,6 +1275,7 @@ async function saveEdit() {
   orders[idx].og_tel = document.getElementById('e_og_tel').value.trim();
   orders[idx].og_email = document.getElementById('e_og_email').value.trim();
   orders[idx].og_ref = document.getElementById('e_og_ref').value.trim();
+  orders[idx].prioriteit = editPrioVal;
   const eOverig = document.getElementById('e_overig').value.trim();
   if (editSelType) orders[idx].type = (editSelType === 'Overig' && eOverig) ? `Overig: ${eOverig}` : editSelType;
   const newSig = getSigData('editSigCanvas');
@@ -1270,6 +1384,5 @@ function showToast(msg, isErr) {
 
 window.addEventListener('load', init);
 </script>
-
-
-</body></html>
+</body>
+</html>
