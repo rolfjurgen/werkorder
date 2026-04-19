@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_3.html -->
+<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_4.html -->
 <html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -258,7 +258,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="field"><label>E-mailadres bewoner (optioneel)</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Opdracht</div>
-    <div class="field"><label>Datum afspraak</label><input type="date" id="f_datum"></div>
+    <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
+    <div class="field"><label>Geplande datum (optioneel)</label><input type="date" id="f_datum_plan"></div>
+    <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="f_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden, materiaal, bijzonderheden..."></textarea></div>
 
     <div class="slbl">Foto's voor werkzaamheden</div>
@@ -365,7 +367,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="field"><label>Telefoon</label><input type="tel" id="e_tel"></div>
     <div class="field"><label>E-mailadres</label><input type="email" id="e_email"></div>
     <div class="slbl">Opdracht</div>
-    <div class="field"><label>Datum afspraak</label><input type="date" id="e_datum"></div>
+    <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
+    <div class="field"><label>Geplande datum (optioneel)</label><input type="date" id="e_datum_plan"></div>
+    <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="e_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing" style="margin-bottom:7px"></div>
@@ -405,7 +409,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_3.html" alt="">
+  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_4.html" alt="">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -793,6 +797,8 @@ async function saveOrder() {
     tel: document.getElementById('f_tel').value.trim(),
     email: document.getElementById('f_email').value.trim(),
     datum: document.getElementById('f_datum').value,
+    datum_plan: document.getElementById('f_datum_plan').value,
+    datum_deadline: document.getElementById('f_datum_deadline').value,
     omschr: document.getElementById('f_omschr').value.trim(),
     sig: getSigData('sigCanvas'),
     fotos: fotoUrls,
@@ -807,6 +813,8 @@ async function saveOrder() {
   document.getElementById('f_og_type').value = 'particulier';
   toggleOGFields();
   document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f_datum_plan').value = '';
+  document.getElementById('f_datum_deadline').value = '';
   document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
   selTypeVal = '';
   clearSig('sigCanvas');
@@ -840,6 +848,7 @@ function renderList() {
       </div>
       <div class="ometa">
         ${o.datum?'<span>📅 '+fmtDate(o.datum)+'</span>':''}
+        ${o.datum_deadline?'<span style="color:var(--red)">⚠️ klaar: '+fmtDate(o.datum_deadline)+'</span>':''}
         ${o.adres?'<span>📍 '+o.adres+'</span>':''}
       </div>
       <div class="otype">${o.type}</div>
@@ -899,7 +908,9 @@ function showDetail(id) {
     ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
-    ${o.datum?`<div class="drow"><div class="drow-l">Datum</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
+    ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
+    ${o.datum_plan?`<div class="drow"><div class="drow-l">Geplande datum</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
+    ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
     ${fotoVoorHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoVoorHTML}</div>`:''}
     ${fotoNaHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoNaHTML}</div>`:''}
@@ -1057,6 +1068,8 @@ function openEdit(id) {
   document.getElementById('e_tel').value = o.tel || '';
   document.getElementById('e_email').value = o.email || '';
   document.getElementById('e_datum').value = o.datum || '';
+  document.getElementById('e_datum_plan').value = o.datum_plan || '';
+  document.getElementById('e_datum_deadline').value = o.datum_deadline || '';
   document.getElementById('e_omschr').value = o.omschr || '';
   document.getElementById('e_og_type').value = o.og_type || 'particulier';
   document.getElementById('e_og_naam').value = o.og_naam || '';
@@ -1111,6 +1124,8 @@ async function saveEdit() {
   orders[idx].tel = document.getElementById('e_tel').value.trim();
   orders[idx].email = document.getElementById('e_email').value.trim();
   orders[idx].datum = document.getElementById('e_datum').value;
+  orders[idx].datum_plan = document.getElementById('e_datum_plan').value;
+  orders[idx].datum_deadline = document.getElementById('e_datum_deadline').value;
   orders[idx].omschr = document.getElementById('e_omschr').value.trim();
   orders[idx].og_type = document.getElementById('e_og_type').value;
   orders[idx].og_naam = document.getElementById('e_og_naam').value.trim();
@@ -1167,6 +1182,8 @@ function werkbonHTML(o) {
       ${o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:''}
       <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
       ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+      ${o.datum_plan?`<tr><td>Geplande datum</td><td>${fmtDate(o.datum_plan)}</td></tr>`:''}
+      ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
       <tr><td>Bewoner / locatie</td><td>${o.naam}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
