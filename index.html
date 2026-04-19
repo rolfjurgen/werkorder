@@ -1196,31 +1196,16 @@ Hierbij de bevestiging van de uitgevoerde werkzaamheden.
 Opdrachtnummer:     ${o.nr}
 ${ogRegel}${refRegel}Type werkzaamheden: ${o.type}
 Locatie:            ${o.adres || 'niet opgegeven'}
-Bewoner:            ${o.naam}
+Klant / bewoner:    ${o.naam}
 Datum uitvoering:   ${o.datum ? fmtDate(o.datum) : 'niet opgegeven'}
 ${o.omschr ? '\nOmschrijving:\n' + o.omschr + '\n' : ''}
-De werkzaamheden zijn conform opdracht uitgevoerd en door de bewoner voor akkoord ondertekend.${fotoTekst}
-
-
-Met vriendelijke groet,
-
-R. Jurgen
-
-Rolf Jurgen Schadeservice & Laktechniek
-Langheckweg 38-A
-6468 EL Kerkrade (NL)
-T  +31 (0)45-5350200
-M  mail@rolfjurgen.nl
-W  www.rolfjurgen.nl`;
+De werkzaamheden zijn conform opdracht uitgevoerd en door de klant voor akkoord ondertekend.${fotoTekst}`;
 
   // Kopieer emailtekst naar klembord
   try { await navigator.clipboard.writeText(body); } catch(e) {}
 
   // Open Outlook met alleen emailadres en onderwerp — geen body
-  const params = new URLSearchParams();
-  params.set('subject', onderwerp);
-  if (emailCC) params.set('cc', emailCC);
-  const mailto = `mailto:${emailTo}?${params.toString()}`;
+  const mailto = `mailto:${emailTo}?subject=${onderwerp.replace(/ /g,'%20').replace(/—/g,'%E2%80%94').replace(/:/g,'%3A')}${emailCC ? '&cc=' + encodeURIComponent(emailCC) : ''}`;
   window.location.href = mailto;
   showToast('✓ Emailtekst gekopieerd — plak in Outlook');
   setSyncStatus('gesynchroniseerd', 'ok');
