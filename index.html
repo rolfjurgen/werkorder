@@ -1046,7 +1046,7 @@ function showDetail(id) {
     ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`
     :`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
     <div class="divider"></div>
-    <button class="btn btn-email no-print" onclick="mailOrder(${id})">✉️ Werkorder mailen</button>
+    <button class="btn btn-email no-print" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
     <button class="btn btn-print no-print" onclick="printSingle(${id})">🖨️ Werkbon afdrukken</button>
     <button class="btn btn-edit no-print" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
     <button class="btn btn-danger no-print" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
@@ -1083,6 +1083,88 @@ async function deleteOrder(id) {
 // ============================================================
 // EMAIL
 // ============================================================
+// ============================================================
+// PDF
+// ============================================================
+function savePDF(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+
+  const refRegel = o.og_type === 'aannemer' && o.og_ref ? `<tr><td>Uw referentie</td><td>${o.og_ref}</td></tr>` : '';
+  const ogRegel = o.og_type === 'aannemer' && o.og_naam ? `<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact ? ' — ' + o.og_contact : ''}</td></tr>` : '';
+  const sigHTML = o.sig ? `<div style="margin-top:28px;border-top:1px solid #ddd;padding-top:14px">
+    <div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant — akkoord uitvoering</div>
+    <img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px">
+  </div>` : '';
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Werkbon ${o.nr}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #1c1916; margin: 0; padding: 32px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #b5820c; padding-bottom: 16px; margin-bottom: 20px; }
+    .bedrijf { font-size: 18px; font-weight: 700; color: #b5820c; }
+    .bedrijf-sub { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.6; }
+    .nr { font-size: 12px; color: #666; text-align: right; line-height: 1.8; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    td { padding: 7px 10px; border: 1px solid #ddd; vertical-align: top; }
+    td:first-child { font-weight: 600; width: 36%; background: #f9f7f4; color: #666; }
+    .footer { margin-top: 32px; border-top: 1px solid #ddd; padding-top: 16px; font-size: 11px; color: #666; line-height: 1.8; }
+    @media print { body { padding: 0; } }
+  </style>
+  </head><body>
+  <div class="header">
+    <div>
+      <div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div>
+      <div class="bedrijf-sub">
+        Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>
+        T +31 (0)45-5350200 &nbsp;|&nbsp; mail@rolfjurgen.nl &nbsp;|&nbsp; www.rolfjurgen.nl
+      </div>
+    </div>
+    <div class="nr">
+      <strong>Werkbon ${o.nr}</strong><br>
+      Datum: ${new Date().toLocaleDateString('nl-NL')}<br>
+      Status: ${o.status.charAt(0).toUpperCase() + o.status.slice(1)}
+    </div>
+  </div>
+  <table>
+    ${ogRegel}
+    ${refRegel}
+    <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
+    ${o.datum ? `<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>` : ''}
+    ${o.datum_deadline ? `<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>` : ''}
+    <tr><td>Bewoner / locatie</td><td>${o.naam}</td></tr>
+    ${o.adres ? `<tr><td>Adres</td><td>${o.adres}</td></tr>` : ''}
+    ${o.tel ? `<tr><td>Telefoon</td><td>${o.tel}</td></tr>` : ''}
+    ${o.omschr ? `<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>` : ''}
+  </table>
+  <div style="font-size:12px;color:#666;margin-bottom:8px">
+    De werkzaamheden zijn conform opdracht uitgevoerd en door de bewoner voor akkoord ondertekend.
+  </div>
+  ${sigHTML}
+  <div class="footer">
+    R. Jurgen &nbsp;|&nbsp; Rolf Jurgen Schadeservice & Laktechniek &nbsp;|&nbsp; www.rolfjurgen.nl
+  </div>
+  </body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => {
+      setTimeout(() => {
+        win.print();
+      }, 500);
+    };
+  } else {
+    // Fallback: download als HTML die je kunt openen en printen als PDF
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Werkbon-${o.nr}-${o.naam.replace(/\s+/g,'-')}.html`;
+    a.click();
+    showToast('📄 Werkbon gedownload — open en druk af als PDF');
+  }
+}
+
 async function mailOrder(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
