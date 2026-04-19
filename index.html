@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_4.html -->
+<!-- saved from url=(0076)file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_5.html -->
 <html lang="nl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -92,7 +92,12 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 .foto-slot-label { font-size: 11px; color: var(--text3); margin-top: 6px; z-index: 1; }
 .foto-slot-icon { font-size: 22px; z-index: 1; }
 .foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; }
-.foto-input { display: none; }
+.foto-knoppen { display: flex; gap: 4px; margin-top: 6px; z-index: 1; }
+.foto-keuze-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; font-family: inherit; color: var(--text2); transition: all .15s; }
+.foto-keuze-btn:hover { border-color: var(--accent); color: var(--accent); }
+.foto-slot.has-foto .foto-knoppen { display: none; }
+.foto-slot.has-foto .foto-slot-icon { display: none; }
+.foto-slot.has-foto .foto-slot-label { display: none; }
 
 /* BADGES */
 .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: monospace; }
@@ -265,19 +270,51 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid" id="fotoVoorGrid">
-      <div class="foto-slot" onclick="triggerFoto(&#39;fotoVoor0&#39;)" id="slotVoor0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
-      <div class="foto-slot" onclick="triggerFoto(&#39;fotoVoor1&#39;)" id="slotVoor1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="slotVoor0">
+        <span class="foto-slot-icon">📷</span>
+        <span class="foto-slot-label">Voor 1</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;fotoVoor0C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;fotoVoor0G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
+      <div class="foto-slot" id="slotVoor1">
+        <span class="foto-slot-icon">📷</span>
+        <span class="foto-slot-label">Voor 2</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;fotoVoor1C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;fotoVoor1G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
     </div>
-    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotVoor0&#39;,&#39;voor&#39;,0)">
-    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="fotoVoor0C" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotVoor0&#39;,&#39;voor&#39;,0)">
+    <input type="file" class="foto-input" id="fotoVoor0G" accept="image/*" onchange="handleFoto(this,&#39;slotVoor0&#39;,&#39;voor&#39;,0)">
+    <input type="file" class="foto-input" id="fotoVoor1C" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="fotoVoor1G" accept="image/*" onchange="handleFoto(this,&#39;slotVoor1&#39;,&#39;voor&#39;,1)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" onclick="triggerFoto(&#39;fotoNa0&#39;)" id="slotNa0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
-      <div class="foto-slot" onclick="triggerFoto(&#39;fotoNa1&#39;)" id="slotNa1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="slotNa0">
+        <span class="foto-slot-icon">📷</span>
+        <span class="foto-slot-label">Na 1</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;fotoNa0C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;fotoNa0G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
+      <div class="foto-slot" id="slotNa1">
+        <span class="foto-slot-icon">📷</span>
+        <span class="foto-slot-label">Na 1</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;fotoNa1C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;fotoNa1G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
     </div>
-    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotNa0&#39;,&#39;na&#39;,0)">
-    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="fotoNa0C" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotNa0&#39;,&#39;na&#39;,0)">
+    <input type="file" class="foto-input" id="fotoNa0G" accept="image/*" onchange="handleFoto(this,&#39;slotNa0&#39;,&#39;na&#39;,0)">
+    <input type="file" class="foto-input" id="fotoNa1C" accept="image/*" capture="environment" onchange="handleFoto(this,&#39;slotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="fotoNa1G" accept="image/*" onchange="handleFoto(this,&#39;slotNa1&#39;,&#39;na&#39;,1)">
 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div class="sig-wrap">
@@ -374,20 +411,48 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing" style="margin-bottom:7px"></div>
     <div class="foto-grid">
-      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoVoor0&#39;)" id="eSlotVoor0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
-      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoVoor1&#39;)" id="eSlotVoor1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="eSlotVoor0">
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;eFotoVoor0C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;eFotoVoor0G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
+      <div class="foto-slot" id="eSlotVoor1">
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;eFotoVoor1C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;eFotoVoor1G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
     </div>
-    <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor0&#39;,&#39;voor&#39;,0)">
-    <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoVoor0C" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor0&#39;,&#39;voor&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoVoor0G" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotVoor0&#39;,&#39;voor&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoVoor1C" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotVoor1&#39;,&#39;voor&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoVoor1G" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotVoor1&#39;,&#39;voor&#39;,1)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div id="e_fotos_na_existing" style="margin-bottom:7px"></div>
     <div class="foto-grid">
-      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoNa0&#39;)" id="eSlotNa0"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
-      <div class="foto-slot" onclick="triggerFoto(&#39;eFotoNa1&#39;)" id="eSlotNa1"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="eSlotNa0">
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;eFotoNa0C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;eFotoNa0G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
+      <div class="foto-slot" id="eSlotNa1">
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span>
+        <div class="foto-knoppen">
+          <button class="foto-keuze-btn" onclick="triggerFotoCamera(&#39;eFotoNa1C&#39;)">📷 Camera</button>
+          <button class="foto-keuze-btn" onclick="triggerFotoGalerij(&#39;eFotoNa1G&#39;)">🖼️ Galerij</button>
+        </div>
+      </div>
     </div>
-    <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa0&#39;,&#39;na&#39;,0)">
-    <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoNa0C" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa0&#39;,&#39;na&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoNa0G" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotNa0&#39;,&#39;na&#39;,0)">
+    <input type="file" class="foto-input" id="eFotoNa1C" accept="image/*" capture="environment" onchange="handleEditFoto(this,&#39;eSlotNa1&#39;,&#39;na&#39;,1)">
+    <input type="file" class="foto-input" id="eFotoNa1G" accept="image/*" onchange="handleEditFoto(this,&#39;eSlotNa1&#39;,&#39;na&#39;,1)">
 
     <div class="slbl">Handtekening</div>
     <div id="e_sig_existing" style="display:none;margin-bottom:8px">
@@ -409,7 +474,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close">✕</button>
-  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_4.html" alt="">
+  <img id="lightboxImg" src="file:///D:/Dropbox/Mijn%20pc%20(Win10_HP-Rolf)/Downloads/werkorder-v2_5.html" alt="">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -680,7 +745,10 @@ function getSigData(id) {
 // ============================================================
 // FOTO HANDLING
 // ============================================================
-function triggerFoto(inputId) {
+function triggerFotoCamera(inputId) {
+  document.getElementById(inputId).click();
+}
+function triggerFotoGalerij(inputId) {
   document.getElementById(inputId).click();
 }
 
@@ -738,10 +806,14 @@ function resetFotoSlots() {
     s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
     s.onclick = () => triggerFoto(`fotoNa${i}`);
   });
-  document.getElementById('fotoVoor0').value = '';
-  document.getElementById('fotoVoor1').value = '';
-  document.getElementById('fotoNa0').value = '';
-  document.getElementById('fotoNa1').value = '';
+  document.getElementById('fotoVoor0C').value = '';
+  document.getElementById('fotoVoor0G').value = '';
+  document.getElementById('fotoVoor1C').value = '';
+  document.getElementById('fotoVoor1G').value = '';
+  document.getElementById('fotoNa0C').value = '';
+  document.getElementById('fotoNa0G').value = '';
+  document.getElementById('fotoNa1C').value = '';
+  document.getElementById('fotoNa1G').value = '';
 }
 
 // ============================================================
@@ -1042,7 +1114,7 @@ function resetEditFotoSlots() {
     s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
     s.onclick = () => triggerFoto(`eFotoNa${i}`);
   });
-  ['eFotoVoor0','eFotoVoor1','eFotoNa0','eFotoNa1'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['eFotoVoor0C','eFotoVoor0G','eFotoVoor1C','eFotoVoor1G','eFotoNa0C','eFotoNa0G','eFotoNa1C','eFotoNa1G'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
 }
 
 function openEdit(id) {
