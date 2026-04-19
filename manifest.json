@@ -1,19 +1,20 @@
 {
   "name": "RJ Werkorder",
   "short_name": "RJ",
-  "start_url": ".",
+  "start_url": "/werkorder/",
+  "scope": "/werkorder/",
   "display": "standalone",
   "background_color": "#f4f1ec",
   "theme_color": "#b5820c",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/werkorder/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "/werkorder/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
