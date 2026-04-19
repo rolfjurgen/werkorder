@@ -1139,7 +1139,7 @@ function savePDF(id) {
     ${o.omschr ? `<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>` : ''}
   </table>
   <div style="font-size:12px;color:#666;margin-bottom:8px">
-    De werkzaamheden zijn conform opdracht uitgevoerd en door de bewoner voor akkoord ondertekend.
+    De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.
   </div>
   ${sigHTML}
   <div class="footer">
@@ -1200,7 +1200,7 @@ Locatie:            ${o.adres || 'niet opgegeven'}
 Klant / bewoner:    ${o.naam}
 Datum uitvoering:   ${o.datum ? fmtDate(o.datum) : 'niet opgegeven'}
 ${o.omschr ? '\nOmschrijving:\n' + o.omschr + '\n' : ''}
-De werkzaamheden zijn conform opdracht uitgevoerd en door de klant voor akkoord ondertekend.${fotoTekst}`;
+De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}`;
 
   // Kopieer emailtekst naar klembord
   try { await navigator.clipboard.writeText(body); } catch(e) {}
