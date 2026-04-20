@@ -1175,7 +1175,8 @@ function addToAgenda(id) {
   if (!gebruikDatum) { showToast('Vul eerst een datum in', true); return; }
 
   const datum = gebruikDatum.replace(/-/g, '');
-  const titel = encodeURIComponent(`${o.naam} — ${o.type.replace('Overig: ','').replace('Overig','')}`);
+  const opdrachtgeverNaam = o.og_type === 'aannemer' && o.og_naam ? o.og_naam : o.naam;
+  const titel = encodeURIComponent(`${opdrachtgeverNaam} — ${o.type.replace('Overig: ','').replace('Overig','')}`);
   const locatie = encodeURIComponent(o.adres || '');
   const details = encodeURIComponent(
     `Werkorder: ${o.nr}\nKlant / bewoner: ${o.naam}\n${o.adres ? 'Adres: ' + o.adres + '\n' : ''}${o.omschr ? 'Omschrijving: ' + o.omschr : ''}`
