@@ -181,10 +181,8 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
 
 @media print {
-  body { background: #fff; }
-  .hdr, .tabs, .no-print { display: none !important; }
-  .panel { display: block !important; padding: 0; }
-  .print-only { display: block !important; }
+  body > * { display: none !important; }
+  #printOutput { display: block !important; }
   .werkbon { padding: 24px; font-family: sans-serif; }
   .werkbon-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #1c1916; padding-bottom: 14px; }
   .werkbon-logo { font-size: 18px; font-weight: 700; }
@@ -325,9 +323,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <button class="btn-sm btn" style="background:var(--accent);color:#fff;margin-top:0;width:auto;padding:5px 12px;font-size:12px" onclick="syncQueue()">Nu synchroniseren</button>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nieuw</div></div>
-    <div class="stat"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Bezig</div></div>
-    <div class="stat"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('nieuw')"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nieuw</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('bezig')"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Bezig</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar</div></div>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -1044,23 +1042,35 @@ function showDetail(id) {
 
     <div class="slbl">Tijdregistratie</div>
     <div class="drow">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
         <div>
-          <div class="drow-l">Reistijd (minuten)</div>
-          <input type="number" min="0" step="5" value="${o.tijd_reis||''}" placeholder="bijv. 30"
+          <div class="drow-l">Vertrek</div>
+          <input type="time" value="${o.tijd_vertrek||''}"
             style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
-            onchange="saveTijd(${id},'reis',this.value)">
+            onchange="saveTijd(${id},'tijd_vertrek',this.value)">
         </div>
         <div>
-          <div class="drow-l">Werktijd (minuten)</div>
-          <input type="number" min="0" step="5" value="${o.tijd_werk||''}" placeholder="bijv. 90"
+          <div class="drow-l">Aankomst</div>
+          <input type="time" value="${o.tijd_aankomst||''}"
             style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
-            onchange="saveTijd(${id},'werk',this.value)">
+            onchange="saveTijd(${id},'tijd_aankomst',this.value)">
         </div>
       </div>
-      ${(o.tijd_reis||o.tijd_werk) ? `<div style="font-size:12px;color:var(--text3);margin-top:8px">
-        Totaal: ${Math.floor(((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))/60)}u ${((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))%60}min
-      </div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <div class="drow-l">Werk van</div>
+          <input type="time" value="${o.tijd_werk_van||''}"
+            style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
+            onchange="saveTijd(${id},'tijd_werk_van',this.value)">
+        </div>
+        <div>
+          <div class="drow-l">Werk tot</div>
+          <input type="time" value="${o.tijd_werk_tot||''}"
+            style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
+            onchange="saveTijd(${id},'tijd_werk_tot',this.value)">
+        </div>
+      </div>
+      ${berekenTijden(o)}
     </div>
 
     <div class="slbl">Agenda starttijd</div>
@@ -1162,7 +1172,7 @@ function savePDF(id) {
     <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
     ${o.datum ? `<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>` : ''}
     ${o.datum_deadline ? `<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>` : ''}
-    <tr><td>Bewoner / locatie</td><td>${o.naam}</td></tr>
+    <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
     ${o.adres ? `<tr><td>Adres</td><td>${o.adres}</td></tr>` : ''}
     ${o.tel ? `<tr><td>Telefoon</td><td>${o.tel}</td></tr>` : ''}
     ${o.omschr ? `<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>` : ''}
@@ -1195,11 +1205,46 @@ function savePDF(id) {
   }
 }
 
-async function saveTijd(id, type, waarde) {
+function tijdNaarMinuten(t) {
+  if (!t) return 0;
+  const [u, m] = t.split(':').map(Number);
+  return u * 60 + m;
+}
+
+function minutenNaarTijd(m) {
+  if (!m) return '';
+  return `${Math.floor(m/60)}u ${m%60}min`;
+}
+
+function berekenTijden(o) {
+  const reisMin = o.tijd_vertrek && o.tijd_aankomst
+    ? tijdNaarMinuten(o.tijd_aankomst) - tijdNaarMinuten(o.tijd_vertrek)
+    : 0;
+  const werkMin = o.tijd_werk_van && o.tijd_werk_tot
+    ? tijdNaarMinuten(o.tijd_werk_tot) - tijdNaarMinuten(o.tijd_werk_van)
+    : 0;
+  if (!reisMin && !werkMin) return '';
+  return `<div style="font-size:12px;color:var(--text3);margin-top:4px;padding-top:8px;border-top:1px solid var(--border)">
+    ${reisMin > 0 ? `Reistijd: ${minutenNaarTijd(reisMin)} &nbsp;|&nbsp;` : ''}
+    ${werkMin > 0 ? `Werktijd: ${minutenNaarTijd(werkMin)} &nbsp;|&nbsp;` : ''}
+    ${reisMin+werkMin > 0 ? `Totaal: ${minutenNaarTijd(reisMin+werkMin)}` : ''}
+  </div>`;
+}
+
+function filterOpStatus(status) {
+  const sel = document.getElementById('filterStatus');
+  if (sel.value === status) {
+    sel.value = 'alle';
+  } else {
+    sel.value = status;
+  }
+  renderList();
+}
+
+async function saveTijd(id, veld, waarde) {
   const idx = orders.findIndex(x => x.id === id);
   if (idx < 0) return;
-  if (type === 'reis') orders[idx].tijd_reis = parseInt(waarde) || 0;
-  if (type === 'werk') orders[idx].tijd_werk = parseInt(waarde) || 0;
+  orders[idx][veld] = waarde;
   await dbxWrite();
 }
 
@@ -1486,12 +1531,12 @@ function werkbonHTML(o) {
       ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
       ${o.datum_plan?`<tr><td>Geplande datum</td><td>${fmtDate(o.datum_plan)}</td></tr>`:''}
       ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
-      <tr><td>Bewoner / locatie</td><td>${o.naam}</td></tr>
+      <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
       <tr><td>Status</td><td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td></tr>
       ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
-      ${o.tijd_reis||o.tijd_werk?`<tr><td>Tijdregistratie</td><td>Reistijd: ${o.tijd_reis||0} min &nbsp;|&nbsp; Werktijd: ${o.tijd_werk||0} min &nbsp;|&nbsp; Totaal: ${Math.floor(((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))/60)}u ${((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))%60}min</td></tr>`:''}
+      ${(o.tijd_vertrek||o.tijd_aankomst||o.tijd_werk_van||o.tijd_werk_tot)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_aankomst)-tijdNaarMinuten(o.tijd_vertrek))})<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_werk_tot)-tijdNaarMinuten(o.tijd_werk_van))})`:''}</td></tr>`:''}
     </table>
     ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}"></div>`:''}
   </div>`;
@@ -1525,7 +1570,7 @@ function printList() {
       <div><div style="font-size:18px;font-weight:700">RJ Oppervlakteherstel</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
       <div style="font-size:12px;color:#666">${filtered.length} opdrachten</div>
     </div>
-    <table><thead><tr><th>Nr</th><th>Bewoner</th><th>Adres</th><th>Opdrachtgever</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead>
+    <table><thead><tr><th>Nr</th><th>Klant / bewoner</th><th>Adres</th><th>Opdrachtgever</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead>
     <tbody>${rows}</tbody></table>
   </div>`;
   window.print();
