@@ -1048,7 +1048,7 @@ function showDetail(id) {
     <div class="divider"></div>
     <button class="btn btn-email no-print" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
     <button class="btn btn-secondary no-print" onclick="mailOrder(${id})">✉️ Mailen</button>
-    ${o.datum_plan ? `<button class="btn no-print" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;margin-bottom:7px;font-size:14px" onclick="addToAgenda(${id})">📅 Toevoegen aan Google Agenda</button>` : ''}
+    <button class="btn no-print" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;margin-bottom:7px;font-size:14px" onclick="addToAgenda(${id})">📅 Toevoegen aan Google Agenda</button>
     <button class="btn btn-print no-print" onclick="printSingle(${id})">🖨️ Werkbon afdrukken</button>
     <button class="btn btn-edit no-print" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
     <button class="btn btn-danger no-print" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
@@ -1169,9 +1169,12 @@ function savePDF(id) {
 
 function addToAgenda(id) {
   const o = orders.find(x => x.id === id);
-  if (!o || !o.datum_plan) return;
+  if (!o) return;
 
-  const datum = o.datum_plan.replace(/-/g, '');
+  const gebruikDatum = o.datum_plan || o.datum;
+  if (!gebruikDatum) { showToast('Vul eerst een datum in', true); return; }
+
+  const datum = gebruikDatum.replace(/-/g, '');
   const titel = encodeURIComponent(`${o.type} — ${o.naam}`);
   const locatie = encodeURIComponent(o.adres || '');
   const details = encodeURIComponent(
@@ -1179,7 +1182,7 @@ function addToAgenda(id) {
   );
 
   const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${datum}/${datum}&location=${locatie}&details=${details}`;
-  window.open(url, '_blank');
+  window.location.href = url;
 }
 
 async function mailOrder(id) {
