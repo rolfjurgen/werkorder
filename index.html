@@ -1041,8 +1041,36 @@ function showDetail(id) {
     ${o.datum_plan?`<div class="drow"><div class="drow-l">Geplande datum</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
     ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
-    ${fotoVoorHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoVoorHTML}</div>`:''}
-    ${fotoNaHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoNaHTML}</div>`:''}
+
+    <div class="slbl">Tijdregistratie</div>
+    <div class="drow">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="drow-l">Reistijd (minuten)</div>
+          <input type="number" min="0" step="5" value="${o.tijd_reis||''}" placeholder="bijv. 30"
+            style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
+            onchange="saveTijd(${id},'reis',this.value)">
+        </div>
+        <div>
+          <div class="drow-l">Werktijd (minuten)</div>
+          <input type="number" min="0" step="5" value="${o.tijd_werk||''}" placeholder="bijv. 90"
+            style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
+            onchange="saveTijd(${id},'werk',this.value)">
+        </div>
+      </div>
+      ${(o.tijd_reis||o.tijd_werk) ? `<div style="font-size:12px;color:var(--text3);margin-top:8px">
+        Totaal: ${Math.floor(((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))/60)}u ${((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))%60}min
+      </div>` : ''}
+    </div>
+
+    <div class="slbl">Agenda starttijd</div>
+    <div class="drow">
+      <div class="drow-l">Starttijd afspraak</div>
+      <input type="time" value="${o.agenda_tijd||'08:00'}"
+        style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit"
+        onchange="saveAgendaTijd(${id},this.value)">
+    </div>
+    ${fotoVoorHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoVoorHTML}</div>`:''}    ${fotoNaHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoNaHTML}</div>`:''}
     ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`
     :`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
     <div class="divider"></div>
@@ -1167,6 +1195,21 @@ function savePDF(id) {
   }
 }
 
+async function saveTijd(id, type, waarde) {
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  if (type === 'reis') orders[idx].tijd_reis = parseInt(waarde) || 0;
+  if (type === 'werk') orders[idx].tijd_werk = parseInt(waarde) || 0;
+  await dbxWrite();
+}
+
+async function saveAgendaTijd(id, tijd) {
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  orders[idx].agenda_tijd = tijd;
+  await dbxWrite();
+}
+
 function addToAgenda(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
@@ -1175,14 +1218,22 @@ function addToAgenda(id) {
   if (!gebruikDatum) { showToast('Vul eerst een datum in', true); return; }
 
   const datum = gebruikDatum.replace(/-/g, '');
+  const tijdStr = (o.agenda_tijd || '08:00');
+  const [uurStr, minStr] = tijdStr.split(':');
+  const uur = parseInt(uurStr);
+  const einduur = String(uur + 1).padStart(2, '0');
+  const startStr = `${datum}T${String(uur).padStart(2,'0')}${minStr}00`;
+  const eindStr = `${datum}T${einduur}${minStr}00`;
+
   const opdrachtgeverNaam = o.og_type === 'aannemer' && o.og_naam ? o.og_naam : o.naam;
-  const titel = encodeURIComponent(`${opdrachtgeverNaam} — ${o.type.replace('Overig: ','').replace('Overig','')}`);
+  const typeKort = o.type.replace('Overig: ','').replace('Overig','');
+  const titel = encodeURIComponent(`${opdrachtgeverNaam} — ${typeKort}`);
   const locatie = encodeURIComponent(o.adres || '');
   const details = encodeURIComponent(
     `Werkorder: ${o.nr}\nKlant / bewoner: ${o.naam}\n${o.adres ? 'Adres: ' + o.adres + '\n' : ''}${o.omschr ? 'Omschrijving: ' + o.omschr : ''}`
   );
 
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${datum}/${datum}&location=${locatie}&details=${details}`;
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${locatie}&details=${details}`;
   window.location.href = url;
 }
 
@@ -1440,6 +1491,7 @@ function werkbonHTML(o) {
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
       <tr><td>Status</td><td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td></tr>
       ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
+      ${o.tijd_reis||o.tijd_werk?`<tr><td>Tijdregistratie</td><td>Reistijd: ${o.tijd_reis||0} min &nbsp;|&nbsp; Werktijd: ${o.tijd_werk||0} min &nbsp;|&nbsp; Totaal: ${Math.floor(((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))/60)}u ${((parseInt(o.tijd_reis)||0)+(parseInt(o.tijd_werk)||0))%60}min</td></tr>`:''}
     </table>
     ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}"></div>`:''}
   </div>`;
