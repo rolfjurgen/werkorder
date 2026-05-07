@@ -29,126 +29,138 @@
   --rlg: 16px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', -apple-system, sans-serif; font-size: 15px; min-height: 100vh; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 15px; min-height: 100vh; }
 
-.hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+/* HEADER */
+.hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .logo-wrap { display: flex; align-items: center; gap: 10px; }
-.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; letter-spacing: -.5px; flex-shrink: 0; }
-.logo-text { font-size: 12px; color: var(--accent); letter-spacing: .06em; font-weight: 500; font-family: monospace; }
-.hdr-right { display: flex; align-items: center; gap: 8px; }
-.sync-status { font-size: 11px; color: var(--text3); font-family: monospace; }
-.sync-status.ok { color: var(--green); }
-.sync-status.err { color: var(--red); }
-.sync-status.warn { color: var(--accent); }
+.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
+.logo-text { font-size: 12px; color: var(--accent); font-weight: 600; font-family: monospace; letter-spacing: .05em; }
+.sync-ok { font-size: 11px; color: var(--green); font-family: monospace; }
+.sync-err { font-size: 11px; color: var(--red); font-family: monospace; }
+.sync-busy { font-size: 11px; color: var(--text3); font-family: monospace; }
+.btn-logout { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; display: none; }
 
-.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 18px; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+/* TABS */
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab { padding: 11px 14px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
+.tab { padding: 11px 16px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; transition: color .2s; }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-.panel { display: none; padding: 18px; padding-bottom: 60px; }
+/* PANELS */
+.panel { display: none; padding: 16px; padding-bottom: 60px; }
 .panel.active { display: block; }
 
-.slbl { font-family: monospace; font-size: 10px; letter-spacing: .12em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; margin-top: 22px; }
+/* FORM */
+.slbl { font-family: monospace; font-size: 10px; letter-spacing: .1em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
 .slbl:first-child { margin-top: 0; }
-.field { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 13px; margin-bottom: 7px; transition: border-color .2s; }
+.field { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
 .field:focus-within { border-color: var(--accent); }
 .field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; font-weight: 500; }
 .field input, .field textarea, .field select { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 15px; -webkit-appearance: none; }
-.field textarea { resize: none; min-height: 80px; line-height: 1.6; }
-.field select option { background: var(--surface); }
+.field textarea { resize: none; min-height: 78px; line-height: 1.5; }
 ::placeholder { color: var(--text3); }
 
+/* TYPE / PRIO GRID */
 .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
-.tbtn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
+.prio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.tbtn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
 .tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
-.tbtn.sel { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.tbtn.sel { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-.btn { width: 100%; padding: 13px; border-radius: var(--r); border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s; margin-top: 7px; }
-.btn:active { transform: scale(.98); }
+/* BUTTONS */
+.btn { width: 100%; padding: 12px; border-radius: var(--r); border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: opacity .15s; }
+.btn:active { opacity: .8; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-green { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; font-size: 14px; margin-bottom: 7px; }
+.btn-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; font-size: 14px; margin-bottom: 7px; }
+.btn-edit { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); font-size: 14px; margin-bottom: 7px; }
 .btn-danger { background: transparent; color: var(--red); border: 1px solid #e8c0bc; font-size: 13px; padding: 9px; }
-.btn-edit { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); margin-bottom: 7px; font-size: 14px; }
-.btn-print { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; margin-bottom: 7px; font-size: 14px; }
-.btn-email { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; margin-bottom: 7px; font-size: 14px; }
-.btn-sm { width: auto; padding: 7px 14px; font-size: 13px; margin-top: 0; }
 
 /* SIGNATURE */
 .sig-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 7px; }
-.sig-top { padding: 9px 13px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.sig-top { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .sig-top span { font-size: 12px; color: var(--text3); }
 .sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: inherit; }
-.sig-clr:hover { border-color: var(--red); color: var(--red); }
-canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; cursor: crosshair; background: #fafaf8; }
-.sig-hint { padding: 7px 13px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
+canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair; background: #fafaf8; }
+.sig-hint { padding: 6px 12px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
 .sig-preview { width: 100%; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
 
-/* FOTO UPLOAD */
+/* FOTO */
 .foto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
-.foto-slot { background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--r); aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color .2s; }
-.foto-slot:hover { border-color: var(--accent); }
-.foto-slot.has-foto { border-style: solid; border-color: var(--border); }
+.foto-slot { background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--r); aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+.foto-slot.has-foto { border-style: solid; }
 .foto-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
-.foto-slot-label { font-size: 11px; color: var(--text3); margin-top: 6px; z-index: 1; }
-.foto-slot-icon { font-size: 22px; z-index: 1; }
-.foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; }
-.foto-knoppen { display: flex; gap: 4px; margin-top: 6px; z-index: 1; }
-.foto-keuze-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; font-family: inherit; color: var(--text2); transition: all .15s; }
-.foto-keuze-btn:hover { border-color: var(--accent); color: var(--accent); }
-.foto-slot.has-foto .foto-knoppen { display: none; }
-.foto-slot.has-foto .foto-slot-icon { display: none; }
-.foto-slot.has-foto .foto-slot-label { display: none; }
+.foto-slot-icon { font-size: 20px; }
+.foto-slot-label { font-size: 10px; color: var(--text3); margin-top: 4px; z-index: 1; text-align: center; padding: 0 4px; }
+.foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+.foto-input { display: none; }
+.foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
+.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
+.foto-detail-item img { width: 100%; display: block; cursor: pointer; }
+.foto-detail-label { font-size: 11px; color: var(--text3); padding: 4px 8px; background: var(--surface2); }
 
 /* BADGES */
 .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: monospace; }
 .b-nieuw { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; }
 .b-bezig { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
 .b-klaar { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; }
+.b-spoed { background: var(--red-bg); color: var(--red); border: 1px solid #e8c0bc; }
 
 /* STATS */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 18px; }
-.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 6px; text-align: center; }
-.stat-n { font-family: monospace; font-size: 22px; font-weight: 500; margin-bottom: 2px; }
-.stat-l { font-size: 10px; color: var(--text3); }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 6px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.stat:hover { border-color: var(--border2); }
+.stat.active-filter { border-color: var(--accent); background: var(--accent-bg); }
+.stat-n { font-family: monospace; font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+.stat-l { font-size: 10px; color: var(--text3); line-height: 1.3; }
 
-/* WACHTRIJ BANNER */
-.filter-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-.filter-bar select { flex: 1; min-width: 100px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 12px; color: var(--text); font-family: inherit; -webkit-appearance: none; }
-.prio-spoed { background: #fdf0ee; color: var(--red); border: 1px solid #e8c0bc; }
-.prio-normaal { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
-.queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 13px; margin-bottom: 12px; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
-.queue-banner.hidden { display: none !important; }
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-bar select { flex: 1; min-width: 90px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 7px 10px; font-size: 12px; color: var(--text); font-family: inherit; -webkit-appearance: none; }
 
 /* ORDER CARDS */
-.ocard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); padding: 14px; margin-bottom: 9px; cursor: pointer; transition: border-color .2s; }
+.ocard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); padding: 13px; margin-bottom: 9px; cursor: pointer; transition: border-color .2s; }
 .ocard:hover { border-color: var(--border2); }
-.ocard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 7px; }
+.ocard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
 .onr { font-family: monospace; font-size: 10px; color: var(--text3); margin-bottom: 2px; }
 .oname { font-size: 15px; font-weight: 600; }
-.ometa { font-size: 12px; color: var(--text2); display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+.osub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.ometa { font-size: 12px; color: var(--text2); display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
 .otype { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 11px; color: var(--text2); margin-top: 5px; }
 .sig-ok { font-size: 11px; color: var(--green); margin-top: 3px; }
 .foto-ok { font-size: 11px; color: var(--blue); margin-top: 2px; }
 
 /* DETAIL */
-.det-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-.back { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; color: var(--text2); font-size: 13px; cursor: pointer; font-family: inherit; }
-.drow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 13px; margin-bottom: 7px; }
+.det-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.back-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; color: var(--text2); font-size: 13px; cursor: pointer; font-family: inherit; }
+.drow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
 .drow-l { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
 .drow-v { font-size: 14px; color: var(--text); line-height: 1.5; }
-.status-row { display: flex; gap: 7px; margin-bottom: 14px; }
-.sopt { flex: 1; padding: 9px 4px; border-radius: var(--r); border: 1px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
+.status-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.sopt { flex: 1; padding: 8px 4px; border-radius: var(--r); border: 1px solid var(--border); text-align: center; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
 .sopt.a-nieuw { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
 .sopt.a-bezig { background: var(--accent-bg); color: var(--accent); border-color: #e8d090; }
 .sopt.a-klaar { background: var(--green-bg); color: var(--green); border-color: #b0ddc0; }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
+.time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
 
-/* FOTO DETAIL GRID */
-.foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
-.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
-.foto-detail-item img { width: 100%; display: block; cursor: pointer; }
-.foto-detail-label { font-size: 11px; color: var(--text3); padding: 5px 8px; background: var(--surface2); }
+/* MODAL */
+.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; }
+.modal-ov.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--rlg) var(--rlg) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 16px; padding-bottom: 40px; }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.modal-ttl { font-size: 16px; font-weight: 600; }
+.mclose { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text2); }
+
+/* LOGIN */
+.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; }
+.login-icon { width: 70px; height: 70px; background: var(--accent); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; margin: 0 auto 16px; }
+.login-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; max-width: 300px; }
+.btn-dbx { background: #0061FF; color: #fff; border: none; border-radius: var(--r); padding: 14px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 10px; }
+.login-note { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.6; }
 
 /* LIGHTBOX */
 .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 500; align-items: center; justify-content: center; }
@@ -156,44 +168,34 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
 .lightbox-close { position: absolute; top: 16px; right: 16px; color: white; font-size: 28px; cursor: pointer; background: none; border: none; }
 
-/* MODAL */
-.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; }
-.modal-ov.open { display: flex; }
-.modal { background: var(--surface); border-radius: var(--rlg) var(--rlg) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 18px; padding-bottom: 40px; }
-.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.modal-ttl { font-size: 16px; font-weight: 600; }
-.mclose { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text2); }
+/* QUEUE BANNER */
+.queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
+.queue-banner.hidden { display: none; }
+.btn-queue { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
-/* LOGIN */
-.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; }
-.login-icon { width: 72px; height: 72px; background: var(--accent); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: white; margin: 0 auto 16px; }
-.login-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 28px; max-width: 320px; }
-.btn-dropbox { background: #0061FF; color: #fff; border: none; border-radius: var(--r); padding: 14px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 10px; }
-.login-note { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.6; }
-
-.empty { text-align: center; padding: 40px 18px; color: var(--text3); }
-.empty-icon { font-size: 30px; margin-bottom: 10px; }
+/* EMPTY / LOADING */
+.empty { text-align: center; padding: 40px 16px; color: var(--text3); }
+.empty-icon { font-size: 28px; margin-bottom: 10px; }
 .empty-txt { font-size: 14px; line-height: 1.6; }
 
-.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 11px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
+/* TOAST */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
-.loading { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
 
+/* PRINT */
 @media print {
   body > * { display: none !important; }
   #printOutput { display: block !important; }
-  .werkbon { padding: 24px; font-family: sans-serif; }
-  .werkbon-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #1c1916; padding-bottom: 14px; }
-  .werkbon-logo { font-size: 18px; font-weight: 700; }
+  .werkbon { padding: 24px; font-family: Arial, sans-serif; }
+  .werkbon-hdr { display: flex; justify-content: space-between; border-bottom: 2px solid #b5820c; padding-bottom: 14px; margin-bottom: 20px; }
+  .werkbon-logo { font-size: 18px; font-weight: 700; color: #b5820c; }
   .werkbon table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
   .werkbon td { padding: 7px 10px; border: 1px solid #ddd; font-size: 13px; vertical-align: top; }
-  .werkbon td:first-child { font-weight: 500; width: 34%; background: #f9f9f9; }
-  .werkbon-sig { margin-top: 24px; border-top: 1px solid #ddd; padding-top: 14px; }
-  .werkbon-sig img { max-height: 80px; border: 1px solid #ddd; border-radius: 6px; }
-  .print-list table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .print-list th { background: #f0ede8; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #ddd; }
-  .print-list td { padding: 7px 10px; border: 1px solid #ddd; vertical-align: top; }
+  .werkbon td:first-child { font-weight: 600; width: 34%; background: #f9f9f9; color: #666; }
+  .werkbon-sig img { max-height: 80px; border: 1px solid #ddd; border-radius: 4px; margin-top: 14px; }
+  .print-list table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .print-list th { background: #f0ede8; padding: 7px 10px; text-align: left; border: 1px solid #ddd; }
+  .print-list td { padding: 6px 10px; border: 1px solid #ddd; }
 }
 .print-only { display: none; }
 </style>
@@ -205,17 +207,17 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="logo-icon">RJ</div>
     <div class="logo-text">WERKORDER</div>
   </div>
-  <div class="hdr-right">
-    <span class="sync-status" id="syncStatus">niet verbonden</span>
-    <button class="btn btn-sm btn-secondary no-print" id="logoutBtn" style="display:none;font-size:11px;padding:5px 10px" onclick="logout()">Uitloggen</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="syncStatus" class="sync-busy">niet verbonden</span>
+    <button class="btn-logout" id="logoutBtn" onclick="logout()">Uitloggen</button>
   </div>
 </div>
 
-<div class="tabs no-print">
-  <div class="tab active" data-tab="nieuw" onclick="switchTab('nieuw')">+ Nieuw</div>
-  <div class="tab" data-tab="overzicht" onclick="switchTab('overzicht')">Opdrachten</div>
-  <div class="tab" data-tab="detail" id="detailTabBtn" style="display:none" onclick="switchTab('detail')">Detail</div>
-  <div class="tab" data-tab="print" onclick="switchTab('print')">Printen</div>
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="nieuw" onclick="goTab('nieuw')">+ Nieuw</div>
+  <div class="tab" data-tab="overzicht" onclick="goTab('overzicht')">Opdrachten</div>
+  <div class="tab" data-tab="detail" id="detailTab" style="display:none" onclick="goTab('detail')">Detail</div>
+  <div class="tab" data-tab="print" onclick="goTab('print')">Printen</div>
 </div>
 
 <!-- NIEUW -->
@@ -223,12 +225,12 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
   <div id="loginScreen" class="login-screen">
     <div class="login-icon">RJ</div>
     <div class="login-title">RJ Oppervlakteherstel</div>
-    <div class="login-sub">Verbind je Dropbox-account om te starten. Je gegevens worden veilig opgeslagen in je eigen Dropbox.</div>
-    <button class="btn-dropbox" onclick="startDropboxAuth()">
-      <svg width="18" height="18" viewBox="0 0 40 40" fill="none"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 0.5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 0.5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+    <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
+    <button class="btn-dbx" onclick="startAuth()">
+      <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
       Inloggen met Dropbox
     </button>
-    <div class="login-note">Je gegevens blijven in je eigen Dropbox.<br>Alleen de map Apps/RJ-Werkorder wordt gebruikt.</div>
+    <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
   </div>
 
   <div id="newForm" style="display:none">
@@ -240,52 +242,49 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <button class="tbtn" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
-      <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair, tegel..." autocomplete="off"></div>
+      <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
     </div>
 
     <div class="slbl">Prioriteit</div>
-    <div class="type-grid" style="grid-template-columns:1fr 1fr">
+    <div class="prio-grid">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
     </div>
 
     <div class="slbl">Opdrachtgever</div>
-    <div class="field">
-      <label>Type</label>
-      <select id="f_og_type" onchange="toggleOGFields()">
+    <div class="field"><label>Type</label>
+      <select id="f_og_type" onchange="toggleOG()">
         <option value="particulier">Particulier (opdrachtgever = bewoner)</option>
         <option value="aannemer">Via aannemer / bedrijf</option>
       </select>
     </div>
     <div id="f_og_extra" style="display:none">
-      <div class="field"><label>Naam aannemer / bedrijf</label><input type="text" id="f_og_naam" placeholder="Bouwbedrijf Janssen BV" autocomplete="off"></div>
-      <div class="field"><label>Contactpersoon</label><input type="text" id="f_og_contact" placeholder="Peter Janssen" autocomplete="off"></div>
-      <div class="field"><label>Telefoon aannemer</label><input type="tel" id="f_og_tel" placeholder="043 1234567"></div>
-      <div class="field"><label>Email aannemer</label><input type="email" id="f_og_email" placeholder="info@bouwbedrijf.nl"></div>
-      <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" placeholder="Werkopdracht 2024-123" autocomplete="off"></div>
+      <div class="field"><label>Naam aannemer / bedrijf</label><input type="text" id="f_og_naam" autocomplete="off"></div>
+      <div class="field"><label>Contactpersoon</label><input type="text" id="f_og_contact" autocomplete="off"></div>
+      <div class="field"><label>Telefoon aannemer</label><input type="tel" id="f_og_tel"></div>
+      <div class="field"><label>Email aannemer</label><input type="email" id="f_og_email"></div>
+      <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
     </div>
 
-    <div class="slbl">Locatie & bewoner</div>
-    <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries — leeg laten als onbekend" autocomplete="off"></div>
+    <div class="slbl">Locatie & klant</div>
+    <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
     <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
-    <div class="field"><label>Telefoon bewoner (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
-    <div class="field"><label>E-mailadres bewoner (optioneel)</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
+    <div class="field"><label>Telefoon bewoner</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres bewoner</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
     <div class="field"><label>Ontvangen op (datum opdracht)</label><input type="date" id="f_datum_plan"></div>
-    <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="f_datum_deadline"></div>
-    <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden, materiaal, bijzonderheden..."></textarea></div>
+    <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="f_datum_deadline"></div>
+    <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..."></textarea></div>
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
       <div class="foto-slot" id="slotVoor0" onclick="document.getElementById('fotoVoor0').click()">
-        <span class="foto-slot-icon">📷</span>
-        <span class="foto-slot-label">Voor 1 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span>
       </div>
       <div class="foto-slot" id="slotVoor1" onclick="document.getElementById('fotoVoor1').click()">
-        <span class="foto-slot-icon">📷</span>
-        <span class="foto-slot-label">Voor 2 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span>
       </div>
     </div>
     <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
@@ -294,12 +293,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
       <div class="foto-slot" id="slotNa0" onclick="document.getElementById('fotoNa0').click()">
-        <span class="foto-slot-icon">📷</span>
-        <span class="foto-slot-label">Na 1 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span>
       </div>
       <div class="foto-slot" id="slotNa1" onclick="document.getElementById('fotoNa1').click()">
-        <span class="foto-slot-icon">📷</span>
-        <span class="foto-slot-label">Na 2 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span>
       </div>
     </div>
     <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
@@ -318,14 +315,26 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 <!-- OVERZICHT -->
 <div class="panel" id="panel-overzicht">
   <div class="queue-banner hidden" id="queueBanner">
-    <span id="queueMsg">📤 Opdrachten wachten op synchronisatie</span>
-    <button class="btn-sm btn" style="background:var(--accent);color:#fff;margin-top:0;width:auto;padding:5px 12px;font-size:12px" onclick="syncQueue()">Nu synchroniseren</button>
+    <span>📤 Opdrachten wachten op synchronisatie</span>
+    <button class="btn-queue" onclick="syncQueue()">Nu synchroniseren</button>
   </div>
   <div class="stats">
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('alle')"><div class="stat-n" id="s-totaal" style="color:var(--text)">0</div><div class="stat-l">Totaal</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('nogteplannen')"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nog te plannen</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('bezig')"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Onderhanden</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar v. fact.</div></div>
+    <div class="stat" id="stat-totaal" onclick="statFilter('alle')">
+      <div class="stat-n" id="s-totaal" style="color:var(--text)">0</div>
+      <div class="stat-l">Totaal</div>
+    </div>
+    <div class="stat" id="stat-nieuw" onclick="statFilter('nogteplannen')">
+      <div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div>
+      <div class="stat-l">Nog te plannen</div>
+    </div>
+    <div class="stat" id="stat-bezig" onclick="statFilter('bezig')">
+      <div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div>
+      <div class="stat-l">Onderhanden</div>
+    </div>
+    <div class="stat" id="stat-klaar" onclick="statFilter('klaar')">
+      <div class="stat-n" id="s-klaar" style="color:var(--green)">0</div>
+      <div class="stat-l">Klaar v. fact.</div>
+    </div>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -344,23 +353,26 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <option value="ontvangen">Ontvangen op</option>
       <option value="deadline">Deadline eerst</option>
       <option value="datum">Datum afspraak</option>
-      <option value="aangemaakt">Nieuwste eerst</option>
+      <option value="nieuwste">Nieuwste eerst</option>
     </select>
   </div>
-  <div id="orderList"><div class="loading">Laden...</div></div>
+  <div id="orderList"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Laden...</div></div></div>
 </div>
+
+<!-- DETAIL -->
+<div class="panel" id="panel-detail">
   <div id="detailContent"></div>
 </div>
 
 <!-- PRINTEN -->
 <div class="panel" id="panel-print">
-  <div class="slbl" style="margin-top:0">Werkbon (één opdracht)</div>
-  <div class="field"><label>Opdrachtnummer</label>
+  <div class="slbl" style="margin-top:0">Werkbon afdrukken</div>
+  <div class="field"><label>Kies opdracht</label>
     <select id="printSelect"><option value="">— Kies opdracht —</option></select>
   </div>
-  <button class="btn btn-print no-print" onclick="printWerkbon()">🖨️ Werkbon afdrukken</button>
-  <div class="slbl">Opdrachtenlijst</div>
-  <div class="field"><label>Status filteren</label>
+  <button class="btn btn-blue" onclick="printWerkbon()">🖨️ Werkbon afdrukken</button>
+  <div class="slbl">Lijst afdrukken</div>
+  <div class="field"><label>Filter op status</label>
     <select id="listFilter">
       <option value="alle">Alle opdrachten</option>
       <option value="nieuw">Nog te plannen</option>
@@ -368,10 +380,8 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <option value="klaar">Klaar voor facturatie</option>
     </select>
   </div>
-  <button class="btn btn-print no-print" onclick="printList()">🖨️ Lijst afdrukken</button>
+  <button class="btn btn-blue" onclick="printList()">🖨️ Lijst afdrukken</button>
 </div>
-
-<div class="print-only" id="printOutput"></div>
 
 <!-- BEWERK MODAL -->
 <div class="modal-ov" id="editModal">
@@ -388,17 +398,16 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <button class="tbtn" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
-      <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="e_overig" placeholder="bijv. garagepoort, sanitair, tegel..."></div>
+      <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="e_overig"></div>
     </div>
     <div class="slbl">Prioriteit</div>
-    <div class="type-grid" style="grid-template-columns:1fr 1fr">
+    <div class="prio-grid">
       <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
     </div>
     <div class="slbl">Opdrachtgever</div>
-    <div class="field">
-      <label>Type</label>
-      <select id="e_og_type" onchange="toggleEditOGFields()">
+    <div class="field"><label>Type</label>
+      <select id="e_og_type" onchange="toggleEditOG()">
         <option value="particulier">Particulier</option>
         <option value="aannemer">Via aannemer / bedrijf</option>
       </select>
@@ -410,37 +419,38 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <div class="field"><label>Email aannemer</label><input type="email" id="e_og_email"></div>
       <div class="field"><label>Referentie</label><input type="text" id="e_og_ref"></div>
     </div>
-    <div class="slbl">Locatie & bewoner</div>
+    <div class="slbl">Locatie & klant</div>
     <div class="field"><label>Naam bewoner</label><input type="text" id="e_naam"></div>
     <div class="field"><label>Adres</label><input type="text" id="e_adres"></div>
     <div class="field"><label>Telefoon</label><input type="tel" id="e_tel"></div>
     <div class="field"><label>E-mailadres</label><input type="email" id="e_email"></div>
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
-    <div class="field"><label>Ontvangen op (datum opdracht)</label><input type="date" id="e_datum_plan"></div>
-    <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="e_datum_deadline"></div>
+    <div class="field"><label>Ontvangen op</label><input type="date" id="e_datum_plan"></div>
+    <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="e_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
+
     <div class="slbl">Foto's voor werkzaamheden</div>
-    <div id="e_fotos_voor_existing" style="margin-bottom:7px"></div>
+    <div id="e_fotos_voor_existing"></div>
     <div class="foto-grid">
       <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById('eFotoVoor0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1 toevoegen</span>
       </div>
       <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById('eFotoVoor1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2 toevoegen</span>
       </div>
     </div>
     <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
     <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
-    <div id="e_fotos_na_existing" style="margin-bottom:7px"></div>
+    <div id="e_fotos_na_existing"></div>
     <div class="foto-grid">
       <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById('eFotoNa0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1 toevoegen</span>
       </div>
       <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById('eFotoNa1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2 — tik om toe te voegen</span>
+        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2 toevoegen</span>
       </div>
     </div>
     <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
@@ -448,7 +458,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
     <div class="slbl">Handtekening</div>
     <div id="e_sig_existing" style="display:none;margin-bottom:8px">
-      <img id="e_sig_img" class="sig-preview" alt="Handtekening">
+      <img id="e_sig_img" class="sig-preview" alt="Bestaande handtekening">
       <button class="btn btn-secondary" style="margin-top:7px;font-size:13px;padding:9px" onclick="replaceEditSig()">Handtekening vervangen</button>
     </div>
     <div id="e_sig_new">
@@ -465,589 +475,460 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightboxImg" src="" alt="">
 </div>
 
+<div class="print-only" id="printOutput"></div>
 <div class="toast" id="toast"></div>
 
 <script>
+// ── CONFIG ──────────────────────────────────────────────────
 const DBX_APP_KEY = '1kdk0mz2o7kqea8';
 const DBX_REDIRECT = 'https://rolfjurgen.github.io/werkorder';
 const DBX_FILE = '/werkorders.json';
-const QUEUE_KEY = 'rj_queue';
-const BACKUP_KEY = 'rj_backup';
+const BACKUP_KEY = 'rj_backup_v3';
+const QUEUE_KEY = 'rj_queue_v3';
+const DELETED_KEY = 'rj_deleted_v3';
 
+// ── STATE ────────────────────────────────────────────────────
 let token = localStorage.getItem('dbx_token') || null;
 let orders = [];
 let selTypeVal = '';
-let editSelType = '';
-let newFotos = { voor: [null, null], na: [null, null] };
+let selPrioVal = 'normaal';
+let editTypeVal = '';
+let editPrioVal = 'normaal';
+let newFotos = { voor: [null,null], na: [null,null] };
+let editFotos = { voor: [null,null], na: [null,null] };
+let currentStatFilter = 'alle'; // 'alle','nogteplannen','bezig','klaar'
+const sigStates = {};
 
-// ============================================================
-// DROPBOX AUTH
-// ============================================================
-function startDropboxAuth() {
-  const state = Math.random().toString(36).slice(2);
-  localStorage.setItem('dbx_state', state);
-  window.location.href = `https://www.dropbox.com/oauth2/authorize?client_id=${DBX_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DBX_REDIRECT)}&state=${state}`;
+// ── AUTH ─────────────────────────────────────────────────────
+function startAuth() {
+  const st = Math.random().toString(36).slice(2);
+  localStorage.setItem('dbx_state', st);
+  location.href = `https://www.dropbox.com/oauth2/authorize?client_id=${DBX_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DBX_REDIRECT)}&state=${st}`;
 }
-
-function handleAuthCallback() {
-  const hash = window.location.hash;
-  if (!hash) return false;
-  const params = new URLSearchParams(hash.slice(1));
-  const at = params.get('access_token');
-  const state = params.get('state');
-  if (at && state === localStorage.getItem('dbx_state')) {
-    token = at;
-    localStorage.setItem('dbx_token', at);
-    window.location.hash = '';
-    return true;
+function handleCallback() {
+  if (!location.hash) return false;
+  const p = new URLSearchParams(location.hash.slice(1));
+  const at = p.get('access_token'), st = p.get('state');
+  if (at && st === localStorage.getItem('dbx_state')) {
+    token = at; localStorage.setItem('dbx_token', at); location.hash = ''; return true;
   }
   return false;
 }
-
 function logout() {
-  localStorage.removeItem('dbx_token');
-  token = null;
-  orders = [];
-  showLoginScreen();
+  localStorage.removeItem('dbx_token'); token = null; orders = [];
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('newForm').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+  setSyncStatus('niet verbonden','busy');
 }
 
-// ============================================================
-// DROPBOX API
-// ============================================================
+// ── DROPBOX API ──────────────────────────────────────────────
 async function dbxRead() {
-  setSyncStatus('laden...', '');
+  setSyncStatus('laden...','busy');
   try {
     const r = await fetch('https://content.dropboxapi.com/2/files/download', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE }) }
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}
     });
-    if (r.status === 409) { orders = []; setSyncStatus('verbonden', 'ok'); return; }
-    if (!r.ok) throw new Error('read ' + r.status);
+    if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); return; }
+    if (!r.ok) throw new Error(r.status);
     orders = JSON.parse(await r.text());
-    setSyncStatus('gesynchroniseerd', 'ok');
+    setSyncStatus('gesynchroniseerd','ok');
   } catch(e) {
-    setSyncStatus('offline — lokaal', 'err');
-    orders = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+    setSyncStatus('offline — lokaal','err');
+    orders = JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]');
   }
 }
-
 async function dbxWrite() {
-  setSyncStatus('opslaan...', '');
-  const body = JSON.stringify(orders, null, 2);
-  localStorage.setItem(BACKUP_KEY, body);
+  setSyncStatus('opslaan...','busy');
+  const body = JSON.stringify(orders,null,2);
+  localStorage.setItem(BACKUP_KEY,body);
   if (!token) { addToQueue(); return; }
   try {
-    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE, mode: 'overwrite', autorename: false }),
-        'Content-Type': 'application/octet-stream'
-      },
-      body
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload',{
+      method:'POST', headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE,mode:'overwrite',autorename:false}),
+        'Content-Type':'application/octet-stream'
+      }, body
     });
-    if (!r.ok) throw new Error('write ' + r.status);
-    setSyncStatus('gesynchroniseerd', 'ok');
-  } catch(e) {
-    setSyncStatus('offline — lokaal opgeslagen', 'err');
-    addToQueue();
-  }
+    if (!r.ok) throw new Error(r.status);
+    setSyncStatus('gesynchroniseerd','ok');
+  } catch(e) { setSyncStatus('offline — lokaal','err'); addToQueue(); }
 }
-
-async function dbxUploadFoto(path, dataUrl) {
+async function dbxUploadFoto(path,dataUrl) {
+  if (!token||!dataUrl) return null;
+  try {
+    const b64=dataUrl.split(',')[1], bin=atob(b64), arr=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path,mode:'overwrite',autorename:false}),'Content-Type':'application/octet-stream'},body:arr
+    });
+    return r.ok ? path : null;
+  } catch(e){return null;}
+}
+async function dbxShareLink(path) {
   if (!token) return null;
   try {
-    const base64 = dataUrl.split(',')[1];
-    const bin = atob(base64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Dropbox-API-Arg': JSON.stringify({ path, mode: 'overwrite', autorename: false }),
-        'Content-Type': 'application/octet-stream'
-      },
-      body: arr
+    const r=await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path,settings:{requested_visibility:{'.tag':'public'}}})
     });
-    if (!r.ok) return null;
-    return path;
-  } catch(e) { return null; }
-}
-
-async function dbxGetShareLink(path) {
-  if (!token) return null;
-  try {
-    const r = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, settings: { requested_visibility: { '.tag': 'public' } } })
-    });
-    if (r.status === 409) {
-      const r2 = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path })
+    if (r.status===409){
+      const r2=await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({path})
       });
-      const d = await r2.json();
-      return d.links?.[0]?.url || null;
+      const d=await r2.json(); return d.links?.[0]?.url||null;
     }
-    const d = await r.json();
-    return d.url || null;
-  } catch(e) { return null; }
+    const d=await r.json(); return d.url||null;
+  } catch(e){return null;}
+}
+function setSyncStatus(msg,type) {
+  const el=document.getElementById('syncStatus');
+  el.textContent=msg;
+  el.className = type==='ok'?'sync-ok':type==='err'?'sync-err':'sync-busy';
 }
 
-function setSyncStatus(msg, cls) {
-  const el = document.getElementById('syncStatus');
-  el.textContent = msg;
-  el.className = 'sync-status' + (cls ? ' ' + cls : '');
-}
-
-// ============================================================
-// WACHTRIJ
-// ============================================================
-function addToQueue() {
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(orders));
-  setSyncStatus('in wachtrij', 'warn');
-  renderQueueBanner();
-}
-
+// ── QUEUE ────────────────────────────────────────────────────
+function addToQueue() { localStorage.setItem(QUEUE_KEY,JSON.stringify(orders)); renderQueueBanner(); }
 function renderQueueBanner() {
-  const q = localStorage.getItem(QUEUE_KEY);
-  const banner = document.getElementById('queueBanner');
-  if (q && token) {
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
+  const b=document.getElementById('queueBanner');
+  b.classList.toggle('hidden',!localStorage.getItem(QUEUE_KEY)||!token);
 }
-
 async function syncQueue() {
-  const q = localStorage.getItem(QUEUE_KEY);
-  if (!q || !token) return;
-  orders = JSON.parse(q);
-  await dbxWrite();
-  localStorage.removeItem(QUEUE_KEY);
-  renderQueueBanner();
-  showToast('✓ Wachtrij gesynchroniseerd');
-  renderAll();
+  const q=localStorage.getItem(QUEUE_KEY); if(!q||!token) return;
+  orders=JSON.parse(q); await dbxWrite();
+  localStorage.removeItem(QUEUE_KEY); renderQueueBanner(); showToast('✓ Gesynchroniseerd'); renderList();
 }
 
-// ============================================================
-// INIT
-// ============================================================
+// ── INIT ─────────────────────────────────────────────────────
 async function init() {
-  handleAuthCallback();
+  handleCallback();
   document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
   if (token) {
-    showAppScreen();
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('newForm').style.display='block';
+    document.getElementById('logoutBtn').style.display='inline-block';
     await dbxRead();
-    // Als token verlopen is probeer opnieuw in te loggen
-    if (document.getElementById('syncStatus').classList.contains('err')) {
-      const stored = localStorage.getItem('dbx_token');
-      if (!stored) { showLoginScreen(); return; }
-    }
-    renderAll();
-    renderQueueBanner();
-    // Elke 45 minuten automatisch opnieuw verbinden
-    setInterval(async () => {
-      if (token) {
-        await dbxRead();
-        renderAll();
-      }
-    }, 45 * 60 * 1000);
-  } else {
-    showLoginScreen();
+    renderList(); renderPrintSelect(); renderQueueBanner();
+    setInterval(async()=>{ if(token){await dbxRead();renderList();} }, 45*60*1000);
   }
   initSigPad('sigCanvas');
 }
 
-function showLoginScreen() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('newForm').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'none';
-}
-
-function showAppScreen() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('newForm').style.display = 'block';
-  document.getElementById('logoutBtn').style.display = 'inline-block';
-}
-
-function switchTab(tab) {
-  if (tab === 'overzicht') { gaNaarOverzicht(); return; }
-
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-
-  document.querySelectorAll('.tab').forEach(t => {
-    if (t.getAttribute('data-tab') === tab) t.classList.add('active');
-  });
-
-  const panel = document.getElementById('panel-' + tab);
-  if (panel) panel.classList.add('active');
+// ── TAB NAVIGATION ───────────────────────────────────────────
+function goTab(tab) {
+  // Verberg alle panels
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
 
   if (tab !== 'detail') {
-    document.getElementById('detailContent').innerHTML = '';
-    document.getElementById('detailTabBtn').style.display = 'none';
+    // Leeg detail panel bij weggaan
+    document.getElementById('detailContent').innerHTML='';
+    document.getElementById('detailTab').style.display='none';
   }
-  if (tab === 'print') renderPrintSelect();
+
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
+
+  if (tab==='overzicht') renderList();
+  if (tab==='print') renderPrintSelect();
 }
 
-function renderAll() { renderList(); renderPrintSelect(); }
+function goDetail() {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-detail').classList.add('active');
+  document.getElementById('detailTab').style.display='block';
+  document.getElementById('detailTab').classList.add('active');
+}
 
-// ============================================================
-// SIGNATURE
-// ============================================================
-const sigStates = {};
-
+// ── SIGNATURE ────────────────────────────────────────────────
 function initSigPad(id) {
-  const c = document.getElementById(id);
-  if (!c) return;
-  const dpr = window.devicePixelRatio || 1;
-  const rect = c.getBoundingClientRect();
-  c.width = (rect.width || 320) * dpr;
-  c.height = 150 * dpr;
-  const ctx = c.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.strokeStyle = '#1c1916';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  sigStates[id] = { ctx, drawing: false, hasSig: false };
-  const pos = (e) => { const r = c.getBoundingClientRect(); const s = e.touches?e.touches[0]:e; return {x:s.clientX-r.left,y:s.clientY-r.top}; };
-  c.addEventListener('mousedown', e=>{sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
-  c.addEventListener('mousemove', e=>{if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
-  c.addEventListener('mouseup', ()=>sigStates[id].drawing=false);
-  c.addEventListener('mouseleave', ()=>sigStates[id].drawing=false);
-  c.addEventListener('touchstart', e=>{e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
-  c.addEventListener('touchmove', e=>{e.preventDefault();if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
-  c.addEventListener('touchend', ()=>sigStates[id].drawing=false);
+  const c=document.getElementById(id); if(!c)return;
+  const dpr=window.devicePixelRatio||1, rect=c.getBoundingClientRect();
+  c.width=(rect.width||320)*dpr; c.height=140*dpr;
+  const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.strokeStyle='#1c1916'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  sigStates[id]={ctx,drawing:false,hasSig:false};
+  const pos=(e)=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
+  c.addEventListener('mousedown',e=>{sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  c.addEventListener('mousemove',e=>{if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
+  c.addEventListener('mouseup',()=>sigStates[id].drawing=false);
+  c.addEventListener('mouseleave',()=>sigStates[id].drawing=false);
+  c.addEventListener('touchstart',e=>{e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
+  c.addEventListener('touchend',()=>sigStates[id].drawing=false);
 }
+function clearSig(id){const s=sigStates[id];if(!s)return;const c=document.getElementById(id);s.ctx.clearRect(0,0,c.width,c.height);s.hasSig=false;}
+function getSig(id){const s=sigStates[id];return s&&s.hasSig?document.getElementById(id).toDataURL('image/png'):null;}
 
-function clearSig(id) {
-  const s = sigStates[id];
-  if (!s) return;
-  const c = document.getElementById(id);
-  s.ctx.clearRect(0, 0, c.width, c.height);
-  s.hasSig = false;
+// ── FOTO ─────────────────────────────────────────────────────
+function compressImg(dataUrl,cb){
+  const img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas'),mw=1200;let w=img.width,h=img.height;if(w>mw){h=Math.round(h*mw/w);w=mw;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.75));};
+  img.src=dataUrl;
 }
-
-function getSigData(id) {
-  const s = sigStates[id];
-  if (!s || !s.hasSig) return null;
-  return document.getElementById(id).toDataURL('image/png');
-}
-
-// ============================================================
-// FOTO HANDLING
-// ============================================================
-function triggerFotoCamera(inputId) {
-  document.getElementById(inputId).click();
-}
-function triggerFoto(inputId) {
-  document.getElementById(inputId).click();
-}
-
-function handleFoto(input, slotId, type, idx) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    compressImage(e.target.result, (compressed) => {
-      newFotos[type][idx] = compressed;
-      const slot = document.getElementById(slotId);
-      slot.classList.add('has-foto');
-      slot.innerHTML = `<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
-    });
-  };
-  reader.readAsDataURL(file);
-}
-
-function compressImage(dataUrl, callback) {
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const maxW = 1200;
-    let w = img.width, h = img.height;
-    if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    callback(canvas.toDataURL('image/jpeg', 0.75));
-  };
-  img.src = dataUrl;
-}
-
-function removeFoto(event, slotId, type, idx) {
-  event.stopPropagation();
-  newFotos[type][idx] = null;
-  const slot = document.getElementById(slotId);
-  slot.classList.remove('has-foto');
-  const label = type === 'voor' ? `Voor ${idx+1}` : `Na ${idx+1}`;
-  slot.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${label}</span>`;
-  slot.onclick = () => triggerFoto(type === 'voor' ? `fotoVoor${idx}` : `fotoNa${idx}`);
-}
-
-function resetFotoSlots() {
-  newFotos = { voor: [null, null], na: [null, null] };
-  ['Voor 1','Voor 2'].forEach((lbl, i) => {
-    const s = document.getElementById(`slotVoor${i}`);
-    s.classList.remove('has-foto');
-    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
-    s.onclick = () => triggerFoto(`fotoVoor${i}`);
+function handleFoto(input,slotId,type,idx){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>compressImg(e.target.result,compressed=>{
+    newFotos[type][idx]=compressed;
+    const slot=document.getElementById(slotId);
+    slot.classList.add('has-foto');
+    slot.innerHTML=`<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
   });
-  ['Na 1','Na 2'].forEach((lbl, i) => {
-    const s = document.getElementById(`slotNa${i}`);
-    s.classList.remove('has-foto');
-    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
-    s.onclick = () => triggerFoto(`fotoNa${i}`);
+  r.readAsDataURL(f);
+}
+function removeFoto(ev,slotId,type,idx){
+  ev.stopPropagation(); newFotos[type][idx]=null;
+  const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
+  const lbl=type==='voor'?`Voor ${idx+1}`:`Na ${idx+1}`;
+  slot.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
+  slot.onclick=()=>document.getElementById(type==='voor'?`fotoVoor${idx}`:`fotoNa${idx}`).click();
+}
+function resetFotos(){
+  newFotos={voor:[null,null],na:[null,null]};
+  ['Voor 1','Voor 2'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoVoor${i}`).click();});
+  ['Na 1','Na 2'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoNa${i}`).click();});
+  ['fotoVoor0','fotoVoor1','fotoNa0','fotoNa1'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function handleEditFoto(input,slotId,type,idx){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>compressImg(e.target.result,compressed=>{
+    editFotos[type][idx]=compressed;
+    const slot=document.getElementById(slotId); slot.classList.add('has-foto');
+    slot.innerHTML=`<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeEditFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
   });
-  document.getElementById('fotoVoor0').value = '';
-  document.getElementById('fotoVoor1').value = '';
-  document.getElementById('fotoNa0').value = '';
-  document.getElementById('fotoNa1').value = '';
+  r.readAsDataURL(f);
+}
+function removeEditFoto(ev,slotId,type,idx){
+  ev.stopPropagation(); editFotos[type][idx]=null;
+  const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
+  slot.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${type==='voor'?'Voor':'Na'} ${idx+1} toevoegen</span>`;
+  slot.onclick=()=>document.getElementById(`eFoto${type==='voor'?'Voor':'Na'}${idx}`).click();
+}
+function resetEditFotos(){
+  editFotos={voor:[null,null],na:[null,null]};
+  ['eFotoVoor0','eFotoVoor1','eFotoNa0','eFotoNa1'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 
-// ============================================================
-// NEW ORDER
-// ============================================================
-let selPrioVal = 'normaal';
-let editPrioVal = 'normaal';
-
-function selPrio(btn, prio) {
-  document.querySelectorAll('#newForm #prioSpoed, #newForm #prioNormaal').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  selPrioVal = prio;
+// ── FORM HELPERS ─────────────────────────────────────────────
+function selType(btn,type){
+  document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); selTypeVal=type;
+  document.getElementById('f_overig_wrap').style.display=type==='Overig'?'block':'none';
+  if(type!=='Overig') document.getElementById('f_overig').value='';
+}
+function selPrio(btn,prio){
+  document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('prioNormaal').classList.remove('sel');
+  btn.classList.add('sel'); selPrioVal=prio;
+}
+function toggleOG(){
+  document.getElementById('f_og_extra').style.display=document.getElementById('f_og_type').value==='aannemer'?'block':'none';
+}
+function selEditType(btn,type){
+  document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); editTypeVal=type;
+  document.getElementById('e_overig_wrap').style.display=type==='Overig'?'block':'none';
+}
+function selEditPrio(btn,prio){
+  document.getElementById('eprioSpoed').classList.remove('sel');
+  document.getElementById('eprioNormaal').classList.remove('sel');
+  btn.classList.add('sel'); editPrioVal=prio;
+}
+function toggleEditOG(){
+  document.getElementById('e_og_extra').style.display=document.getElementById('e_og_type').value==='aannemer'?'block':'none';
+}
+function replaceEditSig(){
+  document.getElementById('e_sig_existing').style.display='none';
+  document.getElementById('e_sig_new').style.display='block';
+  setTimeout(()=>initSigPad('editSigCanvas'),120);
 }
 
-function selEditPrio(btn, prio) {
-  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  editPrioVal = prio;
-}
+// ── SAVE ORDER ───────────────────────────────────────────────
+async function saveOrder(){
+  if(!token){showToast('Verbind eerst met Dropbox',true);return;}
+  const naam=document.getElementById('f_naam').value.trim();
+  const ogNaam=document.getElementById('f_og_naam').value.trim();
+  const ogType=document.getElementById('f_og_type').value;
+  if(!naam&&!(ogType==='aannemer'&&ogNaam)){showToast('Vul een naam in',true);return;}
+  if(!selTypeVal){showToast('Kies een type werkzaamheden',true);return;}
 
-function prioRank(p) { return p === 'spoed' ? 0 : p === 'normaal' ? 1 : 2; }
+  const overig=document.getElementById('f_overig').value.trim();
+  const typeLabel=selTypeVal==='Overig'&&overig?`Overig: ${overig}`:selTypeVal;
+  const nr='RJ-'+String(orders.length+1).padStart(4,'0');
+  const mapPad=`/Fotos/${nr}`;
 
-function selType(btn, type) {
-  document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  selTypeVal = type;
-  document.getElementById('f_overig_wrap').style.display = type === 'Overig' ? 'block' : 'none';
-  if (type !== 'Overig') document.getElementById('f_overig').value = '';
-}
-
-function toggleOGFields() {
-  document.getElementById('f_og_extra').style.display =
-    document.getElementById('f_og_type').value === 'aannemer' ? 'block' : 'none';
-}
-
-function toggleEditOGFields() {
-  document.getElementById('e_og_extra').style.display =
-    document.getElementById('e_og_type').value === 'aannemer' ? 'block' : 'none';
-}
-
-async function saveOrder() {
-  if (!token) { showToast('Verbind eerst met Dropbox', true); return; }
-  const naam = document.getElementById('f_naam').value.trim();
-  const ogNaam = document.getElementById('f_og_naam').value.trim();
-  const ogType = document.getElementById('f_og_type').value;
-  if (!naam && !(ogType === 'aannemer' && ogNaam)) { showToast('Vul een naam in (bewoner of aannemer)', true); return; }
-  if (!selTypeVal) { showToast('Kies een type werkzaamheden', true); return; }
-
-  const overigOmschr = document.getElementById('f_overig').value.trim();
-  const typeLabel = selTypeVal === 'Overig' && overigOmschr ? `Overig: ${overigOmschr}` : selTypeVal;
-
-  const nr = 'RJ-' + String(orders.length + 1).padStart(4, '0');
-  const mapPad = `/Fotos/${nr}`;
-
-  setSyncStatus('foto\'s uploaden...', '');
-  const fotoUrls = { voor: [null,null], na: [null,null] };
-  for (let i = 0; i < 2; i++) {
-    if (newFotos.voor[i]) fotoUrls.voor[i] = await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`, newFotos.voor[i]);
-    if (newFotos.na[i]) fotoUrls.na[i] = await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`, newFotos.na[i]);
+  setSyncStatus("foto's uploaden...",'busy');
+  const fotoUrls={voor:[null,null],na:[null,null]};
+  for(let i=0;i<2;i++){
+    if(newFotos.voor[i]) fotoUrls.voor[i]=await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`,newFotos.voor[i]);
+    if(newFotos.na[i]) fotoUrls.na[i]=await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`,newFotos.na[i]);
   }
 
   orders.unshift({
-    id: Date.now(), nr, status: 'nieuw',
-    prioriteit: selPrioVal,
-    naam, type: typeLabel,
-    og_type: document.getElementById('f_og_type').value,
-    og_naam: document.getElementById('f_og_naam').value.trim(),
-    og_contact: document.getElementById('f_og_contact').value.trim(),
-    og_tel: document.getElementById('f_og_tel').value.trim(),
-    og_email: document.getElementById('f_og_email').value.trim(),
-    og_ref: document.getElementById('f_og_ref').value.trim(),
-    adres: document.getElementById('f_adres').value.trim(),
-    tel: document.getElementById('f_tel').value.trim(),
-    email: document.getElementById('f_email').value.trim(),
-    datum: document.getElementById('f_datum').value,
-    datum_plan: document.getElementById('f_datum_plan').value,
-    datum_deadline: document.getElementById('f_datum_deadline').value,
-    omschr: document.getElementById('f_omschr').value.trim(),
-    sig: getSigData('sigCanvas'),
-    fotos: fotoUrls,
-    fotoMap: mapPad,
-    aangemaakt: new Date().toISOString()
+    id:Date.now(),nr,status:'nieuw',prioriteit:selPrioVal,
+    naam,type:typeLabel,
+    og_type:ogType,og_naam:ogNaam,
+    og_contact:document.getElementById('f_og_contact').value.trim(),
+    og_tel:document.getElementById('f_og_tel').value.trim(),
+    og_email:document.getElementById('f_og_email').value.trim(),
+    og_ref:document.getElementById('f_og_ref').value.trim(),
+    adres:document.getElementById('f_adres').value.trim(),
+    tel:document.getElementById('f_tel').value.trim(),
+    email:document.getElementById('f_email').value.trim(),
+    datum:document.getElementById('f_datum').value,
+    datum_plan:document.getElementById('f_datum_plan').value,
+    datum_deadline:document.getElementById('f_datum_deadline').value,
+    omschr:document.getElementById('f_omschr').value.trim(),
+    sig:getSig('sigCanvas'),
+    fotos:fotoUrls,fotoMap:mapPad,
+    aangemaakt:new Date().toISOString()
   });
 
   await dbxWrite();
 
-  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f_overig_wrap').style.display = 'none';
-  document.getElementById('f_og_type').value = 'particulier';
-  toggleOGFields();
-  document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
-  document.getElementById('f_datum_plan').value = '';
-  document.getElementById('f_datum_deadline').value = '';
-  document.querySelectorAll('#newForm .tbtn').forEach(b => b.classList.remove('sel'));
-  selTypeVal = '';
-  selPrioVal = 'normaal';
+  // Reset formulier
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_plan','f_datum_deadline'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_datum').value=new Date().toISOString().split('T')[0];
+  document.getElementById('f_og_type').value='particulier'; toggleOG();
+  document.getElementById('f_overig_wrap').style.display='none';
+  document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  selTypeVal=''; selPrioVal='normaal';
   document.getElementById('prioNormaal').classList.add('sel');
-  resetFotoSlots();
-
-  showToast('✓ Opdracht ' + nr + ' opgeslagen');
-  switchTab('overzicht');
-  renderAll();
+  document.getElementById('prioSpoed').classList.remove('sel');
+  clearSig('sigCanvas'); resetFotos();
+  showToast('✓ Opdracht '+nr+' opgeslagen');
+  goTab('overzicht');
 }
 
-// ============================================================
-// LIST
-// ============================================================
-function renderList() {
-  const counts = { nieuw:0, bezig:0, klaar:0 };
-  orders.forEach(o => { if(counts[o.status]!==undefined) counts[o.status]++; });
-  const nogTePlannen = orders.filter(o => !o.datum_plan || o.datum_plan === '').length;
-  document.getElementById('s-totaal').textContent = orders.length;
-  document.getElementById('s-nieuw').textContent = nogTePlannen;
-  document.getElementById('s-bezig').textContent = counts.bezig;
-  document.getElementById('s-klaar').textContent = counts.klaar;
+// ── RENDER LIST ──────────────────────────────────────────────
+function statusLabel(s){return s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie';}
+function prioRank(p){return p==='spoed'?0:1;}
 
-  const filterStatus = document.getElementById('filterStatus')?.value || 'alle';
-  const filterPrio = document.getElementById('filterPrio')?.value || 'alle';
-  const sortOrder = document.getElementById('sortOrder')?.value || 'prio';
+function statFilter(type){
+  currentStatFilter=type;
+  // Update stat highlight
+  ['totaal','nieuw','bezig','klaar'].forEach(k=>{
+    document.getElementById('stat-'+k).classList.remove('active-filter');
+  });
+  if(type==='alle') document.getElementById('stat-totaal').classList.add('active-filter');
+  else if(type==='nogteplannen') document.getElementById('stat-nieuw').classList.add('active-filter');
+  else if(type==='bezig') document.getElementById('stat-bezig').classList.add('active-filter');
+  else if(type==='klaar') document.getElementById('stat-klaar').classList.add('active-filter');
+  // Reset dropdown filter
+  document.getElementById('filterStatus').value='alle';
+  renderList();
+}
 
-  let filtered = [...orders];
-  if (filterStatus !== 'alle') filtered = filtered.filter(o => o.status === filterStatus);
-  if (extraFilter === 'nogteplannen') filtered = filtered.filter(o => !o.datum_plan || o.datum_plan === '');
-  if (filterPrio !== 'alle') filtered = filtered.filter(o => (o.prioriteit || 'normaal') === filterPrio);
+function renderList(){
+  // Tellers
+  const nogTeP=orders.filter(o=>!o.datum_plan||o.datum_plan==='').length;
+  const bezig=orders.filter(o=>o.status==='bezig').length;
+  const klaar=orders.filter(o=>o.status==='klaar').length;
+  document.getElementById('s-totaal').textContent=orders.length;
+  document.getElementById('s-nieuw').textContent=nogTeP;
+  document.getElementById('s-bezig').textContent=bezig;
+  document.getElementById('s-klaar').textContent=klaar;
 
-  filtered.sort((a, b) => {
-    if (sortOrder === 'prio') {
-      const pd = prioRank(a.prioriteit||'normaal') - prioRank(b.prioriteit||'normaal');
-      if (pd !== 0) return pd;
-      return new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0);
-    }
-    if (sortOrder === 'ontvangen') {
-      if (!a.datum_plan && !b.datum_plan) return 0;
-      if (!a.datum_plan) return 1;
-      if (!b.datum_plan) return -1;
-      return new Date(a.datum_plan) - new Date(b.datum_plan);
-    }
-    if (sortOrder === 'deadline') {
-      if (!a.datum_deadline && !b.datum_deadline) return 0;
-      if (!a.datum_deadline) return 1;
-      if (!b.datum_deadline) return -1;
-      return new Date(a.datum_deadline) - new Date(b.datum_deadline);
-    }
-    if (sortOrder === 'datum') {
-      if (!a.datum && !b.datum) return 0;
-      if (!a.datum) return 1;
-      if (!b.datum) return -1;
-      return new Date(a.datum) - new Date(b.datum);
-    }
-    return new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0);
+  // Filter
+  const fStatus=document.getElementById('filterStatus').value;
+  const fPrio=document.getElementById('filterPrio').value;
+  const sort=document.getElementById('sortOrder').value;
+
+  let filtered=[...orders];
+
+  // Stat filter heeft voorrang
+  if(currentStatFilter==='nogteplannen'){
+    filtered=filtered.filter(o=>!o.datum_plan||o.datum_plan==='');
+  } else if(currentStatFilter==='bezig'){
+    filtered=filtered.filter(o=>o.status==='bezig');
+  } else if(currentStatFilter==='klaar'){
+    filtered=filtered.filter(o=>o.status==='klaar');
+  } else {
+    // Gebruik dropdown filter
+    if(fStatus!=='alle') filtered=filtered.filter(o=>o.status===fStatus);
+  }
+  if(fPrio!=='alle') filtered=filtered.filter(o=>(o.prioriteit||'normaal')===fPrio);
+
+  // Sorteren
+  filtered.sort((a,b)=>{
+    if(sort==='prio'){const pd=prioRank(a.prioriteit||'normaal')-prioRank(b.prioriteit||'normaal');return pd||new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);}
+    if(sort==='ontvangen'){if(!a.datum_plan&&!b.datum_plan)return 0;if(!a.datum_plan)return 1;if(!b.datum_plan)return -1;return new Date(a.datum_plan)-new Date(b.datum_plan);}
+    if(sort==='deadline'){if(!a.datum_deadline&&!b.datum_deadline)return 0;if(!a.datum_deadline)return 1;if(!b.datum_deadline)return -1;return new Date(a.datum_deadline)-new Date(b.datum_deadline);}
+    if(sort==='datum'){if(!a.datum&&!b.datum)return 0;if(!a.datum)return 1;if(!b.datum)return -1;return new Date(a.datum)-new Date(b.datum);}
+    return new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);
   });
 
-  const el = document.getElementById('orderList');
-  if (!orders.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';
-    return;
-  }
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';
-    return;
-  }
+  const el=document.getElementById('orderList');
+  if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';return;}
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';return;}
 
-  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal' };
-  const prioCls = { spoed:'prio-spoed', normaal:'prio-normaal' };
+  const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
+  const pBadge=o=>(o.prioriteit||'normaal')==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':'';
 
-  el.innerHTML = filtered.map(o => {
-    const prio = o.prioriteit || 'normaal';
-    const hasFotos = o.fotos && (o.fotos.voor.some(f=>f) || o.fotos.na.some(f=>f));
-    return `<div class="ocard" onclick="showDetail(${o.id})">
+  el.innerHTML=filtered.map(o=>`
+    <div class="ocard" onclick="showDetail(${o.id})">
       <div class="ocard-top">
         <div>
           <div class="onr">${o.nr}</div>
-          <div class="oname">${o.og_type==='aannemer'&&o.og_naam ? o.og_naam : o.naam}</div>
-          ${o.og_type==='aannemer'&&o.naam ? `<div style="font-size:12px;color:var(--text2)">Bewoner: ${o.naam}</div>` : ''}
+          <div class="oname">${hoofdNaam(o)}</div>
+          ${o.og_type==='aannemer'&&o.naam?`<div class="osub">Bewoner: ${o.naam}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span class="badge b-${o.status}">${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</span>
-          <span class="badge ${prioCls[prio]}">${prioLabel[prio]}</span>
+          <span class="badge b-${o.status}">${statusLabel(o.status)}</span>
+          ${pBadge(o)}
         </div>
       </div>
       <div class="ometa">
-        ${o.datum?'<span>📅 '+fmtDate(o.datum)+'</span>':''}
-        ${o.datum_deadline?'<span style="color:var(--red)">⚠️ klaar: '+fmtDate(o.datum_deadline)+'</span>':''}
-        ${o.adres?'<span>📍 '+o.adres+'</span>':''}
+        ${o.datum?`<span>📅 ${fmtDate(o.datum)}</span>`:''}
+        ${o.datum_deadline?`<span style="color:var(--red)">⚠️ ${fmtDate(o.datum_deadline)}</span>`:''}
+        ${o.adres?`<span>📍 ${o.adres}</span>`:''}
       </div>
       <div class="otype">${o.type}</div>
-      ${o.og_type==='aannemer'&&o.og_naam?`<div class="otype" style="background:var(--accent-bg);border-color:#e8d090;color:var(--accent)">🏗️ ${o.og_naam}</div>`:''}
-      ${o.sig?'<div class="sig-ok">✓ Handtekening aanwezig</div>':''}
-      ${hasFotos?'<div class="foto-ok">📷 Foto\'s aanwezig</div>':''}
-    </div>`;
-  }).join('');
+      ${hasFotos(o)?'<div class="foto-ok">📷 Foto\'s aanwezig</div>':''}
+      ${o.sig?'<div class="sig-ok">✓ Handtekening</div>':''}
+    </div>`).join('');
 }
 
-function fmtDate(d) {
-  if (!d) return '';
-  return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});
-}
+function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
 
-// ============================================================
-// DETAIL
-// ============================================================
-function showDetail(id) {
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
+// ── DETAIL ───────────────────────────────────────────────────
+function showDetail(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
 
-  const sopts = ['nieuw','bezig','klaar'].map(s =>
-    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie'}</div>`
+  const sopts=['nieuw','bezig','klaar'].map(s=>
+    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s)}</div>`
   ).join('');
 
-  const fotoVoorHTML = o.fotos ? [0,1].map(i => o.fotos.voor[i] ?
-    `<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>` : ''
-  ).join('') : '';
+  const fVHTML=o.fotos?[0,1].map(i=>o.fotos.voor[i]?`<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>`:'').join(''):'';
+  const fNHTML=o.fotos?[0,1].map(i=>o.fotos.na[i]?`<div class="foto-detail-item"><img src="${o.fotos.na[i]}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}"><div class="foto-detail-label">Na ${i+1}</div></div>`:'').join(''):'';
 
-  const fotoNaHTML = o.fotos ? [0,1].map(i => o.fotos.na[i] ?
-    `<div class="foto-detail-item"><img src="${o.fotos.na[i]}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}"><div class="foto-detail-label">Na ${i+1}</div></div>` : ''
-  ).join('') : '';
-
-  const hoofdNaam = o.og_type === 'aannemer' && o.og_naam ? o.og_naam : o.naam;
-
-  document.getElementById('detailContent').innerHTML = `
+  document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
-      <button class="back" onclick="gaNaarOverzicht()">← Terug</button>
+      <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
       <div><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:16px;font-weight:600">${hoofdNaam}</div></div>
     </div>
-    <div class="slbl" style="margin-top:0">Status & prioriteit</div>
+    <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${sopts}</div>
     <div class="status-row">
-      ${['spoed','normaal'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}
+      ${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}
     </div>
     <div class="slbl">Opdrachtgever</div>
     ${o.og_type==='aannemer'?`
-      <div class="drow"><div class="drow-l">Type</div><div class="drow-v">Via aannemer / bedrijf</div></div>
       ${o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}</div></div>`:''}
       ${o.og_contact?`<div class="drow"><div class="drow-l">Contactpersoon</div><div class="drow-v">${o.og_contact}</div></div>`:''}
-      ${o.og_tel?`<div class="drow"><div class="drow-l">Tel. aannemer</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
-      ${o.og_email?`<div class="drow"><div class="drow-l">Email aannemer</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
+      ${o.og_tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
+      ${o.og_email?`<div class="drow"><div class="drow-l">Email</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
       ${o.og_ref?`<div class="drow"><div class="drow-l">Referentie</div><div class="drow-v">${o.og_ref}</div></div>`:''}
     `:`<div class="drow"><div class="drow-l">Type</div><div class="drow-v">Particulier</div></div>`}
     <div class="slbl">Locatie & klant</div>
@@ -1064,562 +945,287 @@ function showDetail(id) {
     <div class="slbl">Tijdregistratie</div>
     <div class="drow">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div><div class="drow-l">Vertrek</div>
-          <input type="time" value="${o.tijd_vertrek||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="saveTijd(${id},'tijd_vertrek',this.value)"></div>
-        <div><div class="drow-l">Aankomst</div>
-          <input type="time" value="${o.tijd_aankomst||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="saveTijd(${id},'tijd_aankomst',this.value)"></div>
+        <div><div class="drow-l">Vertrek</div><input class="time-input" type="time" value="${o.tijd_vertrek||''}" onchange="saveTijd(${id},'tijd_vertrek',this.value)"></div>
+        <div><div class="drow-l">Aankomst</div><input class="time-input" type="time" value="${o.tijd_aankomst||''}" onchange="saveTijd(${id},'tijd_aankomst',this.value)"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div><div class="drow-l">Werk van</div>
-          <input type="time" value="${o.tijd_werk_van||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="saveTijd(${id},'tijd_werk_van',this.value)"></div>
-        <div><div class="drow-l">Werk tot</div>
-          <input type="time" value="${o.tijd_werk_tot||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="saveTijd(${id},'tijd_werk_tot',this.value)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="drow-l">Werk van</div><input class="time-input" type="time" value="${o.tijd_werk_van||''}" onchange="saveTijd(${id},'tijd_werk_van',this.value)"></div>
+        <div><div class="drow-l">Werk tot</div><input class="time-input" type="time" value="${o.tijd_werk_tot||''}" onchange="saveTijd(${id},'tijd_werk_tot',this.value)"></div>
       </div>
       ${berekenTijden(o)}
     </div>
     <div class="slbl">Agenda starttijd</div>
     <div class="drow"><div class="drow-l">Starttijd afspraak</div>
-      <input type="time" value="${o.agenda_tijd||'08:00'}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="saveAgendaTijd(${id},this.value)">
+      <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
     </div>
-    ${fotoVoorHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoVoorHTML}</div>`:''}
-    ${fotoNaHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoNaHTML}</div>`:''}
-    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`
-    :`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
+    ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
+    ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
+    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
     <div class="divider"></div>
-    <button class="btn btn-email no-print" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
-    <button class="btn btn-secondary no-print" onclick="mailOrder(${id})">✉️ Mailen</button>
-    <button class="btn no-print" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;margin-bottom:7px;font-size:14px" onclick="addToAgenda(${id})">📅 Toevoegen aan Google Agenda</button>
-    <button class="btn btn-print no-print" onclick="printSingle(${id})">🖨️ Werkbon afdrukken</button>
-    <button class="btn btn-edit no-print" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
-    <button class="btn btn-danger no-print" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
+    <button class="btn btn-green" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
+    <button class="btn btn-secondary" onclick="mailOrder(${id})" style="margin-bottom:7px">✉️ Mailen</button>
+    <button class="btn btn-blue" onclick="addToAgenda(${id})">📅 Toevoegen aan Google Agenda</button>
+    <button class="btn btn-edit" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
+    <button class="btn btn-danger" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
 
-  document.getElementById('detailTabBtn').style.display = 'block';
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-detail').classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('detailTabBtn').classList.add('active');
+  goDetail();
 }
 
-function gaNaarOverzicht() {
-  document.getElementById('detailContent').innerHTML = '';
-  document.getElementById('detailTabBtn').style.display = 'none';
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-overzicht').classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('[data-tab="overzicht"]').classList.add('active');
-  renderList();
+async function changeStatus(id,status){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].status=status; await dbxWrite(); showDetail(id); renderList();
+}
+async function changePrio(id,prio){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].prioriteit=prio; await dbxWrite(); showDetail(id);
+}
+async function deleteOrder(id){
+  if(!confirm('Opdracht verwijderen?'))return;
+  const del=JSON.parse(localStorage.getItem(DELETED_KEY)||'[]'); del.push(id); localStorage.setItem(DELETED_KEY,JSON.stringify(del));
+  orders=orders.filter(x=>x.id!==id); await dbxWrite();
+  goTab('overzicht'); showToast('Opdracht verwijderd');
 }
 
-async function changePrio(id, prio) {
-  const idx = orders.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  orders[idx].prioriteit = prio;
-  await dbxWrite();
-  showDetail(id);
-}
+// ── EDIT ─────────────────────────────────────────────────────
+function openEdit(id){
+  resetEditFotos();
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  document.getElementById('e_id').value=id;
+  document.getElementById('e_naam').value=o.naam||'';
+  document.getElementById('e_adres').value=o.adres||'';
+  document.getElementById('e_tel').value=o.tel||'';
+  document.getElementById('e_email').value=o.email||'';
+  document.getElementById('e_datum').value=o.datum||'';
+  document.getElementById('e_datum_plan').value=o.datum_plan||'';
+  document.getElementById('e_datum_deadline').value=o.datum_deadline||'';
+  document.getElementById('e_omschr').value=o.omschr||'';
+  document.getElementById('e_og_type').value=o.og_type||'particulier'; toggleEditOG();
+  document.getElementById('e_og_naam').value=o.og_naam||'';
+  document.getElementById('e_og_contact').value=o.og_contact||'';
+  document.getElementById('e_og_tel').value=o.og_tel||'';
+  document.getElementById('e_og_email').value=o.og_email||'';
+  document.getElementById('e_og_ref').value=o.og_ref||'';
 
-async function changeStatus(id, status) {
-  const idx = orders.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  orders[idx].status = status;
-  await dbxWrite();
-  showDetail(id);
-  renderAll();
-}
+  editTypeVal=o.type||'';
+  const isOverig=editTypeVal.startsWith('Overig');
+  document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>{
+    const bType=b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    b.classList.toggle('sel',isOverig?bType==='Overig':bType===editTypeVal);
+  });
+  document.getElementById('e_overig_wrap').style.display=isOverig?'block':'none';
+  if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overig: ','').replace('Overig','');
 
-async function deleteOrder(id) {
-  if (!confirm('Opdracht verwijderen?')) return;
-  // Bijhouden welke IDs verwijderd zijn zodat ze niet terugkomen bij sync
-  const deleted = JSON.parse(localStorage.getItem('rj_deleted') || '[]');
-  deleted.push(id);
-  localStorage.setItem('rj_deleted', JSON.stringify(deleted));
-  orders = orders.filter(x => x.id !== id);
-  await dbxWrite();
-  document.getElementById('detailTabBtn').style.display = 'none';
-  switchTab('overzicht');
-  showToast('Opdracht verwijderd');
-}
+  editPrioVal=o.prioriteit||'normaal';
+  document.getElementById('eprioSpoed').classList.toggle('sel',editPrioVal==='spoed');
+  document.getElementById('eprioNormaal').classList.toggle('sel',editPrioVal==='normaal');
 
-// ============================================================
-// EMAIL
-// ============================================================
-// ============================================================
-// PDF
-// ============================================================
-function savePDF(id) {
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
+  // Bestaande fotos tonen
+  ['voor','na'].forEach(type=>{
+    const el=document.getElementById(`e_fotos_${type}_existing`);
+    if(o.fotos&&o.fotos[type]&&o.fotos[type].some(f=>f)){
+      el.innerHTML=`<div class="foto-detail-grid">${[0,1].map(i=>o.fotos[type][i]?`<div class="foto-detail-item"><img src="${o.fotos[type][i]}" onclick="openLightbox('${o.fotos[type][i]}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`:'').join('')}</div><div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's toevoegen ter vervanging</div>`;
+    } else { el.innerHTML=''; }
+  });
 
-  const refRegel = o.og_type === 'aannemer' && o.og_ref ? `<tr><td>Uw referentie</td><td>${o.og_ref}</td></tr>` : '';
-  const ogRegel = o.og_type === 'aannemer' && o.og_naam ? `<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact ? ' — ' + o.og_contact : ''}</td></tr>` : '';
-  const sigHTML = o.sig ? `<div style="margin-top:28px;border-top:1px solid #ddd;padding-top:14px">
-    <div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant — akkoord uitvoering</div>
-    <img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px">
-  </div>` : '';
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Werkbon ${o.nr}</title>
-  <style>
-    body { font-family: Arial, sans-serif; font-size: 13px; color: #1c1916; margin: 0; padding: 32px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #b5820c; padding-bottom: 16px; margin-bottom: 20px; }
-    .bedrijf { font-size: 18px; font-weight: 700; color: #b5820c; }
-    .bedrijf-sub { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.6; }
-    .nr { font-size: 12px; color: #666; text-align: right; line-height: 1.8; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    td { padding: 7px 10px; border: 1px solid #ddd; vertical-align: top; }
-    td:first-child { font-weight: 600; width: 36%; background: #f9f7f4; color: #666; }
-    .footer { margin-top: 32px; border-top: 1px solid #ddd; padding-top: 16px; font-size: 11px; color: #666; line-height: 1.8; }
-    @media print { body { padding: 0; } }
-  </style>
-  </head><body>
-  <div class="header">
-    <div>
-      <div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div>
-      <div class="bedrijf-sub">
-        Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>
-        T +31 (0)45-5350200 &nbsp;|&nbsp; mail@rolfjurgen.nl &nbsp;|&nbsp; www.rolfjurgen.nl
-      </div>
-    </div>
-    <div class="nr">
-      <strong>Werkbon ${o.nr}</strong><br>
-      Datum: ${new Date().toLocaleDateString('nl-NL')}<br>
-      Status: ${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}
-    </div>
-  </div>
-  <table>
-    ${ogRegel}
-    ${refRegel}
-    <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
-    ${o.datum ? `<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>` : ''}
-    ${o.datum_deadline ? `<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>` : ''}
-    <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
-    ${o.adres ? `<tr><td>Adres</td><td>${o.adres}</td></tr>` : ''}
-    ${o.tel ? `<tr><td>Telefoon</td><td>${o.tel}</td></tr>` : ''}
-    ${o.omschr ? `<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>` : ''}
-  </table>
-  <div style="font-size:12px;color:#666;margin-bottom:8px">
-    De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.
-  </div>
-  ${sigHTML}
-  <div class="footer">
-    R. Jurgen &nbsp;|&nbsp; Rolf Jurgen Schadeservice & Laktechniek &nbsp;|&nbsp; www.rolfjurgen.nl
-  </div>
-  </body></html>`;
-
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank');
-  if (win) {
-    win.onload = () => {
-      setTimeout(() => {
-        win.print();
-      }, 500);
-    };
+  if(o.sig){
+    document.getElementById('e_sig_existing').style.display='block';
+    document.getElementById('e_sig_img').src=o.sig;
+    document.getElementById('e_sig_new').style.display='none';
   } else {
-    // Fallback: download als HTML die je kunt openen en printen als PDF
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Werkbon-${o.nr}-${o.naam.replace(/\s+/g,'-')}.html`;
-    a.click();
-    showToast('📄 Werkbon gedownload — open en druk af als PDF');
-  }
-}
-
-function tijdNaarMinuten(t) {
-  if (!t) return 0;
-  const [u, m] = t.split(':').map(Number);
-  return u * 60 + m;
-}
-
-function minutenNaarTijd(m) {
-  if (!m) return '';
-  return `${Math.floor(m/60)}u ${m%60}min`;
-}
-
-function berekenTijden(o) {
-  const reisMin = o.tijd_vertrek && o.tijd_aankomst
-    ? tijdNaarMinuten(o.tijd_aankomst) - tijdNaarMinuten(o.tijd_vertrek)
-    : 0;
-  const werkMin = o.tijd_werk_van && o.tijd_werk_tot
-    ? tijdNaarMinuten(o.tijd_werk_tot) - tijdNaarMinuten(o.tijd_werk_van)
-    : 0;
-  if (!reisMin && !werkMin) return '';
-  return `<div style="font-size:12px;color:var(--text3);margin-top:4px;padding-top:8px;border-top:1px solid var(--border)">
-    ${reisMin > 0 ? `Reistijd: ${minutenNaarTijd(reisMin)} &nbsp;|&nbsp;` : ''}
-    ${werkMin > 0 ? `Werktijd: ${minutenNaarTijd(werkMin)} &nbsp;|&nbsp;` : ''}
-    ${reisMin+werkMin > 0 ? `Totaal: ${minutenNaarTijd(reisMin+werkMin)}` : ''}
-  </div>`;
-}
-
-let extraFilter = 'alle'; // 'alle', 'nogteplannen'
-
-function filterOpStatus(type) {
-  const sel = document.getElementById('filterStatus');
-  if (type === 'alle') {
-    sel.value = 'alle';
-    extraFilter = 'alle';
-  } else if (type === 'nogteplannen') {
-    sel.value = 'alle';
-    extraFilter = 'nogteplannen';
-  } else {
-    if (sel.value === type) {
-      sel.value = 'alle';
-    } else {
-      sel.value = type;
-    }
-    extraFilter = 'alle';
-  }
-  renderList();
-}
-
-async function saveTijd(id, veld, waarde) {
-  const idx = orders.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  orders[idx][veld] = waarde;
-  await dbxWrite();
-}
-
-async function saveAgendaTijd(id, tijd) {
-  const idx = orders.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  orders[idx].agenda_tijd = tijd;
-  await dbxWrite();
-}
-
-function addToAgenda(id) {
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-
-  const gebruikDatum = o.datum_plan || o.datum;
-  if (!gebruikDatum) { showToast('Vul eerst een datum in', true); return; }
-
-  const datum = gebruikDatum.replace(/-/g, '');
-  const tijdStr = (o.agenda_tijd || '08:00');
-  const [uurStr, minStr] = tijdStr.split(':');
-  const uur = parseInt(uurStr);
-  const einduur = String(uur + 1).padStart(2, '0');
-  const startStr = `${datum}T${String(uur).padStart(2,'0')}${minStr}00`;
-  const eindStr = `${datum}T${einduur}${minStr}00`;
-
-  const opdrachtgeverNaam = o.og_type === 'aannemer' && o.og_naam ? o.og_naam : o.naam;
-  const typeKort = o.type.replace('Overig: ','').replace('Overig','');
-  const titel = encodeURIComponent(`${opdrachtgeverNaam} — ${typeKort}`);
-  const locatie = encodeURIComponent(o.adres || '');
-  const details = encodeURIComponent(
-    `Werkorder: ${o.nr}\nKlant / bewoner: ${o.naam}\n${o.adres ? 'Adres: ' + o.adres + '\n' : ''}${o.omschr ? 'Omschrijving: ' + o.omschr : ''}`
-  );
-
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${locatie}&details=${details}`;
-  window.location.href = url;
-}
-
-async function mailOrder(id) {
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-
-  setSyncStatus('email voorbereiden...', '');
-
-  const emailTo = o.og_type === 'aannemer' ? (o.og_email || '') : (o.email || '');
-  const emailCC = o.og_type === 'aannemer' ? (o.email || '') : '';
-
-  let fotoTekst = '';
-  if (o.fotoMap && token) {
-    const link = await dbxGetShareLink(o.fotoMap);
-    if (link) fotoTekst = `\n\nFoto's voor en na de werkzaamheden:\n${link}`;
-  }
-
-  const typeKort = o.type.replace('Overig: ','').replace('Overig','');
-  const onderwerp = `Herstelopdracht — ${typeKort || o.type}`;
-  const aanhef = o.og_type === 'aannemer'
-    ? `Beste ${o.og_contact || o.og_naam || 'opdrachtgever'}`
-    : `Beste ${o.naam}`;
-
-  const refRegel = o.og_type === 'aannemer' && o.og_ref ? `Uw referentie:      ${o.og_ref}\n` : '';
-  const ogRegel = o.og_type === 'aannemer' && o.og_naam ? `Opdrachtgever:      ${o.og_naam}\n` : '';
-
-  const body = `${aanhef},
-
-Hierbij de bevestiging van de uitgevoerde werkzaamheden.
-
-Opdrachtnummer:     ${o.nr}
-${ogRegel}${refRegel}Type werkzaamheden: ${o.type}
-Locatie:            ${o.adres || 'niet opgegeven'}
-Klant / bewoner:    ${o.naam}
-Datum uitvoering:   ${o.datum ? fmtDate(o.datum) : 'niet opgegeven'}
-${o.omschr ? '\nOmschrijving:\n' + o.omschr + '\n' : ''}
-De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}`;
-
-  // Kopieer emailtekst naar klembord
-  try { await navigator.clipboard.writeText(body); } catch(e) {}
-
-  // Open Outlook met alleen emailadres en onderwerp — geen body
-  const mailto = `mailto:${emailTo}?subject=${onderwerp.replace(/ /g,'%20').replace(/—/g,'%E2%80%94').replace(/:/g,'%3A')}${emailCC ? '&cc=' + encodeURIComponent(emailCC) : ''}`;
-  window.location.href = mailto;
-  showToast('✓ Emailtekst gekopieerd — plak in Outlook');
-  setSyncStatus('gesynchroniseerd', 'ok');
-}
-
-// ============================================================
-// LIGHTBOX
-// ============================================================
-function openLightbox(src) {
-  document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-}
-
-// ============================================================
-// EDIT
-// ============================================================
-let editFotos = { voor: [null, null], na: [null, null] };
-
-function handleEditFoto(input, slotId, type, idx) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    compressImage(e.target.result, (compressed) => {
-      editFotos[type][idx] = compressed;
-      const slot = document.getElementById(slotId);
-      slot.classList.add('has-foto');
-      slot.innerHTML = `<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeEditFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
-    });
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeEditFoto(event, slotId, type, idx) {
-  event.stopPropagation();
-  editFotos[type][idx] = null;
-  const slot = document.getElementById(slotId);
-  slot.classList.remove('has-foto');
-  const label = type === 'voor' ? `Voor ${idx+1}` : `Na ${idx+1}`;
-  slot.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${label}</span>`;
-  slot.onclick = () => triggerFoto(type==='voor'?`eFotoVoor${idx}`:`eFotoNa${idx}`);
-}
-
-function resetEditFotoSlots() {
-  editFotos = { voor: [null,null], na: [null,null] };
-  ['Voor 1','Voor 2'].forEach((lbl,i) => {
-    const s = document.getElementById(`eSlotVoor${i}`);
-    s.classList.remove('has-foto');
-    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
-    s.onclick = () => triggerFoto(`eFotoVoor${i}`);
-  });
-  ['Na 1','Na 2'].forEach((lbl,i) => {
-    const s = document.getElementById(`eSlotNa${i}`);
-    s.classList.remove('has-foto');
-    s.innerHTML = `<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
-    s.onclick = () => triggerFoto(`eFotoNa${i}`);
-  });
-  ['eFotoVoor0','eFotoVoor1','eFotoNa0','eFotoNa1'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-}
-
-function openEdit(id) {
-  resetEditFotoSlots();
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-
-  // Toon bestaande foto's
-  ['voor','na'].forEach(type => {
-    const el = document.getElementById(`e_fotos_${type}_existing`);
-    if (o.fotos && o.fotos[type] && o.fotos[type].some(f=>f)) {
-      el.innerHTML = `<div class="foto-detail-grid">${[0,1].map(i => o.fotos[type][i]
-        ? `<div class="foto-detail-item"><img src="${o.fotos[type][i]}" onclick="openLightbox('${o.fotos[type][i]}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`
-        : '').join('')}</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's hieronder toevoegen ter vervanging</div>`;
-    } else {
-      el.innerHTML = '';
-    }
-  });
-  document.getElementById('e_id').value = id;
-  document.getElementById('e_naam').value = o.naam || '';
-  document.getElementById('e_adres').value = o.adres || '';
-  document.getElementById('e_tel').value = o.tel || '';
-  document.getElementById('e_email').value = o.email || '';
-  document.getElementById('e_datum').value = o.datum || '';
-  document.getElementById('e_datum_plan').value = o.datum_plan || '';
-  document.getElementById('e_datum_deadline').value = o.datum_deadline || '';
-  document.getElementById('e_omschr').value = o.omschr || '';
-  document.getElementById('e_og_type').value = o.og_type || 'particulier';
-  document.getElementById('e_og_naam').value = o.og_naam || '';
-  document.getElementById('e_og_contact').value = o.og_contact || '';
-  document.getElementById('e_og_tel').value = o.og_tel || '';
-  document.getElementById('e_og_email').value = o.og_email || '';
-  document.getElementById('e_og_ref').value = o.og_ref || '';
-  editPrioVal = o.prioriteit || 'normaal';
-  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal').forEach(b => b.classList.remove('sel'));
-  const prioMap = { spoed:'eprioSpoed', normaal:'eprioNormaal' };
-  document.getElementById(prioMap[editPrioVal])?.classList.add('sel');
-
-  toggleEditOGFields();
-  editSelType = o.type || '';
-  const isOverig = editSelType.startsWith('Overig');
-  document.getElementById('e_overig_wrap').style.display = isOverig ? 'block' : 'none';
-  if (isOverig) document.getElementById('e_overig').value = editSelType.replace('Overig: ','').replace('Overig','');
-  document.querySelectorAll('#editModal .tbtn').forEach(b => {
-    const bType = b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
-    b.classList.toggle('sel', isOverig ? bType === 'Overig' : bType === editSelType);
-  });
-  if (o.sig) {
-    document.getElementById('e_sig_existing').style.display = 'block';
-    document.getElementById('e_sig_img').src = o.sig;
-    document.getElementById('e_sig_new').style.display = 'none';
-  } else {
-    document.getElementById('e_sig_existing').style.display = 'none';
-    document.getElementById('e_sig_new').style.display = 'block';
+    document.getElementById('e_sig_existing').style.display='none';
+    document.getElementById('e_sig_new').style.display='block';
   }
   document.getElementById('editModal').classList.add('open');
-  setTimeout(() => initSigPad('editSigCanvas'), 120);
+  setTimeout(()=>initSigPad('editSigCanvas'),120);
 }
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
+async function saveEdit(){
+  const id=parseInt(document.getElementById('e_id').value);
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  const naam=document.getElementById('e_naam').value.trim();
+  const ogNaam=document.getElementById('e_og_naam').value.trim();
+  const ogType=document.getElementById('e_og_type').value;
+  if(!naam&&!(ogType==='aannemer'&&ogNaam)){showToast('Vul een naam in',true);return;}
 
-function replaceEditSig() {
-  document.getElementById('e_sig_existing').style.display = 'none';
-  document.getElementById('e_sig_new').style.display = 'block';
-  setTimeout(() => initSigPad('editSigCanvas'), 120);
-}
+  const eOverig=document.getElementById('e_overig').value.trim();
+  orders[idx].naam=naam;
+  orders[idx].adres=document.getElementById('e_adres').value.trim();
+  orders[idx].tel=document.getElementById('e_tel').value.trim();
+  orders[idx].email=document.getElementById('e_email').value.trim();
+  orders[idx].datum=document.getElementById('e_datum').value;
+  orders[idx].datum_plan=document.getElementById('e_datum_plan').value;
+  orders[idx].datum_deadline=document.getElementById('e_datum_deadline').value;
+  orders[idx].omschr=document.getElementById('e_omschr').value.trim();
+  orders[idx].og_type=ogType;
+  orders[idx].og_naam=ogNaam;
+  orders[idx].og_contact=document.getElementById('e_og_contact').value.trim();
+  orders[idx].og_tel=document.getElementById('e_og_tel').value.trim();
+  orders[idx].og_email=document.getElementById('e_og_email').value.trim();
+  orders[idx].og_ref=document.getElementById('e_og_ref').value.trim();
+  orders[idx].prioriteit=editPrioVal;
+  if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
 
-function selEditType(btn, type) {
-  document.querySelectorAll('#editModal .tbtn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  editSelType = type;
-  document.getElementById('e_overig_wrap').style.display = type === 'Overig' ? 'block' : 'none';
-}
-
-function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
-
-async function saveEdit() {
-  const id = parseInt(document.getElementById('e_id').value);
-  const idx = orders.findIndex(x => x.id === id);
-  if (idx < 0) return;
-  const naam = document.getElementById('e_naam').value.trim();
-  if (!naam) { showToast('Vul een naam in', true); return; }
-  orders[idx].naam = naam;
-  orders[idx].adres = document.getElementById('e_adres').value.trim();
-  orders[idx].tel = document.getElementById('e_tel').value.trim();
-  orders[idx].email = document.getElementById('e_email').value.trim();
-  orders[idx].datum = document.getElementById('e_datum').value;
-  orders[idx].datum_plan = document.getElementById('e_datum_plan').value;
-  orders[idx].datum_deadline = document.getElementById('e_datum_deadline').value;
-  orders[idx].omschr = document.getElementById('e_omschr').value.trim();
-  orders[idx].og_type = document.getElementById('e_og_type').value;
-  orders[idx].og_naam = document.getElementById('e_og_naam').value.trim();
-  orders[idx].og_contact = document.getElementById('e_og_contact').value.trim();
-  orders[idx].og_tel = document.getElementById('e_og_tel').value.trim();
-  orders[idx].og_email = document.getElementById('e_og_email').value.trim();
-  orders[idx].og_ref = document.getElementById('e_og_ref').value.trim();
-  orders[idx].prioriteit = editPrioVal;
-  const eOverig = document.getElementById('e_overig').value.trim();
-  if (editSelType) orders[idx].type = (editSelType === 'Overig' && eOverig) ? `Overig: ${eOverig}` : editSelType;
-  const newSig = getSigData('editSigCanvas');
-  if (newSig) orders[idx].sig = newSig;
-
-  // Nieuwe foto's uploaden
-  if (!orders[idx].fotos) orders[idx].fotos = { voor:[null,null], na:[null,null] };
-  if (!orders[idx].fotoMap) orders[idx].fotoMap = `/Fotos/${orders[idx].nr}`;
-  for (let i = 0; i < 2; i++) {
-    if (editFotos.voor[i]) {
-      const pad = await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`, editFotos.voor[i]);
-      if (pad) orders[idx].fotos.voor[i] = editFotos.voor[i];
-    }
-    if (editFotos.na[i]) {
-      const pad = await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`, editFotos.na[i]);
-      if (pad) orders[idx].fotos.na[i] = editFotos.na[i];
-    }
+  // Nieuwe fotos
+  if(!orders[idx].fotos) orders[idx].fotos={voor:[null,null],na:[null,null]};
+  if(!orders[idx].fotoMap) orders[idx].fotoMap=`/Fotos/${orders[idx].nr}`;
+  for(let i=0;i<2;i++){
+    if(editFotos.voor[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`,editFotos.voor[i]);orders[idx].fotos.voor[i]=editFotos.voor[i];}
+    if(editFotos.na[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`,editFotos.na[i]);orders[idx].fotos.na[i]=editFotos.na[i];}
   }
-  await dbxWrite();
-  closeEdit();
-  showToast('✓ Wijzigingen opgeslagen');
-  showDetail(id);
-  renderAll();
+  const newSig=getSig('editSigCanvas');
+  if(newSig) orders[idx].sig=newSig;
+
+  await dbxWrite(); closeEdit(); showToast('✓ Wijzigingen opgeslagen'); showDetail(id);
 }
 
-// ============================================================
-// PRINT
-// ============================================================
-function renderPrintSelect() {
-  const sel = document.getElementById('printSelect');
-  sel.innerHTML = '<option value="">— Kies opdracht —</option>';
-  orders.forEach(o => {
-    const opt = document.createElement('option');
-    opt.value = o.id;
-    opt.textContent = o.nr + ' — ' + o.naam + (o.datum?' ('+fmtDate(o.datum)+')':'');
-    sel.appendChild(opt);
-  });
+// ── TIJDREGISTRATIE ──────────────────────────────────────────
+function tijdNaarMin(t){if(!t)return 0;const[u,m]=t.split(':').map(Number);return u*60+m;}
+function minNaarTijd(m){if(!m||m<=0)return '';return `${Math.floor(m/60)}u ${m%60}min`;}
+function berekenTijden(o){
+  const reis=o.tijd_vertrek&&o.tijd_aankomst?tijdNaarMin(o.tijd_aankomst)-tijdNaarMin(o.tijd_vertrek):0;
+  const werk=o.tijd_werk_van&&o.tijd_werk_tot?tijdNaarMin(o.tijd_werk_tot)-tijdNaarMin(o.tijd_werk_van):0;
+  if(!reis&&!werk)return '';
+  return `<div style="font-size:12px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+    ${reis>0?`Reistijd: ${minNaarTijd(reis)} &nbsp;|&nbsp;`:''}${werk>0?`Werktijd: ${minNaarTijd(werk)} &nbsp;|&nbsp;`:''}${reis+werk>0?`Totaal: ${minNaarTijd(reis+werk)}`:''}
+  </div>`;
+}
+async function saveTijd(id,veld,waarde){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx][veld]=waarde; await dbxWrite();
+}
+async function saveAgendaTijd(id,tijd){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].agenda_tijd=tijd; await dbxWrite();
 }
 
-function werkbonHTML(o) {
-  return `<div class="werkbon">
-    <div class="werkbon-hdr">
-      <div><div class="werkbon-logo">RJ Oppervlakteherstel</div><div style="font-size:12px;color:#666;margin-top:3px">mail@rolfjurgen.nl</div></div>
-      <div style="font-family:monospace;font-size:12px;color:#666">${o.nr}<br>${new Date().toLocaleDateString('nl-NL')}</div>
-    </div>
+// ── AGENDA ───────────────────────────────────────────────────
+function addToAgenda(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  const datum=o.datum_plan||o.datum;
+  if(!datum){showToast('Vul eerst een datum in',true);return;}
+  const d=datum.replace(/-/g,'');
+  const tijdStr=(o.agenda_tijd||'08:00');
+  const[uurStr,minStr]=tijdStr.split(':');
+  const uur=parseInt(uurStr);
+  const startStr=`${d}T${String(uur).padStart(2,'0')}${minStr}00`;
+  const eindStr=`${d}T${String(uur+1).padStart(2,'0')}${minStr}00`;
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const titel=encodeURIComponent(`${hoofd} — ${type}`);
+  const loc=encodeURIComponent(o.adres||'');
+  const det=encodeURIComponent(`Werkorder: ${o.nr}\nKlant: ${o.naam||''}\n${o.adres?'Adres: '+o.adres+'\n':''}${o.omschr?'Omschrijving: '+o.omschr:''}`);
+  window.location.href=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${loc}&details=${det}`;
+}
+
+// ── MAIL ─────────────────────────────────────────────────────
+async function mailOrder(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  setSyncStatus('email voorbereiden...','busy');
+  const emailTo=o.og_type==='aannemer'?(o.og_email||''):(o.email||'');
+  const emailCC=o.og_type==='aannemer'?(o.email||''):'';
+  let fotoTekst='';
+  if(o.fotoMap&&token){const link=await dbxShareLink(o.fotoMap);if(link)fotoTekst=`\n\nFoto's voor en na:\n${link}`;}
+  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const onderwerp=`Herstelopdracht — ${type}`;
+  const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
+  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`Opdrachtgever:      ${o.og_naam}${o.og_contact?' — '+o.og_contact:''}\n`:'';
+  const refRegel=o.og_type==='aannemer'&&o.og_ref?`Uw referentie:      ${o.og_ref}\n`:'';
+  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}`;
+  try{await navigator.clipboard.writeText(body);}catch(e){}
+  const mailto=`mailto:${emailTo}?subject=${onderwerp.replace(/ /g,'%20').replace(/—/g,'%E2%80%94').replace(/:/g,'%3A')}${emailCC?'&cc='+encodeURIComponent(emailCC):''}`;
+  window.location.href=mailto;
+  showToast('✓ Emailtekst gekopieerd');
+  setSyncStatus('gesynchroniseerd','ok');
+}
+
+// ── PDF ──────────────────────────────────────────────────────
+function savePDF(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
+  const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
+  const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot}`:''}</td></tr>`:'';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Werkbon ${o.nr}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#1c1916;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:2px solid #b5820c;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#b5820c}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f9f7f4;color:#666}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
+  </head><body><div class="werkbon-hdr"><div><div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div><div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
+  <div class="nr"><strong>Werkbon ${o.nr}</strong><br>Datum: ${new Date().toLocaleDateString('nl-NL')}<br>Status: ${statusLabel(o.status)}</div></div>
+  <table>${ogRegel}${refRegel}<tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
+  ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+  ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
+  <tr><td>Klant / bewoner</td><td>${o.naam||'—'}</td></tr>
+  ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
+  ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
+  ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
+  ${tijdRegel}</table>
+  <div style="font-size:12px;color:#666">De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.</div>
+  ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
+  <div class="footer">R. Jurgen | Rolf Jurgen Schadeservice & Laktechniek | www.rolfjurgen.nl</div>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win){win.onload=()=>setTimeout(()=>win.print(),500);}
+  else{const a=document.createElement('a');a.href=url;a.download=`Werkbon-${o.nr}.html`;a.click();showToast('📄 Werkbon gedownload');}
+}
+
+// ── LIGHTBOX ─────────────────────────────────────────────────
+function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+// ── PRINT ────────────────────────────────────────────────────
+function statusLabelPrint(s){return s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie';}
+function renderPrintSelect(){
+  const sel=document.getElementById('printSelect');
+  sel.innerHTML='<option value="">— Kies opdracht —</option>';
+  orders.forEach(o=>{const opt=document.createElement('option');opt.value=o.id;const h=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;opt.textContent=`${o.nr} — ${h}${o.datum?' ('+fmtDate(o.datum)+')':''}`;sel.appendChild(opt);});
+}
+function printWerkbon(){
+  const id=parseInt(document.getElementById('printSelect').value);if(!id){showToast('Kies eerst een opdracht',true);return;}
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  document.getElementById('printOutput').innerHTML=`<div class="werkbon">
+    <div class="werkbon-hdr"><div><div class="werkbon-logo">Rolf Jurgen Schadeservice & Laktechniek</div><div style="font-size:11px;color:#666;margin-top:3px">mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
+    <div style="font-family:monospace;font-size:12px;color:#666">${o.nr}<br>${new Date().toLocaleDateString('nl-NL')}</div></div>
     <table>
-      ${o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:''}
+      ${o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}</td></tr>`:''}
       ${o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:''}
       <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
-      ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
-      ${o.datum_plan?`<tr><td>Ontvangen op</td><td>${fmtDate(o.datum_plan)}</td></tr>`:''}
-      ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
-      <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
+      ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+      <tr><td>Klant / bewoner</td><td>${o.naam||'—'}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
-      <tr><td>Status</td><td>${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</td></tr>
+      <tr><td>Status</td><td>${statusLabelPrint(o.status)}</td></tr>
       ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
-      ${(o.tijd_vertrek||o.tijd_aankomst||o.tijd_werk_van||o.tijd_werk_tot)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_aankomst)-tijdNaarMinuten(o.tijd_vertrek))})<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_werk_tot)-tijdNaarMinuten(o.tijd_werk_van))})`:''}</td></tr>`:''}
     </table>
     ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}"></div>`:''}
   </div>`;
-}
-
-function printSingle(id) {
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-  document.getElementById('printOutput').innerHTML = werkbonHTML(o);
   window.print();
 }
-
-function printWerkbon() {
-  const id = parseInt(document.getElementById('printSelect').value);
-  if (!id) { showToast('Kies eerst een opdracht', true); return; }
-  printSingle(id);
-}
-
-function printList() {
-  const filter = document.getElementById('listFilter').value;
-  const filtered = filter === 'alle' ? orders : orders.filter(o => o.status === filter);
-  if (!filtered.length) { showToast('Geen opdrachten gevonden', true); return; }
-  const rows = filtered.map(o => `<tr>
-    <td>${o.nr}</td><td>${o.naam}</td><td>${o.adres||''}</td>
-    <td>${o.og_type==='aannemer'&&o.og_naam?o.og_naam:'Particulier'}</td>
-    <td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td>
-    <td>${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</td>
-  </tr>`).join('');
-  document.getElementById('printOutput').innerHTML = `<div class="print-list">
-    <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #1c1916;padding-bottom:10px">
-      <div><div style="font-size:18px;font-weight:700">RJ Oppervlakteherstel</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
+function printList(){
+  const filter=document.getElementById('listFilter').value;
+  const filtered=filter==='alle'?orders:orders.filter(o=>o.status===filter);
+  if(!filtered.length){showToast('Geen opdrachten gevonden',true);return;}
+  const hoofd=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const rows=filtered.map(o=>`<tr><td>${o.nr}</td><td>${hoofd(o)}</td><td>${o.adres||''}</td><td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td><td>${statusLabelPrint(o.status)}</td></tr>`).join('');
+  document.getElementById('printOutput').innerHTML=`<div class="print-list">
+    <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #b5820c;padding-bottom:10px">
+      <div><div style="font-size:18px;font-weight:700;color:#b5820c">Rolf Jurgen Schadeservice & Laktechniek</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
       <div style="font-size:12px;color:#666">${filtered.length} opdrachten</div>
     </div>
-    <table><thead><tr><th>Nr</th><th>Klant / bewoner</th><th>Adres</th><th>Opdrachtgever</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead>
-    <tbody>${rows}</tbody></table>
+    <table><thead><tr><th>Nr</th><th>Opdrachtgever</th><th>Adres</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
   </div>`;
   window.print();
 }
 
-// ============================================================
-// TOAST
-// ============================================================
-function showToast(msg, isErr) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = isErr ? 'var(--red)' : 'var(--green)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+// ── TOAST ────────────────────────────────────────────────────
+function showToast(msg,isErr){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=isErr?'var(--red)':'var(--green)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-window.addEventListener('load', init);
+// ── START ────────────────────────────────────────────────────
+window.addEventListener('load',init);
 </script>
 </body>
 </html>
