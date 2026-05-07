@@ -912,6 +912,7 @@ async function saveOrder() {
 
   showToast('✓ Opdracht ' + nr + ' opgeslagen');
   switchTab('overzicht');
+  renderAll();
 }
 
 // ============================================================
@@ -920,7 +921,7 @@ async function saveOrder() {
 function renderList() {
   const counts = { nieuw:0, bezig:0, klaar:0 };
   orders.forEach(o => { if(counts[o.status]!==undefined) counts[o.status]++; });
-  const nogTePlannen = orders.filter(o => !o.datum_plan).length;
+  const nogTePlannen = orders.filter(o => !o.datum_plan || o.datum_plan === '').length;
   document.getElementById('s-totaal').textContent = orders.length;
   document.getElementById('s-nieuw').textContent = nogTePlannen;
   document.getElementById('s-bezig').textContent = counts.bezig;
@@ -1131,7 +1132,7 @@ async function changeStatus(id, status) {
   orders[idx].status = status;
   await dbxWrite();
   showDetail(id);
-  renderList();
+  renderAll();
 }
 
 async function deleteOrder(id) {
@@ -1529,6 +1530,7 @@ async function saveEdit() {
   closeEdit();
   showToast('✓ Wijzigingen opgeslagen');
   showDetail(id);
+  renderAll();
 }
 
 // ============================================================
