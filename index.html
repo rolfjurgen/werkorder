@@ -681,7 +681,6 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
-  // Activeer het juiste tab icoon op basis van data-tab attribuut
   document.querySelectorAll('.tab').forEach(t => {
     if (t.getAttribute('data-tab') === tab) t.classList.add('active');
   });
@@ -692,9 +691,9 @@ function switchTab(tab) {
   if (tab === 'overzicht') renderList();
   if (tab === 'print') renderPrintSelect();
 
-  // Verberg detailtab als we weggaan van detail
   if (tab !== 'detail') {
     document.getElementById('detailTabBtn').style.display = 'none';
+    document.getElementById('detailContent').innerHTML = '';
   }
 }
 
