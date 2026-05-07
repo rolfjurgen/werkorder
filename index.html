@@ -107,10 +107,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
 .b-klaar { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; }
 
 /* STATS */
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 18px; }
-.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 10px; text-align: center; }
-.stat-n { font-family: monospace; font-size: 26px; font-weight: 500; margin-bottom: 2px; }
-.stat-l { font-size: 11px; color: var(--text3); }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 18px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 6px; text-align: center; }
+.stat-n { font-family: monospace; font-size: 22px; font-weight: 500; margin-bottom: 2px; }
+.stat-l { font-size: 10px; color: var(--text3); }
 
 /* WACHTRIJ BANNER */
 .filter-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -322,9 +322,10 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <button class="btn-sm btn" style="background:var(--accent);color:#fff;margin-top:0;width:auto;padding:5px 12px;font-size:12px" onclick="syncQueue()">Nu synchroniseren</button>
   </div>
   <div class="stats">
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('alle')"><div class="stat-n" id="s-totaal" style="color:var(--text)">0</div><div class="stat-l">Totaal open</div></div>
     <div class="stat" style="cursor:pointer" onclick="filterOpStatus('nieuw')"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nog te plannen</div></div>
     <div class="stat" style="cursor:pointer" onclick="filterOpStatus('bezig')"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Onderhanden</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar voor facturatie</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar v. fact.</div></div>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -919,7 +920,11 @@ async function saveOrder() {
 function renderList() {
   const counts = { nieuw:0, bezig:0, klaar:0 };
   orders.forEach(o => { if(counts[o.status]!==undefined) counts[o.status]++; });
-  document.getElementById('s-nieuw').textContent = counts.nieuw;
+  // Nog te plannen = status nieuw EN geen datum_plan ingevuld
+  const nogTePlannen = orders.filter(o => o.status === 'nieuw' && !o.datum_plan).length;
+  const totaalOpen = orders.filter(o => o.status !== 'klaar').length;
+  document.getElementById('s-totaal').textContent = totaalOpen;
+  document.getElementById('s-nieuw').textContent = nogTePlannen;
   document.getElementById('s-bezig').textContent = counts.bezig;
   document.getElementById('s-klaar').textContent = counts.klaar;
 
@@ -1257,7 +1262,7 @@ function berekenTijden(o) {
 
 function filterOpStatus(status) {
   const sel = document.getElementById('filterStatus');
-  if (sel.value === status) {
+  if (status === 'alle' || sel.value === status) {
     sel.value = 'alle';
   } else {
     sel.value = status;
