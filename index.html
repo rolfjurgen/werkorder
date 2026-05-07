@@ -244,10 +244,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
 
     <div class="slbl">Prioriteit</div>
-    <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="type-grid" style="grid-template-columns:1fr 1fr">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
-      <button class="tbtn" id="prioWacht" onclick="selPrio(this,'wacht')"><span class="ti">🟢</span>Klaar voor facturatie</button>
     </div>
 
     <div class="slbl">Opdrachtgever</div>
@@ -323,22 +322,21 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <button class="btn-sm btn" style="background:var(--accent);color:#fff;margin-top:0;width:auto;padding:5px 12px;font-size:12px" onclick="syncQueue()">Nu synchroniseren</button>
   </div>
   <div class="stats">
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('nieuw')"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nieuw</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('bezig')"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Bezig</div></div>
-    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('nieuw')"><div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div><div class="stat-l">Nog te plannen</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('bezig')"><div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div><div class="stat-l">Onderhanden</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterOpStatus('klaar')"><div class="stat-n" id="s-klaar" style="color:var(--green)">0</div><div class="stat-l">Klaar voor facturatie</div></div>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
       <option value="alle">Alle statussen</option>
-      <option value="nieuw">Nieuw</option>
-      <option value="bezig">Bezig</option>
-      <option value="klaar">Klaar</option>
+      <option value="nieuw">Nog te plannen</option>
+      <option value="bezig">Onderhanden</option>
+      <option value="klaar">Klaar voor facturatie</option>
     </select>
     <select id="filterPrio" onchange="renderList()">
       <option value="alle">Alle prioriteiten</option>
       <option value="spoed">🔴 Spoed</option>
       <option value="normaal">🟡 Normaal</option>
-      <option value="wacht">🟢 Klaar voor facturatie</option>
     </select>
     <select id="sortOrder" onchange="renderList()">
       <option value="prio">Prioriteit eerst</option>
@@ -364,9 +362,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
   <div class="field"><label>Status filteren</label>
     <select id="listFilter">
       <option value="alle">Alle opdrachten</option>
-      <option value="nieuw">Alleen nieuw</option>
-      <option value="bezig">Alleen bezig</option>
-      <option value="klaar">Alleen klaar</option>
+      <option value="nieuw">Nog te plannen</option>
+      <option value="bezig">Onderhanden</option>
+      <option value="klaar">Klaar voor facturatie</option>
     </select>
   </div>
   <button class="btn btn-print no-print" onclick="printList()">🖨️ Lijst afdrukken</button>
@@ -392,10 +390,9 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <div class="field"><label>Omschrijf het type schade / werk</label><input type="text" id="e_overig" placeholder="bijv. garagepoort, sanitair, tegel..."></div>
     </div>
     <div class="slbl">Prioriteit</div>
-    <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="type-grid" style="grid-template-columns:1fr 1fr">
       <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
-      <button class="tbtn" id="eprioWacht" onclick="selEditPrio(this,'wacht')"><span class="ti">🟢</span>Klaar voor facturatie</button>
     </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="field">
@@ -813,13 +810,13 @@ let selPrioVal = 'normaal';
 let editPrioVal = 'normaal';
 
 function selPrio(btn, prio) {
-  document.querySelectorAll('#newForm #prioSpoed, #newForm #prioNormaal, #newForm #prioWacht').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('#newForm #prioSpoed, #newForm #prioNormaal').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
   selPrioVal = prio;
 }
 
 function selEditPrio(btn, prio) {
-  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal, #editModal #eprioWacht').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
   editPrioVal = prio;
 }
@@ -962,8 +959,8 @@ function renderList() {
     return;
   }
 
-  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal', wacht:'🟢 Klaar voor facturatie' };
-  const prioCls = { spoed:'prio-spoed', normaal:'prio-normaal', wacht:'prio-wacht' };
+  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal' };
+  const prioCls = { spoed:'prio-spoed', normaal:'prio-normaal' };
 
   el.innerHTML = filtered.map(o => {
     const prio = o.prioriteit || 'normaal';
@@ -976,7 +973,7 @@ function renderList() {
           ${o.og_type==='aannemer'&&o.naam ? `<div style="font-size:12px;color:var(--text2)">Bewoner: ${o.naam}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span class="badge b-${o.status}">${o.status}</span>
+          <span class="badge b-${o.status}">${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</span>
           <span class="badge ${prioCls[prio]}">${prioLabel[prio]}</span>
         </div>
       </div>
@@ -1007,7 +1004,7 @@ function showDetail(id) {
   document.getElementById('detailTabBtn').style.display = 'block';
 
   const sopts = ['nieuw','bezig','klaar'].map(s =>
-    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`
+    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie'}</div>`
   ).join('');
 
   const fotoVoorHTML = o.fotos ? [0,1].map(i => o.fotos.voor[i] ?
@@ -1027,7 +1024,7 @@ function showDetail(id) {
     <div class="slbl" style="margin-top:0">Status & prioriteit</div>
     <div class="status-row">${sopts}</div>
     <div class="status-row">
-      ${['spoed','normaal','wacht'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':p==='wacht'?'background:var(--green-bg);color:var(--green);border-color:#b0ddc0':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='normaal'?'🟡 Normaal':'🟢 Klaar voor facturatie'}</div>`).join('')}
+      ${['spoed','normaal'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}
     </div>
     <div class="slbl">Opdrachtgever</div>
     ${o.og_type==='aannemer'?`
@@ -1177,7 +1174,7 @@ function savePDF(id) {
     <div class="nr">
       <strong>Werkbon ${o.nr}</strong><br>
       Datum: ${new Date().toLocaleDateString('nl-NL')}<br>
-      Status: ${o.status.charAt(0).toUpperCase() + o.status.slice(1)}
+      Status: ${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}
     </div>
   </div>
   <table>
@@ -1433,8 +1430,8 @@ function openEdit(id) {
   document.getElementById('e_og_email').value = o.og_email || '';
   document.getElementById('e_og_ref').value = o.og_ref || '';
   editPrioVal = o.prioriteit || 'normaal';
-  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal, #editModal #eprioWacht').forEach(b => b.classList.remove('sel'));
-  const prioMap = { spoed:'eprioSpoed', normaal:'eprioNormaal', wacht:'eprioWacht' };
+  document.querySelectorAll('#editModal #eprioSpoed, #editModal #eprioNormaal').forEach(b => b.classList.remove('sel'));
+  const prioMap = { spoed:'eprioSpoed', normaal:'eprioNormaal' };
   document.getElementById(prioMap[editPrioVal])?.classList.add('sel');
 
   toggleEditOGFields();
@@ -1548,7 +1545,7 @@ function werkbonHTML(o) {
       <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
-      <tr><td>Status</td><td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td></tr>
+      <tr><td>Status</td><td>${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</td></tr>
       ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
       ${(o.tijd_vertrek||o.tijd_aankomst||o.tijd_werk_van||o.tijd_werk_tot)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_aankomst)-tijdNaarMinuten(o.tijd_vertrek))})<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot} (${minutenNaarTijd(tijdNaarMinuten(o.tijd_werk_tot)-tijdNaarMinuten(o.tijd_werk_van))})`:''}</td></tr>`:''}
     </table>
@@ -1577,7 +1574,7 @@ function printList() {
     <td>${o.nr}</td><td>${o.naam}</td><td>${o.adres||''}</td>
     <td>${o.og_type==='aannemer'&&o.og_naam?o.og_naam:'Particulier'}</td>
     <td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td>
-    <td>${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</td>
+    <td>${o.status==='nieuw'?'Nog te plannen':o.status==='bezig'?'Onderhanden':'Klaar voor facturatie'}</td>
   </tr>`).join('');
   document.getElementById('printOutput').innerHTML = `<div class="print-list">
     <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #1c1916;padding-bottom:10px">
