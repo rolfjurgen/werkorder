@@ -543,40 +543,16 @@ async function dbxWrite() {
   localStorage.setItem(BACKUP_KEY, body);
   if (!token) { addToQueue(); return; }
   try {
-    // Eerst lezen wat er al in Dropbox staat
-    let remoteOrders = [];
-    try {
-      const r = await fetch('https://content.dropboxapi.com/2/files/download', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE }) }
-      });
-      if (r.ok) remoteOrders = JSON.parse(await r.text());
-    } catch(e) { /* eerste keer of bestand bestaat niet */ }
-
-    // Samenvoegen: lokale wijzigingen hebben voorrang, maar verwijderde remote orders niet terugzetten
-    const localIds = new Set(orders.map(o => o.id));
-    const remoteOnly = remoteOrders.filter(o => !localIds.has(o.id));
-    // Alleen remote orders toevoegen als ze niet door ons zijn verwijderd
-    const deletedIds = JSON.parse(localStorage.getItem('rj_deleted') || '[]');
-    const toAdd = remoteOnly.filter(o => !deletedIds.includes(o.id));
-    if (toAdd.length > 0) {
-      orders = [...orders, ...toAdd];
-      orders.sort((a,b) => new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0));
-    }
-
-    const finalBody = JSON.stringify(orders, null, 2);
-    localStorage.setItem(BACKUP_KEY, finalBody);
-
-    const wr = await fetch('https://content.dropboxapi.com/2/files/upload', {
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + token,
         'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE, mode: 'overwrite', autorename: false }),
         'Content-Type': 'application/octet-stream'
       },
-      body: finalBody
+      body
     });
-    if (!wr.ok) throw new Error('write ' + wr.status);
+    if (!r.ok) throw new Error('write ' + r.status);
     setSyncStatus('gesynchroniseerd', 'ok');
   } catch(e) {
     setSyncStatus('offline — lokaal opgeslagen', 'err');
