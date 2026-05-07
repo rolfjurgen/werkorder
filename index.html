@@ -247,7 +247,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
-      <button class="tbtn" id="prioWacht" onclick="selPrio(this,'wacht')"><span class="ti">🟢</span>Wacht</button>
+      <button class="tbtn" id="prioWacht" onclick="selPrio(this,'wacht')"><span class="ti">🟢</span>Klaar voor facturatie</button>
     </div>
 
     <div class="slbl">Opdrachtgever</div>
@@ -267,14 +267,14 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     </div>
 
     <div class="slbl">Locatie & bewoner</div>
-    <div class="field"><label>Naam bewoner</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
+    <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries — leeg laten als onbekend" autocomplete="off"></div>
     <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
     <div class="field"><label>Telefoon bewoner (optioneel)</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
     <div class="field"><label>E-mailadres bewoner (optioneel)</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
-    <div class="field"><label>Geplande datum (optioneel)</label><input type="date" id="f_datum_plan"></div>
+    <div class="field"><label>Ontvangen op (datum opdracht)</label><input type="date" id="f_datum_plan"></div>
     <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="f_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden, materiaal, bijzonderheden..."></textarea></div>
 
@@ -338,10 +338,11 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
       <option value="alle">Alle prioriteiten</option>
       <option value="spoed">🔴 Spoed</option>
       <option value="normaal">🟡 Normaal</option>
-      <option value="wacht">🟢 Wacht</option>
+      <option value="wacht">🟢 Klaar voor facturatie</option>
     </select>
     <select id="sortOrder" onchange="renderList()">
       <option value="prio">Prioriteit eerst</option>
+      <option value="ontvangen">Ontvangen op</option>
       <option value="deadline">Deadline eerst</option>
       <option value="datum">Datum afspraak</option>
       <option value="aangemaakt">Nieuwste eerst</option>
@@ -394,7 +395,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr">
       <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
-      <button class="tbtn" id="eprioWacht" onclick="selEditPrio(this,'wacht')"><span class="ti">🟢</span>Wacht</button>
+      <button class="tbtn" id="eprioWacht" onclick="selEditPrio(this,'wacht')"><span class="ti">🟢</span>Klaar voor facturatie</button>
     </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="field">
@@ -418,7 +419,7 @@ canvas.sigpad { display: block; width: 100%; height: 150px; touch-action: none; 
     <div class="field"><label>E-mailadres</label><input type="email" id="e_email"></div>
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
-    <div class="field"><label>Geplande datum (optioneel)</label><input type="date" id="e_datum_plan"></div>
+    <div class="field"><label>Ontvangen op (datum opdracht)</label><input type="date" id="e_datum_plan"></div>
     <div class="field"><label>Uiterlijk klaar op (optioneel)</label><input type="date" id="e_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
     <div class="slbl">Foto's voor werkzaamheden</div>
@@ -542,16 +543,40 @@ async function dbxWrite() {
   localStorage.setItem(BACKUP_KEY, body);
   if (!token) { addToQueue(); return; }
   try {
-    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
+    // Eerst lezen wat er al in Dropbox staat
+    let remoteOrders = [];
+    try {
+      const r = await fetch('https://content.dropboxapi.com/2/files/download', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE }) }
+      });
+      if (r.ok) remoteOrders = JSON.parse(await r.text());
+    } catch(e) { /* eerste keer of bestand bestaat niet */ }
+
+    // Samenvoegen: lokale wijzigingen hebben voorrang, maar verwijderde remote orders niet terugzetten
+    const localIds = new Set(orders.map(o => o.id));
+    const remoteOnly = remoteOrders.filter(o => !localIds.has(o.id));
+    // Alleen remote orders toevoegen als ze niet door ons zijn verwijderd
+    const deletedIds = JSON.parse(localStorage.getItem('rj_deleted') || '[]');
+    const toAdd = remoteOnly.filter(o => !deletedIds.includes(o.id));
+    if (toAdd.length > 0) {
+      orders = [...orders, ...toAdd];
+      orders.sort((a,b) => new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0));
+    }
+
+    const finalBody = JSON.stringify(orders, null, 2);
+    localStorage.setItem(BACKUP_KEY, finalBody);
+
+    const wr = await fetch('https://content.dropboxapi.com/2/files/upload', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + token,
         'Dropbox-API-Arg': JSON.stringify({ path: DBX_FILE, mode: 'overwrite', autorename: false }),
         'Content-Type': 'application/octet-stream'
       },
-      body
+      body: finalBody
     });
-    if (!r.ok) throw new Error('write ' + r.status);
+    if (!wr.ok) throw new Error('write ' + wr.status);
     setSyncStatus('gesynchroniseerd', 'ok');
   } catch(e) {
     setSyncStatus('offline — lokaal opgeslagen', 'err');
@@ -846,7 +871,9 @@ function toggleEditOGFields() {
 async function saveOrder() {
   if (!token) { showToast('Verbind eerst met Dropbox', true); return; }
   const naam = document.getElementById('f_naam').value.trim();
-  if (!naam) { showToast('Vul een bewonernaam in', true); return; }
+  const ogNaam = document.getElementById('f_og_naam').value.trim();
+  const ogType = document.getElementById('f_og_type').value;
+  if (!naam && !(ogType === 'aannemer' && ogNaam)) { showToast('Vul een naam in (bewoner of aannemer)', true); return; }
   if (!selTypeVal) { showToast('Kies een type werkzaamheden', true); return; }
 
   const overigOmschr = document.getElementById('f_overig').value.trim();
@@ -928,6 +955,12 @@ function renderList() {
       if (pd !== 0) return pd;
       return new Date(b.aangemaakt||0) - new Date(a.aangemaakt||0);
     }
+    if (sortOrder === 'ontvangen') {
+      if (!a.datum_plan && !b.datum_plan) return 0;
+      if (!a.datum_plan) return 1;
+      if (!b.datum_plan) return -1;
+      return new Date(a.datum_plan) - new Date(b.datum_plan);
+    }
     if (sortOrder === 'deadline') {
       if (!a.datum_deadline && !b.datum_deadline) return 0;
       if (!a.datum_deadline) return 1;
@@ -953,7 +986,7 @@ function renderList() {
     return;
   }
 
-  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal', wacht:'🟢 Wacht' };
+  const prioLabel = { spoed:'🔴 Spoed', normaal:'🟡 Normaal', wacht:'🟢 Klaar voor facturatie' };
   const prioCls = { spoed:'prio-spoed', normaal:'prio-normaal', wacht:'prio-wacht' };
 
   el.innerHTML = filtered.map(o => {
@@ -963,7 +996,8 @@ function renderList() {
       <div class="ocard-top">
         <div>
           <div class="onr">${o.nr}</div>
-          <div class="oname">${o.naam}</div>
+          <div class="oname">${o.og_type==='aannemer'&&o.og_naam ? o.og_naam : o.naam}</div>
+          ${o.og_type==='aannemer'&&o.naam ? `<div style="font-size:12px;color:var(--text2)">Bewoner: ${o.naam}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           <span class="badge b-${o.status}">${o.status}</span>
@@ -1017,7 +1051,7 @@ function showDetail(id) {
     <div class="slbl" style="margin-top:0">Status & prioriteit</div>
     <div class="status-row">${sopts}</div>
     <div class="status-row">
-      ${['spoed','normaal','wacht'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':p==='wacht'?'background:var(--green-bg);color:var(--green);border-color:#b0ddc0':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='normaal'?'🟡 Normaal':'🟢 Wacht'}</div>`).join('')}
+      ${['spoed','normaal','wacht'].map(p => `<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':p==='wacht'?'background:var(--green-bg);color:var(--green);border-color:#b0ddc0':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='normaal'?'🟡 Normaal':'🟢 Klaar voor facturatie'}</div>`).join('')}
     </div>
     <div class="slbl">Opdrachtgever</div>
     ${o.og_type==='aannemer'?`
@@ -1036,7 +1070,7 @@ function showDetail(id) {
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
-    ${o.datum_plan?`<div class="drow"><div class="drow-l">Geplande datum</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
+    ${o.datum_plan?`<div class="drow"><div class="drow-l">Ontvangen op</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
     ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
 
@@ -1113,6 +1147,10 @@ async function changeStatus(id, status) {
 
 async function deleteOrder(id) {
   if (!confirm('Opdracht verwijderen?')) return;
+  // Bijhouden welke IDs verwijderd zijn zodat ze niet terugkomen bij sync
+  const deleted = JSON.parse(localStorage.getItem('rj_deleted') || '[]');
+  deleted.push(id);
+  localStorage.setItem('rj_deleted', JSON.stringify(deleted));
   orders = orders.filter(x => x.id !== id);
   await dbxWrite();
   document.getElementById('detailTabBtn').style.display = 'none';
@@ -1529,7 +1567,7 @@ function werkbonHTML(o) {
       ${o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:''}
       <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
       ${o.datum?`<tr><td>Datum afspraak</td><td>${fmtDate(o.datum)}</td></tr>`:''}
-      ${o.datum_plan?`<tr><td>Geplande datum</td><td>${fmtDate(o.datum_plan)}</td></tr>`:''}
+      ${o.datum_plan?`<tr><td>Ontvangen op</td><td>${fmtDate(o.datum_plan)}</td></tr>`:''}
       ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
       <tr><td>Klant / bewoner</td><td>${o.naam}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
