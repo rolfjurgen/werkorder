@@ -892,6 +892,7 @@ function renderList(){
   if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';return;}
   if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';return;}
 
+  const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
   const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
   const pBadge=o=>(o.prioriteit||'normaal')==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':'';
