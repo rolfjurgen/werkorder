@@ -104,17 +104,18 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 /* BADGES */
 .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: monospace; }
 .b-nieuw { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; }
-.b-bezig { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
+.b-gepland { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
+.b-bezig { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
 .b-klaar { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; }
 .b-spoed { background: var(--red-bg); color: var(--red); border: 1px solid #e8c0bc; }
 
 /* STATS */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
-.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 6px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 14px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 4px; text-align: center; cursor: pointer; transition: border-color .15s; }
 .stat:hover { border-color: var(--border2); }
 .stat.active-filter { border-color: var(--accent); background: var(--accent-bg); }
-.stat-n { font-family: monospace; font-size: 22px; font-weight: 600; margin-bottom: 2px; }
-.stat-l { font-size: 10px; color: var(--text3); line-height: 1.3; }
+.stat-n { font-family: monospace; font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+.stat-l { font-size: 9px; color: var(--text3); line-height: 1.3; }
 
 /* FILTER BAR */
 .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -327,8 +328,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div>
       <div class="stat-l">Nog te plannen</div>
     </div>
+    <div class="stat" id="stat-gepland" onclick="statFilter('gepland')">
+      <div class="stat-n" id="s-gepland" style="color:var(--accent)">0</div>
+      <div class="stat-l">Gepland</div>
+    </div>
     <div class="stat" id="stat-bezig" onclick="statFilter('bezig')">
-      <div class="stat-n" id="s-bezig" style="color:var(--accent)">0</div>
+      <div class="stat-n" id="s-bezig" style="color:var(--blue)">0</div>
       <div class="stat-l">Onderhanden</div>
     </div>
     <div class="stat" id="stat-klaar" onclick="statFilter('klaar')">
@@ -339,7 +344,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
       <option value="alle">Alle statussen</option>
-      <option value="nieuw">Nog te plannen</option>
+      <option value="nogteplannen">Nog te plannen</option>
+      <option value="gepland">Gepland</option>
       <option value="bezig">Onderhanden</option>
       <option value="klaar">Klaar voor facturatie</option>
     </select>
@@ -375,7 +381,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="field"><label>Filter op status</label>
     <select id="listFilter">
       <option value="alle">Alle opdrachten</option>
-      <option value="nieuw">Nog te plannen</option>
+      <option value="nogteplannen">Nog te plannen</option>
+      <option value="gepland">Gepland</option>
       <option value="bezig">Onderhanden</option>
       <option value="klaar">Klaar voor facturatie</option>
     </select>
@@ -607,7 +614,7 @@ async function syncQueue() {
 // ── INIT ─────────────────────────────────────────────────────
 async function init() {
   handleCallback();
-  document.getElementById('f_datum').value = new Date().toISOString().split('T')[0];
+  // Datum afspraak NIET automatisch invullen - gebruiker vult zelf in
   if (token) {
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('newForm').style.display='block';
@@ -809,51 +816,66 @@ async function saveOrder(){
 }
 
 // ── RENDER LIST ──────────────────────────────────────────────
-function statusLabel(s){return s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie';}
+function statusLabel(s,o){
+  if(s==='klaar') return 'Klaar voor facturatie';
+  if(s==='bezig') return 'Onderhanden';
+  if(s==='nieuw') return (o&&o.datum&&o.datum!=='')?'Gepland':'Nog te plannen';
+  return s;
+}
 function prioRank(p){return p==='spoed'?0:1;}
 
 function statFilter(type){
   currentStatFilter=type;
-  // Update stat highlight
-  ['totaal','nieuw','bezig','klaar'].forEach(k=>{
-    document.getElementById('stat-'+k).classList.remove('active-filter');
+  ['totaal','nieuw','gepland','bezig','klaar'].forEach(k=>{
+    const el=document.getElementById('stat-'+k);
+    if(el) el.classList.remove('active-filter');
   });
   if(type==='alle') document.getElementById('stat-totaal').classList.add('active-filter');
   else if(type==='nogteplannen') document.getElementById('stat-nieuw').classList.add('active-filter');
+  else if(type==='gepland') document.getElementById('stat-gepland').classList.add('active-filter');
   else if(type==='bezig') document.getElementById('stat-bezig').classList.add('active-filter');
   else if(type==='klaar') document.getElementById('stat-klaar').classList.add('active-filter');
-  // Reset dropdown filter
   document.getElementById('filterStatus').value='alle';
   renderList();
 }
 
+function isNogTePlannen(o){ return o.status==='nieuw' && (!o.datum||o.datum===''); }
+function isGepland(o){ return o.status==='nieuw' && o.datum && o.datum!==''; }
+
 function renderList(){
-  // Tellers
-  const nogTeP=orders.filter(o=>!o.datum_plan||o.datum_plan==='').length;
-  const bezig=orders.filter(o=>o.status==='bezig').length;
-  const klaar=orders.filter(o=>o.status==='klaar').length;
+  // Tellers — gebaseerd op datum afspraak en status
+  const nogTeP = orders.filter(o=>isNogTePlannen(o)).length;
+  const gepland = orders.filter(o=>isGepland(o)).length;
+  const bezig = orders.filter(o=>o.status==='bezig').length;
+  const klaar = orders.filter(o=>o.status==='klaar').length;
+
   document.getElementById('s-totaal').textContent=orders.length;
   document.getElementById('s-nieuw').textContent=nogTeP;
+  document.getElementById('s-gepland').textContent=gepland;
   document.getElementById('s-bezig').textContent=bezig;
   document.getElementById('s-klaar').textContent=klaar;
 
-  // Filter
   const fStatus=document.getElementById('filterStatus').value;
   const fPrio=document.getElementById('filterPrio').value;
   const sort=document.getElementById('sortOrder').value;
 
   let filtered=[...orders];
 
-  // Stat filter heeft voorrang
+  // Stat filter heeft voorrang boven dropdown
   if(currentStatFilter==='nogteplannen'){
-    filtered=filtered.filter(o=>!o.datum_plan||o.datum_plan==='');
+    filtered=filtered.filter(o=>isNogTePlannen(o));
+  } else if(currentStatFilter==='gepland'){
+    filtered=filtered.filter(o=>isGepland(o));
   } else if(currentStatFilter==='bezig'){
     filtered=filtered.filter(o=>o.status==='bezig');
   } else if(currentStatFilter==='klaar'){
     filtered=filtered.filter(o=>o.status==='klaar');
   } else {
-    // Gebruik dropdown filter
-    if(fStatus!=='alle') filtered=filtered.filter(o=>o.status===fStatus);
+    // Dropdown filter
+    if(fStatus==='nogteplannen') filtered=filtered.filter(o=>isNogTePlannen(o));
+    else if(fStatus==='gepland') filtered=filtered.filter(o=>isGepland(o));
+    else if(fStatus==='bezig') filtered=filtered.filter(o=>o.status==='bezig');
+    else if(fStatus==='klaar') filtered=filtered.filter(o=>o.status==='klaar');
   }
   if(fPrio!=='alle') filtered=filtered.filter(o=>(o.prioriteit||'normaal')===fPrio);
 
@@ -870,7 +892,7 @@ function renderList(){
   if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';return;}
   if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';return;}
 
-  const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
   const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
   const pBadge=o=>(o.prioriteit||'normaal')==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':'';
 
@@ -883,7 +905,7 @@ function renderList(){
           ${o.og_type==='aannemer'&&o.naam?`<div class="osub">Bewoner: ${o.naam}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span class="badge b-${o.status}">${statusLabel(o.status)}</span>
+          <span class="badge ${badgeCls(o)}">${statusLabel(o.status,o)}</span>
           ${pBadge(o)}
         </div>
       </div>
@@ -906,7 +928,7 @@ function showDetail(id){
   const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
 
   const sopts=['nieuw','bezig','klaar'].map(s=>
-    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s)}</div>`
+    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`
   ).join('');
 
   const fVHTML=o.fotos?[0,1].map(i=>o.fotos.voor[i]?`<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>`:'').join(''):'';
@@ -1148,7 +1170,7 @@ function savePDF(id){
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Werkbon ${o.nr}</title>
   <style>body{font-family:Arial,sans-serif;font-size:13px;color:#1c1916;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:2px solid #b5820c;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#b5820c}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f9f7f4;color:#666}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
   </head><body><div class="werkbon-hdr"><div><div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div><div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
-  <div class="nr"><strong>Werkbon ${o.nr}</strong><br>Datum: ${new Date().toLocaleDateString('nl-NL')}<br>Status: ${statusLabel(o.status)}</div></div>
+  <div class="nr"><strong>Werkbon ${o.nr}</strong><br>Datum: ${new Date().toLocaleDateString('nl-NL')}<br>Status: ${statusLabel(o.status,o)}</div></div>
   <table>${ogRegel}${refRegel}<tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
   ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
   ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
@@ -1173,7 +1195,7 @@ function openLightbox(src){document.getElementById('lightboxImg').src=src;docume
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
 // ── PRINT ────────────────────────────────────────────────────
-function statusLabelPrint(s){return s==='nieuw'?'Nog te plannen':s==='bezig'?'Onderhanden':'Klaar voor facturatie';}
+function statusLabelPrint(s,o){return statusLabel(s,o);}
 function renderPrintSelect(){
   const sel=document.getElementById('printSelect');
   sel.innerHTML='<option value="">— Kies opdracht —</option>';
@@ -1194,7 +1216,7 @@ function printWerkbon(){
       <tr><td>Klant / bewoner</td><td>${o.naam||'—'}</td></tr>
       ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
       ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
-      <tr><td>Status</td><td>${statusLabelPrint(o.status)}</td></tr>
+      <tr><td>Status</td><td>${statusLabelPrint(o.status,o)}</td></tr>
       ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
     </table>
     ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}"></div>`:''}
@@ -1203,10 +1225,16 @@ function printWerkbon(){
 }
 function printList(){
   const filter=document.getElementById('listFilter').value;
-  const filtered=filter==='alle'?orders:orders.filter(o=>o.status===filter);
+  let filtered;
+  if(filter==='alle') filtered=[...orders];
+  else if(filter==='nogteplannen') filtered=orders.filter(o=>isNogTePlannen(o));
+  else if(filter==='gepland') filtered=orders.filter(o=>isGepland(o));
+  else if(filter==='bezig') filtered=orders.filter(o=>o.status==='bezig');
+  else if(filter==='klaar') filtered=orders.filter(o=>o.status==='klaar');
+  else filtered=[...orders];
   if(!filtered.length){showToast('Geen opdrachten gevonden',true);return;}
   const hoofd=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
-  const rows=filtered.map(o=>`<tr><td>${o.nr}</td><td>${hoofd(o)}</td><td>${o.adres||''}</td><td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td><td>${statusLabelPrint(o.status)}</td></tr>`).join('');
+  const rows=filtered.map(o=>`<tr><td>${o.nr}</td><td>${hoofd(o)}</td><td>${o.adres||''}</td><td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td><td>${statusLabelPrint(o.status,o)}</td></tr>`).join('');
   document.getElementById('printOutput').innerHTML=`<div class="print-list">
     <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #b5820c;padding-bottom:10px">
       <div><div style="font-size:18px;font-weight:700;color:#b5820c">Rolf Jurgen Schadeservice & Laktechniek</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
