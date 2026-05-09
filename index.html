@@ -271,7 +271,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div class="slbl">Locatie werk</div>
     <div class="loc-grid">
-      <button class="tbtn sel" id="locBinnen" onclick="selLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
+      <button class="tbtn" id="locBinnen" onclick="selLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
       <button class="tbtn" id="locBuiten" onclick="selLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
     </div>
 
@@ -367,6 +367,13 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input type="text" id="searchField" placeholder="Zoek op naam of adres..." oninput="renderList()">
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+    <span style="font-size:11px;color:var(--text3);align-self:center">Legenda:</span>
+    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#edf2fc;color:#2055a4;border:1px solid #c0d0f0">🔵 Inbraakschade</span>
+    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#fff3e0;color:#e07b00;border:1px solid #ffcc80">🟠 Keukenblad</span>
+    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#edf7f2;color:#2a7a4e;border:1px solid #b0ddc0">🟢 Opleverpunten</span>
+    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#f3eef8;color:#7b4ea6;border:1px solid #d0b8e8">🟣 Overig</span>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -762,8 +769,8 @@ function resetEditFotos(){
 }
 
 // ── FORM HELPERS ─────────────────────────────────────────────
-let selLocVal = 'binnen';
-let editLocVal = 'binnen';
+let selLocVal = '';
+let editLocVal = '';
 
 function selLoc(btn,loc){
   document.getElementById('locBinnen').classList.remove('sel');
@@ -868,8 +875,8 @@ async function saveOrder(){
   selTypeVal=''; selPrioVal='normaal';
   document.getElementById('prioNormaal').classList.add('sel');
   document.getElementById('prioSpoed').classList.remove('sel');
-  selLocVal='binnen';
-  document.getElementById('locBinnen').classList.add('sel');
+  selLocVal='';
+  document.getElementById('locBinnen').classList.remove('sel');
   document.getElementById('locBuiten').classList.remove('sel');
   clearSig('sigCanvas'); resetFotos();
   showToast('✓ Opdracht '+nr+' opgeslagen');
@@ -969,7 +976,7 @@ function renderList(){
 
   el.innerHTML=filtered.map(o=>{
     const tk=typeKleur(o.type);
-    const locLabel=o.locatie==='buiten'?'<span style="font-size:11px;color:#e07b00">🌤️ Buiten</span>':'<span style="font-size:11px;color:#2055a4">🏠 Binnen</span>';
+    const locLabel=!o.locatie?'':o.locatie==='buiten'?'<span style="font-size:11px;color:#e07b00">🌤️ Buiten</span>':'<span style="font-size:11px;color:#2055a4">🏠 Binnen</span>';
     return `
     <div class="ocard type-${tk}" onclick="showDetail(${o.id})">
       <div class="ocard-top">
@@ -1038,7 +1045,7 @@ function showDetail(id){
     ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
-    <div class="drow"><div class="drow-l">Locatie werk</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>
+    ${o.locatie?`<div class="drow"><div class="drow-l">Locatie werk</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
     ${o.datum_plan?`<div class="drow"><div class="drow-l">Ontvangen op</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
     ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
