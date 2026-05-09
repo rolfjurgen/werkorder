@@ -183,7 +183,24 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* PRINT */
+/* TYPEWERK KLEUREN */
+.type-inbraak { border-left: 4px solid #2055a4; }
+.type-keuken { border-left: 4px solid #e07b00; }
+.type-oplever { border-left: 4px solid #2a7a4e; }
+.type-overig { border-left: 4px solid #7b4ea6; }
+.typelabel-inbraak { background: #edf2fc; color: #2055a4; border-color: #c0d0f0; }
+.typelabel-keuken { background: #fff3e0; color: #e07b00; border-color: #ffcc80; }
+.typelabel-oplever { background: #edf7f2; color: #2a7a4e; border-color: #b0ddc0; }
+.typelabel-overig { background: #f3eef8; color: #7b4ea6; border-color: #d0b8e8; }
+
+/* BINNEN/BUITEN */
+.loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+
+/* ZOEKBALK */
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px 10px 36px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; }
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
 @media print {
   body > * { display: none !important; }
   #printOutput { display: block !important; }
@@ -250,6 +267,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="prio-grid">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+    </div>
+
+    <div class="slbl">Locatie werk</div>
+    <div class="loc-grid">
+      <button class="tbtn sel" id="locBinnen" onclick="selLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
+      <button class="tbtn" id="locBuiten" onclick="selLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
     </div>
 
     <div class="slbl">Opdrachtgever</div>
@@ -341,6 +364,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="stat-l">Klaar v. fact.</div>
     </div>
   </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchField" placeholder="Zoek op naam of adres..." oninput="renderList()">
+  </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
       <option value="alle">Alle statussen</option>
@@ -353,6 +380,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <option value="alle">Alle prioriteiten</option>
       <option value="spoed">🔴 Spoed</option>
       <option value="normaal">🟡 Normaal</option>
+    </select>
+    <select id="filterLocatie" onchange="renderList()">
+      <option value="alle">Binnen & buiten</option>
+      <option value="binnen">🏠 Binnen</option>
+      <option value="buiten">🌤️ Buiten</option>
     </select>
     <select id="sortOrder" onchange="renderList()">
       <option value="prio">Prioriteit eerst</option>
@@ -411,6 +443,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="prio-grid">
       <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+    </div>
+    <div class="slbl">Locatie werk</div>
+    <div class="loc-grid">
+      <button class="tbtn" id="elocBinnen" onclick="selEditLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
+      <button class="tbtn" id="elocBuiten" onclick="selEditLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
     </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="field"><label>Type</label>
@@ -725,6 +762,27 @@ function resetEditFotos(){
 }
 
 // ── FORM HELPERS ─────────────────────────────────────────────
+let selLocVal = 'binnen';
+let editLocVal = 'binnen';
+
+function selLoc(btn,loc){
+  document.getElementById('locBinnen').classList.remove('sel');
+  document.getElementById('locBuiten').classList.remove('sel');
+  btn.classList.add('sel'); selLocVal=loc;
+}
+function selEditLoc(btn,loc){
+  document.getElementById('elocBinnen').classList.remove('sel');
+  document.getElementById('elocBuiten').classList.remove('sel');
+  btn.classList.add('sel'); editLocVal=loc;
+}
+function typeKleur(type){
+  if(!type) return 'overig';
+  if(type.includes('Inbraak')||type.includes('kozijn')||type.includes('deur')) return 'inbraak';
+  if(type.includes('Keuken')) return 'keuken';
+  if(type.includes('Oplever')) return 'oplever';
+  return 'overig';
+}
+
 function selType(btn,type){
   document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); selTypeVal=type;
@@ -780,7 +838,7 @@ async function saveOrder(){
   }
 
   orders.unshift({
-    id:Date.now(),nr,status:'nieuw',prioriteit:selPrioVal,
+    id:Date.now(),nr,status:'nieuw',prioriteit:selPrioVal,locatie:selLocVal,
     naam,type:typeLabel,
     og_type:ogType,og_naam:ogNaam,
     og_contact:document.getElementById('f_og_contact').value.trim(),
@@ -810,6 +868,9 @@ async function saveOrder(){
   selTypeVal=''; selPrioVal='normaal';
   document.getElementById('prioNormaal').classList.add('sel');
   document.getElementById('prioSpoed').classList.remove('sel');
+  selLocVal='binnen';
+  document.getElementById('locBinnen').classList.add('sel');
+  document.getElementById('locBuiten').classList.remove('sel');
   clearSig('sigCanvas'); resetFotos();
   showToast('✓ Opdracht '+nr+' opgeslagen');
   goTab('overzicht');
@@ -879,6 +940,15 @@ function renderList(){
   }
   if(fPrio!=='alle') filtered=filtered.filter(o=>(o.prioriteit||'normaal')===fPrio);
 
+  const fLocatie=document.getElementById('filterLocatie')?.value||'alle';
+  if(fLocatie!=='alle') filtered=filtered.filter(o=>(o.locatie||'binnen')===fLocatie);
+
+  const zoek=(document.getElementById('searchField')?.value||'').toLowerCase().trim();
+  if(zoek) filtered=filtered.filter(o=>{
+    const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+    return (hoofd||'').toLowerCase().includes(zoek)||(o.naam||'').toLowerCase().includes(zoek)||(o.adres||'').toLowerCase().includes(zoek)||(o.nr||'').toLowerCase().includes(zoek);
+  });
+
   // Sorteren
   filtered.sort((a,b)=>{
     if(sort==='prio'){const pd=prioRank(a.prioriteit||'normaal')-prioRank(b.prioriteit||'normaal');return pd||new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);}
@@ -897,8 +967,11 @@ function renderList(){
   const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
   const pBadge=o=>(o.prioriteit||'normaal')==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':'';
 
-  el.innerHTML=filtered.map(o=>`
-    <div class="ocard" onclick="showDetail(${o.id})">
+  el.innerHTML=filtered.map(o=>{
+    const tk=typeKleur(o.type);
+    const locLabel=o.locatie==='buiten'?'<span style="font-size:11px;color:#e07b00">🌤️ Buiten</span>':'<span style="font-size:11px;color:#2055a4">🏠 Binnen</span>';
+    return `
+    <div class="ocard type-${tk}" onclick="showDetail(${o.id})">
       <div class="ocard-top">
         <div>
           <div class="onr">${o.nr}</div>
@@ -915,10 +988,14 @@ function renderList(){
         ${o.datum_deadline?`<span style="color:var(--red)">⚠️ ${fmtDate(o.datum_deadline)}</span>`:''}
         ${o.adres?`<span>📍 ${o.adres}</span>`:''}
       </div>
-      <div class="otype">${o.type}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">
+        <div class="otype typelabel-${tk}">${o.type}</div>
+        ${locLabel}
+      </div>
       ${hasFotos(o)?'<div class="foto-ok">📷 Foto\'s aanwezig</div>':''}
       ${o.sig?'<div class="sig-ok">✓ Handtekening</div>':''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
@@ -961,6 +1038,7 @@ function showDetail(id){
     ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
+    <div class="drow"><div class="drow-l">Locatie werk</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>
     ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
     ${o.datum_plan?`<div class="drow"><div class="drow-l">Ontvangen op</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
     ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
@@ -1038,6 +1116,9 @@ function openEdit(id){
   document.getElementById('e_overig_wrap').style.display=isOverig?'block':'none';
   if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overig: ','').replace('Overig','');
 
+  editLocVal=o.locatie||'binnen';
+  document.getElementById('elocBinnen').classList.toggle('sel',editLocVal==='binnen');
+  document.getElementById('elocBuiten').classList.toggle('sel',editLocVal==='buiten');
   editPrioVal=o.prioriteit||'normaal';
   document.getElementById('eprioSpoed').classList.toggle('sel',editPrioVal==='spoed');
   document.getElementById('eprioNormaal').classList.toggle('sel',editPrioVal==='normaal');
@@ -1086,6 +1167,7 @@ async function saveEdit(){
   orders[idx].og_email=document.getElementById('e_og_email').value.trim();
   orders[idx].og_ref=document.getElementById('e_og_ref').value.trim();
   orders[idx].prioriteit=editPrioVal;
+  orders[idx].locatie=editLocVal;
   if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
 
   // Nieuwe fotos
