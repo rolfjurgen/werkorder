@@ -884,6 +884,8 @@ async function saveOrder(){
   document.getElementById('locBuiten').classList.remove('sel');
   clearSig('sigCanvas'); resetFotos();
   showToast('✓ Opdracht '+nr+' opgeslagen');
+  currentStatFilter='alle';
+  document.getElementById('filterStatus').value='alle';
   goTab('overzicht');
 }
 
