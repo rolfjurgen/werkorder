@@ -339,13 +339,17 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <label style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie toevoegen</label>
     </div>
     <div id="f_verzekering_wrap" style="display:none">
-      <div class="field"><label>Naam verzekeraar</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
+      <div class="field"><label>Maatschappij (verzekeraar)</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
+      <div class="field"><label>Volmacht</label><input type="text" id="f_volmacht" autocomplete="off"></div>
       <div class="field"><label>Polisnummer</label><input type="text" id="f_polisnr" autocomplete="off"></div>
       <div class="field"><label>Schadedossiernummer</label><input type="text" id="f_schadesnr" autocomplete="off"></div>
-      <div style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:7px">
-        <strong>Akte van Cessie</strong><br>
-        Ondergetekende verklaart hierbij dat de vordering op de verzekeraar ter zake van de herstelwerkzaamheden wordt gecedeerd aan Rolf Jurgen Schadeservice & Laktechniek, en machtigt de verzekeraar tot rechtstreekse betaling aan opdrachtnemer.<br>
-        <em style="color:var(--text3)">(Exacte juridische tekst wordt later toegevoegd)</em>
+      <div class="field"><label>Schadebedrag excl. BTW (€)</label><input type="number" id="f_schadebedrag" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label>BTW (€)</label><input type="number" id="f_btw" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label>Eigen risico (€)</label><input type="number" id="f_eigenrisico" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label>BTW terug (BTW-plichtige ondernemers) (€)</label><input type="number" id="f_btwterug" placeholder="0.00" step="0.01" min="0"></div>
+      <div style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px">
+        <strong style="color:var(--text)">CESSIE / OVERDRACHT VORDERINGSRECHT</strong><br>
+        Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong>, komt de vordering geheel ten laste van de cliënt.
       </div>
     </div>
 
@@ -540,9 +544,14 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <label style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie</label>
     </div>
     <div id="e_verzekering_wrap" style="display:none">
-      <div class="field"><label>Naam verzekeraar</label><input type="text" id="e_verzekeraar"></div>
+      <div class="field"><label>Maatschappij (verzekeraar)</label><input type="text" id="e_verzekeraar"></div>
+      <div class="field"><label>Volmacht</label><input type="text" id="e_volmacht"></div>
       <div class="field"><label>Polisnummer</label><input type="text" id="e_polisnr"></div>
       <div class="field"><label>Schadedossiernummer</label><input type="text" id="e_schadesnr"></div>
+      <div class="field"><label>Schadebedrag excl. BTW (€)</label><input type="number" id="e_schadebedrag" step="0.01" min="0"></div>
+      <div class="field"><label>BTW (€)</label><input type="number" id="e_btw" step="0.01" min="0"></div>
+      <div class="field"><label>Eigen risico (€)</label><input type="number" id="e_eigenrisico" step="0.01" min="0"></div>
+      <div class="field"><label>BTW terug (€)</label><input type="number" id="e_btwterug" step="0.01" min="0"></div>
     </div>
 
     <div class="slbl">Handtekening</div>
@@ -914,8 +923,13 @@ async function saveOrder(){
     intern:document.getElementById('f_intern').value.trim(),
     verzekering:document.getElementById('f_verzekering').checked,
     verzekeraar:document.getElementById('f_verzekeraar').value.trim(),
+    volmacht:document.getElementById('f_volmacht').value.trim(),
     polisnr:document.getElementById('f_polisnr').value.trim(),
     schadesnr:document.getElementById('f_schadesnr').value.trim(),
+    schadebedrag:document.getElementById('f_schadebedrag').value,
+    btw:document.getElementById('f_btw').value,
+    eigenrisico:document.getElementById('f_eigenrisico').value,
+    btwterug:document.getElementById('f_btwterug').value,
     aangemaakt:new Date().toISOString()
   });
 
@@ -933,7 +947,7 @@ async function saveOrder(){
   document.getElementById('f_intern').value='';
   document.getElementById('f_verzekering').checked=false;
   document.getElementById('f_verzekering_wrap').style.display='none';
-  ['f_verzekeraar','f_polisnr','f_schadesnr'].forEach(id=>document.getElementById(id).value='');
+  ['f_verzekeraar','f_volmacht','f_polisnr','f_schadesnr','f_schadebedrag','f_btw','f_eigenrisico','f_btwterug'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('sigHintCessie').style.display='none';
   selLocVal='';
   document.getElementById('locBinnen').classList.remove('sel');
@@ -1132,11 +1146,18 @@ function showDetail(id){
     ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
     ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
     ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
-    ${o.verzekering?`<div class="slbl">Verzekeringsgeval</div>
-      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Verzekeraar</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+    ${o.verzekering?`<div class="slbl">Verzekeringsgeval — Akte van Cessie</div>
+      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+      ${o.volmacht?`<div class="drow"><div class="drow-l">Volmacht</div><div class="drow-v">${o.volmacht}</div></div>`:''}
       ${o.polisnr?`<div class="drow"><div class="drow-l">Polisnummer</div><div class="drow-v">${o.polisnr}</div></div>`:''}
-      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
-      <div class="drow" style="background:var(--accent-bg);border-color:#e8d090"><div class="drow-l">Akte van cessie</div><div class="drow-v" style="font-size:12px">✓ Handtekening geldt als akkoord cessie</div></div>`:''}
+      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier nr.</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
+      ${o.schadebedrag?`<div class="drow"><div class="drow-l">Schadebedrag excl. BTW</div><div class="drow-v">€ ${parseFloat(o.schadebedrag).toFixed(2)}</div></div>`:''}
+      ${o.btw?`<div class="drow"><div class="drow-l">BTW</div><div class="drow-v">€ ${parseFloat(o.btw).toFixed(2)}</div></div>`:''}
+      ${(o.schadebedrag&&o.btw)?`<div class="drow"><div class="drow-l"><strong>Totaal incl. BTW</strong></div><div class="drow-v"><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></div></div>`:''}
+      ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
+      ${o.btwterug?`<div class="drow"><div class="drow-l">Af: BTW terug</div><div class="drow-v">€ ${parseFloat(o.btwterug).toFixed(2)}</div></div>`:''}
+      <div class="drow" style="background:var(--accent-bg);border-color:#e8d090"><div class="drow-l">Status cessie</div><div class="drow-v" style="font-size:12px">✓ Handtekening geldt als akkoord akte van cessie</div></div>
+    `:''}
     ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <button class="btn btn-green" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
@@ -1203,8 +1224,13 @@ function openEdit(id){
   document.getElementById('e_verzekering').checked=o.verzekering||false;
   document.getElementById('e_verzekering_wrap').style.display=o.verzekering?'block':'none';
   document.getElementById('e_verzekeraar').value=o.verzekeraar||'';
+  document.getElementById('e_volmacht').value=o.volmacht||'';
   document.getElementById('e_polisnr').value=o.polisnr||'';
   document.getElementById('e_schadesnr').value=o.schadesnr||'';
+  document.getElementById('e_schadebedrag').value=o.schadebedrag||'';
+  document.getElementById('e_btw').value=o.btw||'';
+  document.getElementById('e_eigenrisico').value=o.eigenrisico||'';
+  document.getElementById('e_btwterug').value=o.btwterug||'';
 
   // Bestaande fotos tonen — uitgebreid naar 4
   ['voor','na'].forEach(type=>{
@@ -1257,8 +1283,13 @@ async function saveEdit(){
   orders[idx].intern=document.getElementById('e_intern').value.trim();
   orders[idx].verzekering=document.getElementById('e_verzekering').checked;
   orders[idx].verzekeraar=document.getElementById('e_verzekeraar').value.trim();
+  orders[idx].volmacht=document.getElementById('e_volmacht').value.trim();
   orders[idx].polisnr=document.getElementById('e_polisnr').value.trim();
   orders[idx].schadesnr=document.getElementById('e_schadesnr').value.trim();
+  orders[idx].schadebedrag=document.getElementById('e_schadebedrag').value;
+  orders[idx].btw=document.getElementById('e_btw').value;
+  orders[idx].eigenrisico=document.getElementById('e_eigenrisico').value;
+  orders[idx].btwterug=document.getElementById('e_btwterug').value;
 
   if(!orders[idx].fotos) orders[idx].fotos={voor:[null,null,null,null],na:[null,null,null,null]};
   while(orders[idx].fotos.voor.length<4) orders[idx].fotos.voor.push(null);
@@ -1341,6 +1372,36 @@ function savePDF(id){
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
   const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
   const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot}`:''}</td></tr>`:'';
+  const cessieHTML=o.verzekering?`
+  <div style="margin-top:24px;border-top:2px solid #b5820c;padding-top:16px">
+    <div style="font-size:14px;font-weight:700;color:#b5820c;margin-bottom:12px">AKTE VAN CESSIE — Overdracht vorderingsrecht · art. 3:94 BW</div>
+    <table>
+      ${o.verzekeraar?`<tr><td>Maatschappij</td><td>${o.verzekeraar}</td><td>Volmacht</td><td>${o.volmacht||'—'}</td></tr>`:''}
+      ${o.polisnr?`<tr><td>Polisnummer</td><td>${o.polisnr}</td><td>Schade nr.</td><td>${o.schadesnr||'—'}</td></tr>`:''}
+    </table>
+    ${(o.schadebedrag||o.btw||o.eigenrisico)?`<table>
+      ${o.schadebedrag?`<tr><td>Schadebedrag excl. BTW</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
+      ${o.btw?`<tr><td>BTW</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
+      ${(o.schadebedrag&&o.btw)?`<tr><td><strong>Totaal schadebedrag incl. BTW</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
+      ${o.eigenrisico?`<tr><td>Af: eigen risico (voor rekening cliënt)</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
+      ${o.btwterug?`<tr><td>Af: BTW terug te ontvangen</td><td>€ ${parseFloat(o.btwterug).toFixed(2)}</td></tr>`:''}
+    </table>`:''}
+    <div style="font-size:11px;color:#444;line-height:1.8;margin:12px 0;padding:10px;border:1px solid #ddd;background:#fef8e7">
+      Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong>, komt de vordering geheel ten laste van de cliënt.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px">
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">Handtekening + naam cliënt / opdrachtgever</div>
+        ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:``}
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">${o.naam||''}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">Handtekening Rolf Jurgen Schadeservice & Laktechniek</div>
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">R. Jurgen</div>
+      </div>
+    </div>
+  </div>`:'';
+
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Werkbon ${o.nr}</title>
   <style>body{font-family:Arial,sans-serif;font-size:13px;color:#1c1916;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:2px solid #b5820c;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#b5820c}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f9f7f4;color:#666}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
   </head><body><div class="werkbon-hdr"><div><div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div><div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
@@ -1355,7 +1416,8 @@ function savePDF(id){
   ${tijdRegel}</table>
   <div style="font-size:12px;color:#666">De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.</div>
   ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
-  <div class="footer">R. Jurgen | Rolf Jurgen Schadeservice & Laktechniek | www.rolfjurgen.nl</div>
+  ${cessieHTML}
+  <div class="footer">R. Jurgen | Rolf Jurgen Schadeservice & Laktechniek | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
   </body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
