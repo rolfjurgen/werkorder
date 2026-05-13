@@ -308,33 +308,53 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotVoor0" onclick="document.getElementById('fotoVoor0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span>
-      </div>
-      <div class="foto-slot" id="slotVoor1" onclick="document.getElementById('fotoVoor1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span>
-      </div>
+      <div class="foto-slot" id="slotVoor0" onclick="document.getElementById('fotoVoor0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="slotVoor1" onclick="document.getElementById('fotoVoor1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="slotVoor2" onclick="document.getElementById('fotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="slotVoor3" onclick="document.getElementById('fotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
     </div>
     <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
     <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" onchange="handleFoto(this,'slotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotNa0" onclick="document.getElementById('fotoNa0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span>
-      </div>
-      <div class="foto-slot" id="slotNa1" onclick="document.getElementById('fotoNa1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span>
-      </div>
+      <div class="foto-slot" id="slotNa0" onclick="document.getElementById('fotoNa0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="slotNa1" onclick="document.getElementById('fotoNa1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="slotNa2" onclick="document.getElementById('fotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="slotNa3" onclick="document.getElementById('fotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
     </div>
     <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
     <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
+
+    <div class="slbl">Intern — niet zichtbaar op werkbon</div>
+    <div class="field"><label>Interne notities / ontvangen berichten</label><textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:100px"></textarea></div>
+
+    <div class="slbl">Verzekeringsgeval</div>
+    <div class="field" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toggleVerzekering()">
+      <input type="checkbox" id="f_verzekering" style="width:20px;height:20px;cursor:pointer">
+      <label style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie toevoegen</label>
+    </div>
+    <div id="f_verzekering_wrap" style="display:none">
+      <div class="field"><label>Naam verzekeraar</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
+      <div class="field"><label>Polisnummer</label><input type="text" id="f_polisnr" autocomplete="off"></div>
+      <div class="field"><label>Schadedossiernummer</label><input type="text" id="f_schadesnr" autocomplete="off"></div>
+      <div style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:7px">
+        <strong>Akte van Cessie</strong><br>
+        Ondergetekende verklaart hierbij dat de vordering op de verzekeraar ter zake van de herstelwerkzaamheden wordt gecedeerd aan Rolf Jurgen Schadeservice & Laktechniek, en machtigt de verzekeraar tot rechtstreekse betaling aan opdrachtnemer.<br>
+        <em style="color:var(--text3)">(Exacte juridische tekst wordt later toegevoegd)</em>
+      </div>
+    </div>
 
     <div class="slbl">Handtekening klant voor akkoord</div>
+    <div id="sigHint" style="font-size:12px;color:var(--text3);margin-bottom:6px">Klant tekent voor akkoord uitvoering werkzaamheden.</div>
+    <div id="sigHintCessie" style="display:none;font-size:12px;color:var(--accent);margin-bottom:6px;font-weight:500">+ Handtekening geldt tevens als akkoord akte van cessie.</div>
     <div class="sig-wrap">
       <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
       <canvas id="sigCanvas" class="sigpad"></canvas>
-      <div class="sig-hint">Klant tekent voor akkoord reparatie</div>
     </div>
     <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
   </div>
@@ -488,28 +508,42 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById('eFotoVoor0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1 toevoegen</span>
-      </div>
-      <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById('eFotoVoor1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2 toevoegen</span>
-      </div>
+      <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById('eFotoVoor0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById('eFotoVoor1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="eSlotVoor2" onclick="document.getElementById('eFotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="eSlotVoor3" onclick="document.getElementById('eFotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
     </div>
     <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
     <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="eFotoVoor2" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="eFotoVoor3" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div id="e_fotos_na_existing"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById('eFotoNa0').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1 toevoegen</span>
-      </div>
-      <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById('eFotoNa1').click()">
-        <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2 toevoegen</span>
-      </div>
+      <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById('eFotoNa0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById('eFotoNa1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="eSlotNa2" onclick="document.getElementById('eFotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="eSlotNa3" onclick="document.getElementById('eFotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
     </div>
     <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
     <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
+    <input type="file" class="foto-input" id="eFotoNa2" accept="image/*" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
+    <input type="file" class="foto-input" id="eFotoNa3" accept="image/*" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
+
+    <div class="slbl">Intern — niet zichtbaar op werkbon</div>
+    <div class="field"><label>Interne notities</label><textarea id="e_intern" style="min-height:80px"></textarea></div>
+
+    <div class="slbl">Verzekeringsgeval</div>
+    <div class="field" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toggleEditVerzekering()">
+      <input type="checkbox" id="e_verzekering" style="width:20px;height:20px;cursor:pointer">
+      <label style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie</label>
+    </div>
+    <div id="e_verzekering_wrap" style="display:none">
+      <div class="field"><label>Naam verzekeraar</label><input type="text" id="e_verzekeraar"></div>
+      <div class="field"><label>Polisnummer</label><input type="text" id="e_polisnr"></div>
+      <div class="field"><label>Schadedossiernummer</label><input type="text" id="e_schadesnr"></div>
+    </div>
 
     <div class="slbl">Handtekening</div>
     <div id="e_sig_existing" style="display:none;margin-bottom:8px">
@@ -553,8 +587,8 @@ let selTypeVal = '';
 let selPrioVal = 'normaal';
 let editTypeVal = '';
 let editPrioVal = 'normaal';
-let newFotos = { voor: [null,null], na: [null,null] };
-let editFotos = { voor: [null,null], na: [null,null] };
+let newFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
+let editFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
 let currentStatFilter = 'alle'; // 'alle','nogteplannen','bezig','klaar'
 const sigStates = {};
 
@@ -746,10 +780,10 @@ function removeFoto(ev,slotId,type,idx){
   slot.onclick=()=>document.getElementById(type==='voor'?`fotoVoor${idx}`:`fotoNa${idx}`).click();
 }
 function resetFotos(){
-  newFotos={voor:[null,null],na:[null,null]};
-  ['Voor 1','Voor 2'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoVoor${i}`).click();});
-  ['Na 1','Na 2'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoNa${i}`).click();});
-  ['fotoVoor0','fotoVoor1','fotoNa0','fotoNa1'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  newFotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  ['Voor 1','Voor 2','Voor 3','Voor 4'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoVoor${i}`).click();});
+  ['Na 1','Na 2','Na 3','Na 4'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoNa${i}`).click();});
+  ['fotoVoor0','fotoVoor1','fotoVoor2','fotoVoor3','fotoNa0','fotoNa1','fotoNa2','fotoNa3'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function handleEditFoto(input,slotId,type,idx){
   const f=input.files[0]; if(!f) return;
@@ -768,13 +802,25 @@ function removeEditFoto(ev,slotId,type,idx){
   slot.onclick=()=>document.getElementById(`eFoto${type==='voor'?'Voor':'Na'}${idx}`).click();
 }
 function resetEditFotos(){
-  editFotos={voor:[null,null],na:[null,null]};
-  ['eFotoVoor0','eFotoVoor1','eFotoNa0','eFotoNa1'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  editFotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  ['eFotoVoor0','eFotoVoor1','eFotoVoor2','eFotoVoor3','eFotoNa0','eFotoNa1','eFotoNa2','eFotoNa3'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 
 // ── FORM HELPERS ─────────────────────────────────────────────
 let selLocVal = '';
 let editLocVal = '';
+
+function toggleVerzekering(){
+  const cb=document.getElementById('f_verzekering');
+  const wrap=document.getElementById('f_verzekering_wrap');
+  const hint=document.getElementById('sigHintCessie');
+  wrap.style.display=cb.checked?'block':'none';
+  hint.style.display=cb.checked?'block':'none';
+}
+function toggleEditVerzekering(){
+  const cb=document.getElementById('e_verzekering');
+  document.getElementById('e_verzekering_wrap').style.display=cb.checked?'block':'none';
+}
 
 function selLoc(btn,loc){
   document.getElementById('locBinnen').classList.remove('sel');
@@ -842,8 +888,8 @@ async function saveOrder(){
   const mapPad=`/Fotos/${nr}`;
 
   setSyncStatus("foto's uploaden...",'busy');
-  const fotoUrls={voor:[null,null],na:[null,null]};
-  for(let i=0;i<2;i++){
+  const fotoUrls={voor:[null,null,null,null],na:[null,null,null,null]};
+  for(let i=0;i<4;i++){
     if(newFotos.voor[i]) fotoUrls.voor[i]=await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`,newFotos.voor[i]);
     if(newFotos.na[i]) fotoUrls.na[i]=await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`,newFotos.na[i]);
   }
@@ -865,6 +911,11 @@ async function saveOrder(){
     omschr:document.getElementById('f_omschr').value.trim(),
     sig:getSig('sigCanvas'),
     fotos:fotoUrls,fotoMap:mapPad,
+    intern:document.getElementById('f_intern').value.trim(),
+    verzekering:document.getElementById('f_verzekering').checked,
+    verzekeraar:document.getElementById('f_verzekeraar').value.trim(),
+    polisnr:document.getElementById('f_polisnr').value.trim(),
+    schadesnr:document.getElementById('f_schadesnr').value.trim(),
     aangemaakt:new Date().toISOString()
   });
 
@@ -879,6 +930,11 @@ async function saveOrder(){
   selTypeVal=''; selPrioVal='normaal';
   document.getElementById('prioNormaal').classList.add('sel');
   document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('f_intern').value='';
+  document.getElementById('f_verzekering').checked=false;
+  document.getElementById('f_verzekering_wrap').style.display='none';
+  ['f_verzekeraar','f_polisnr','f_schadesnr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sigHintCessie').style.display='none';
   selLocVal='';
   document.getElementById('locBinnen').classList.remove('sel');
   document.getElementById('locBuiten').classList.remove('sel');
@@ -1023,8 +1079,8 @@ function showDetail(id){
     `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`
   ).join('');
 
-  const fVHTML=o.fotos?[0,1].map(i=>o.fotos.voor[i]?`<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>`:'').join(''):'';
-  const fNHTML=o.fotos?[0,1].map(i=>o.fotos.na[i]?`<div class="foto-detail-item"><img src="${o.fotos.na[i]}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}"><div class="foto-detail-label">Na ${i+1}</div></div>`:'').join(''):'';
+  const fVHTML=o.fotos?[0,1,2,3].map(i=>o.fotos.voor[i]?`<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>`:'').join(''):'';
+  const fNHTML=o.fotos?[0,1,2,3].map(i=>o.fotos.na[i]?`<div class="foto-detail-item"><img src="${o.fotos.na[i]}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}"><div class="foto-detail-label">Na ${i+1}</div></div>`:'').join(''):'';
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
@@ -1076,6 +1132,12 @@ function showDetail(id){
     ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
     ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
     ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
+    ${o.verzekering?`<div class="slbl">Verzekeringsgeval</div>
+      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Verzekeraar</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+      ${o.polisnr?`<div class="drow"><div class="drow-l">Polisnummer</div><div class="drow-v">${o.polisnr}</div></div>`:''}
+      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
+      <div class="drow" style="background:var(--accent-bg);border-color:#e8d090"><div class="drow-l">Akte van cessie</div><div class="drow-v" style="font-size:12px">✓ Handtekening geldt als akkoord cessie</div></div>`:''}
+    ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <button class="btn btn-green" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
     <button class="btn btn-secondary" onclick="mailOrder(${id})" style="margin-bottom:7px">✉️ Mailen</button>
@@ -1137,7 +1199,14 @@ function openEdit(id){
   document.getElementById('eprioSpoed').classList.toggle('sel',editPrioVal==='spoed');
   document.getElementById('eprioNormaal').classList.toggle('sel',editPrioVal==='normaal');
 
-  // Bestaande fotos tonen
+  document.getElementById('e_intern').value=o.intern||'';
+  document.getElementById('e_verzekering').checked=o.verzekering||false;
+  document.getElementById('e_verzekering_wrap').style.display=o.verzekering?'block':'none';
+  document.getElementById('e_verzekeraar').value=o.verzekeraar||'';
+  document.getElementById('e_polisnr').value=o.polisnr||'';
+  document.getElementById('e_schadesnr').value=o.schadesnr||'';
+
+  // Bestaande fotos tonen — uitgebreid naar 4
   ['voor','na'].forEach(type=>{
     const el=document.getElementById(`e_fotos_${type}_existing`);
     if(o.fotos&&o.fotos[type]&&o.fotos[type].some(f=>f)){
@@ -1185,9 +1254,17 @@ async function saveEdit(){
   if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
 
   // Nieuwe fotos
-  if(!orders[idx].fotos) orders[idx].fotos={voor:[null,null],na:[null,null]};
+  orders[idx].intern=document.getElementById('e_intern').value.trim();
+  orders[idx].verzekering=document.getElementById('e_verzekering').checked;
+  orders[idx].verzekeraar=document.getElementById('e_verzekeraar').value.trim();
+  orders[idx].polisnr=document.getElementById('e_polisnr').value.trim();
+  orders[idx].schadesnr=document.getElementById('e_schadesnr').value.trim();
+
+  if(!orders[idx].fotos) orders[idx].fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  while(orders[idx].fotos.voor.length<4) orders[idx].fotos.voor.push(null);
+  while(orders[idx].fotos.na.length<4) orders[idx].fotos.na.push(null);
   if(!orders[idx].fotoMap) orders[idx].fotoMap=`/Fotos/${orders[idx].nr}`;
-  for(let i=0;i<2;i++){
+  for(let i=0;i<4;i++){
     if(editFotos.voor[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`,editFotos.voor[i]);orders[idx].fotos.voor[i]=editFotos.voor[i];}
     if(editFotos.na[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`,editFotos.na[i]);orders[idx].fotos.na[i]=editFotos.na[i];}
   }
