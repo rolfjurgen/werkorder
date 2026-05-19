@@ -302,7 +302,6 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
-    <div class="field"><label>Ontvangen op (datum opdracht)</label><input type="date" id="f_datum_plan"></div>
     <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="f_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..."></textarea></div>
 
@@ -505,7 +504,6 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="field"><label>E-mailadres</label><input type="email" id="e_email"></div>
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
-    <div class="field"><label>Ontvangen op</label><input type="date" id="e_datum_plan"></div>
     <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="e_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
 
@@ -1046,8 +1044,7 @@ function renderList(){
     let res=0;
     if(sort==='prio'){res=prioRank(a.prioriteit||'normaal')-prioRank(b.prioriteit||'normaal');if(res===0)res=new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);}
     else if(sort==='ontvangen'){
-      // Sorteer op aanmaakdatum (altijd ingevuld) — meest betrouwbaar voor volgorde van binnenkomst
-      res=new Date(a.aangemaakt||0)-new Date(b.aangemaakt||0);
+      res = new Date(a.aangemaakt||0) - new Date(b.aangemaakt||0);
     }
     else if(sort==='deadline'){if(!a.datum_deadline&&!b.datum_deadline)res=0;else if(!a.datum_deadline)res=1;else if(!b.datum_deadline)res=-1;else res=new Date(a.datum_deadline)-new Date(b.datum_deadline);}
     else if(sort==='datum'){if(!a.datum&&!b.datum)res=0;else if(!a.datum)res=1;else if(!b.datum)res=-1;else res=new Date(a.datum)-new Date(b.datum);}
