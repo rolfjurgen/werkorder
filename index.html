@@ -422,11 +422,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <option value="buiten">🌤️ Buiten</option>
     </select>
     <select id="sortOrder" onchange="renderList()">
-      <option value="prio">Prioriteit eerst</option>
-      <option value="ontvangen">Ontvangen op</option>
-      <option value="deadline">Deadline eerst</option>
+      <option value="prio">Prioriteit</option>
+      <option value="ontvangen">Datum binnenkomst</option>
+      <option value="deadline">Deadline</option>
       <option value="datum">Datum afspraak</option>
-      <option value="nieuwste">Nieuwste eerst</option>
     </select>
     <button id="sortRichtingBtn" onclick="toggleSortRichting()" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:7px 12px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--text);flex-shrink:0" title="Volgorde omdraaien">↓</button>
   </div>
