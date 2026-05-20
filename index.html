@@ -913,7 +913,6 @@ async function saveOrder(){
     tel:document.getElementById('f_tel').value.trim(),
     email:document.getElementById('f_email').value.trim(),
     datum:document.getElementById('f_datum').value,
-    datum_plan:document.getElementById('f_datum_plan').value,
     datum_deadline:document.getElementById('f_datum_deadline').value,
     omschr:document.getElementById('f_omschr').value.trim(),
     sig:getSig('sigCanvas'),
@@ -934,7 +933,7 @@ async function saveOrder(){
   await dbxWrite();
 
   // Reset formulier
-  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_plan','f_datum_deadline'].forEach(id=>document.getElementById(id).value='');
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f_datum').value=new Date().toISOString().split('T')[0];
   document.getElementById('f_og_type').value='particulier'; toggleOG();
   document.getElementById('f_overig_wrap').style.display='none';
@@ -1138,7 +1137,7 @@ function showDetail(id){
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie werk</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
-    ${o.datum_plan?`<div class="drow"><div class="drow-l">Ontvangen op</div><div class="drow-v">${fmtDate(o.datum_plan)}</div></div>`:''}
+
     ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
     <div class="slbl">Tijdregistratie</div>
@@ -1208,7 +1207,6 @@ function openEdit(id){
   document.getElementById('e_tel').value=o.tel||'';
   document.getElementById('e_email').value=o.email||'';
   document.getElementById('e_datum').value=o.datum||'';
-  document.getElementById('e_datum_plan').value=o.datum_plan||'';
   document.getElementById('e_datum_deadline').value=o.datum_deadline||'';
   document.getElementById('e_omschr').value=o.omschr||'';
   document.getElementById('e_og_type').value=o.og_type||'particulier'; toggleEditOG();
@@ -1280,7 +1278,6 @@ async function saveEdit(){
   orders[idx].tel=document.getElementById('e_tel').value.trim();
   orders[idx].email=document.getElementById('e_email').value.trim();
   orders[idx].datum=document.getElementById('e_datum').value;
-  orders[idx].datum_plan=document.getElementById('e_datum_plan').value;
   orders[idx].datum_deadline=document.getElementById('e_datum_deadline').value;
   orders[idx].omschr=document.getElementById('e_omschr').value.trim();
   orders[idx].og_type=ogType;
@@ -1342,7 +1339,7 @@ async function saveAgendaTijd(id,tijd){
 // ── AGENDA ───────────────────────────────────────────────────
 function addToAgenda(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
-  const datum=o.datum_plan||o.datum;
+  const datum=o.datum;
   if(!datum){showToast('Vul eerst een datum in',true);return;}
   const d=datum.replace(/-/g,'');
   const tijdStr=(o.agenda_tijd||'08:00');
