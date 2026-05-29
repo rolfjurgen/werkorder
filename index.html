@@ -507,6 +507,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Telefoon aannemer</label><input type="tel" id="e_og_tel"></div>
       <div class="field"><label>Email aannemer</label><input type="email" id="e_og_email"></div>
       <div class="field"><label>Referentie</label><input type="text" id="e_og_ref"></div>
+      <div class="field" style="background:var(--surface2)">
+        <label>📎 Opdrachtbevestiging (PDF)</label>
+        <input type="file" id="e_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
+        <div id="e_og_bijlage_huidig" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
     </div>
     <div class="slbl">Locatie & klant</div>
     <div class="field"><label>Naam bewoner</label><input type="text" id="e_naam"></div>
@@ -1322,6 +1327,9 @@ async function openEdit(id){
   document.getElementById('e_og_tel').value=o.og_tel||'';
   document.getElementById('e_og_email').value=o.og_email||'';
   document.getElementById('e_og_ref').value=o.og_ref||'';
+  const bijlageHuidig=document.getElementById('e_og_bijlage_huidig');
+  if(o.bijlage) bijlageHuidig.innerHTML='✅ Huidig: opdrachtbevestiging.pdf — nieuw bestand uploaden ter vervanging';
+  else bijlageHuidig.innerHTML='';
 
   editTypeVal=o.type||'';
   const isOverig=editTypeVal.startsWith('Overig');
@@ -1394,6 +1402,25 @@ async function saveEdit(){
   orders[idx].og_tel=document.getElementById('e_og_tel').value.trim();
   orders[idx].og_email=document.getElementById('e_og_email').value.trim();
   orders[idx].og_ref=document.getElementById('e_og_ref').value.trim();
+
+  // PDF bijlage uploaden indien nieuw bestand geselecteerd
+  const eBijlageFile=document.getElementById('e_og_bijlage').files[0];
+  if(eBijlageFile&&token){
+    setSyncStatus('bijlage uploaden...','busy');
+    const reader=new FileReader();
+    await new Promise(res=>{
+      reader.onload=async e=>{
+        const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+        const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+          method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`${orders[idx].fotoMap}/opdrachtbevestiging.pdf`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
+        });
+        if(r.ok) orders[idx].bijlage=`${orders[idx].fotoMap}/opdrachtbevestiging.pdf`;
+        res();
+      };
+      reader.readAsDataURL(eBijlageFile);
+    });
+  }
   orders[idx].prioriteit=editPrioVal;
   orders[idx].locatie=editLocVal;
   if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
