@@ -1262,8 +1262,10 @@ async function showDetail(id){
     ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},false)">📄 PDF</button>
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},true)">📸 PDF + foto's</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},fotoOptie_${id})" id="pdfBtn_${id}">📄 PDF</button>
+      <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
+        <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
+      </label>
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})" style="grid-column:span 2">🗑️ Verwijderen</button>
@@ -1496,7 +1498,8 @@ async function mailOrder(id){
 }
 
 // ── PDF ──────────────────────────────────────────────────────
-async function savePDF(id, metFotos=false){
+async function savePDF(id, checkboxEl){
+  const metFotos = checkboxEl && checkboxEl.checked;
   const o=orders.find(x=>x.id===id); if(!o)return;
 
   let fotoVoorHTML='', fotoNaHTML='';
