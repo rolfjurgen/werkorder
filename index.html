@@ -303,8 +303,14 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
       <div class="field" style="background:var(--surface2)">
         <label>📎 Opdrachtbevestiging (PDF)</label>
-        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
-        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+        <div id="f_bijlage_drop" style="border:2px dashed var(--border2);border-radius:var(--r);padding:12px;text-align:center;margin-top:6px;font-size:12px;color:var(--text3);cursor:pointer"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+          ondragleave="this.style.borderColor='var(--border2)'"
+          ondrop="handleBijlageDrop(event,'f_og_bijlage','f_bijlage_drop')"
+          onclick="document.getElementById('f_og_bijlage').click()">
+          📄 Tik om te kiezen of sleep PDF hiernaartoe
+        </div>
+        <input type="file" id="f_og_bijlage" accept=".pdf,application/pdf" style="display:none" onchange="toonBijlageNaam(this,'f_bijlage_drop')">
       </div>
     </div>
     <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
@@ -509,8 +515,15 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Referentie</label><input type="text" id="e_og_ref"></div>
       <div class="field" style="background:var(--surface2)">
         <label>📎 Opdrachtbevestiging (PDF)</label>
-        <input type="file" id="e_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
-        <div id="e_og_bijlage_huidig" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+        <div id="e_bijlage_huidig" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+        <div id="e_bijlage_drop" style="border:2px dashed var(--border2);border-radius:var(--r);padding:12px;text-align:center;margin-top:6px;font-size:12px;color:var(--text3);cursor:pointer"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+          ondragleave="this.style.borderColor='var(--border2)'"
+          ondrop="handleBijlageDrop(event,'e_og_bijlage','e_bijlage_drop')"
+          onclick="document.getElementById('e_og_bijlage').click()">
+          📄 Tik om te kiezen of sleep PDF hiernaartoe
+        </div>
+        <input type="file" id="e_og_bijlage" accept=".pdf,application/pdf" style="display:none" onchange="toonBijlageNaam(this,'e_bijlage_drop')">
       </div>
     </div>
     <div class="slbl">Locatie & klant</div>
@@ -1267,16 +1280,63 @@ async function showDetail(id){
     ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},fotoOptie_${id})" id="pdfBtn_${id}">📄 PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},document.getElementById('fotoOptie_${id}'))">📄 PDF</button>
       <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
         <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
       </label>
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})" style="grid-column:span 2">🗑️ Verwijderen</button>
-    </div>`;
+    </div>
+    ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
 
   goDetail();
+}
+
+function handleBijlageDrop(event, inputId, dropId){
+  event.preventDefault();
+  document.getElementById(dropId).style.borderColor='var(--border2)';
+  const file=event.dataTransfer.files[0];
+  if(!file) return;
+  const input=document.getElementById(inputId);
+  const dt=new DataTransfer(); dt.items.add(file); input.files=dt.files;
+  toonBijlageNaam(input, dropId);
+}
+
+function toonBijlageNaam(input, dropId){
+  const el=document.getElementById(dropId);
+  if(input.files[0]) el.innerHTML=`✅ ${input.files[0].name}`;
+}
+
+async function archiveerOrder(id){
+  if(!confirm('Opdracht archiveren? Hij verdwijnt uit het overzicht en wordt opgeslagen in Dropbox/Archief.')) return;
+  const o=orders.find(x=>x.id===id); if(!o) return;
+
+  // Kopieer werkorders.json entry naar archief map in Dropbox
+  if(token){
+    setSyncStatus('archiveren...','busy');
+    try {
+      const archief={ ...o, gearchiveerd: new Date().toISOString() };
+      const pad=`/Archief/${o.nr}.json`;
+      await fetch('https://content.dropboxapi.com/2/files/upload',{
+        method:'POST',
+        headers:{
+          'Authorization':'Bearer '+token,
+          'Dropbox-API-Arg':JSON.stringify({path:pad,mode:'overwrite'}),
+          'Content-Type':'application/octet-stream'
+        },
+        body: JSON.stringify(archief, null, 2)
+      });
+    } catch(e){ console.error(e); }
+  }
+
+  // Verwijder uit actieve lijst
+  const del=JSON.parse(localStorage.getItem('rj_deleted_v3')||'[]');
+  del.push(id); localStorage.setItem('rj_deleted_v3',JSON.stringify(del));
+  orders=orders.filter(x=>x.id!==id);
+  await dbxWrite();
+  goTab('overzicht');
+  showToast(`✓ ${o.nr} gearchiveerd`);
 }
 
 async function openBijlage(pad){
@@ -1327,8 +1387,8 @@ async function openEdit(id){
   document.getElementById('e_og_tel').value=o.og_tel||'';
   document.getElementById('e_og_email').value=o.og_email||'';
   document.getElementById('e_og_ref').value=o.og_ref||'';
-  const bijlageHuidig=document.getElementById('e_og_bijlage_huidig');
-  if(o.bijlage) bijlageHuidig.innerHTML='✅ Huidig: opdrachtbevestiging.pdf — nieuw bestand uploaden ter vervanging';
+  const bijlageHuidig=document.getElementById('e_bijlage_huidig');
+  if(o.bijlage) bijlageHuidig.innerHTML='✅ Huidig: opdrachtbevestiging.pdf — nieuw uploaden ter vervanging';
   else bijlageHuidig.innerHTML='';
 
   editTypeVal=o.type||'';
