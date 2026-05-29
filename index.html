@@ -1565,22 +1565,24 @@ function addToAgenda(id){
 async function mailOrder(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
   setSyncStatus('email voorbereiden...','busy');
+
+  // Stap 1 - PDF genereren en downloaden
+  await savePDF(id);
+
+  // Stap 2 - Outlook openen met onderwerp en korte tekst
   const emailTo=o.og_type==='aannemer'?(o.og_email||''):(o.email||'');
   const emailCC=o.og_type==='aannemer'?(o.email||''):'';
-  let fotoTekst='';
-  if(o.fotoMap&&token){const link=await dbxShareLink(o.fotoMap);if(link)fotoTekst=`\n\nFoto's voor en na:\n${link}`;}
   const type=o.type.replace('Overig: ','').replace('Overig','');
   const onderwerp=`Herstelopdracht — ${type} — ${o.nr}`;
   const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
-  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`Opdrachtgever:      ${o.og_naam}${o.og_contact?' — '+o.og_contact:''}\n`:'';
-  const refRegel=o.og_type==='aannemer'&&o.og_ref?`Uw referentie:      ${o.og_ref}\n`:'';
-  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nRolf Jurgen Schadeservice & Laktechniek\nT: +31(0)45-5350200\nmail@rolfjurgen.nl`;
+  const body=`${aanhef},\n\nIn de bijlage vindt u de werkbon voor de uitgevoerde werkzaamheden.\n\nMet vriendelijke groet,\n\nRolf Jurgen\nRolf Jurgen Schadeservice & Laktechniek\nT: +31(0)45-5350200\nmail@rolfjurgen.nl`;
   try{await navigator.clipboard.writeText(body);}catch(e){}
   const onderwerpEnc=encodeURIComponent(onderwerp);
   const bodyEnc=encodeURIComponent(body);
-  const mailto=`mailto:${emailTo}?subject=${onderwerpEnc}${emailCC?'&cc='+encodeURIComponent(emailCC):''}&body=${bodyEnc}`;
-  window.location.href=mailto;
-  showToast('✓ Outlook geopend — plak tekst met Ctrl+V als body leeg is');
+  setTimeout(()=>{
+    window.location.href=`mailto:${emailTo}?subject=${onderwerpEnc}${emailCC?'&cc='+encodeURIComponent(emailCC):''}&body=${bodyEnc}`;
+  }, 1500);
+  showToast('✓ PDF geopend — voeg toe als bijlage in Outlook');
   setSyncStatus('gesynchroniseerd','ok');
 }
 
