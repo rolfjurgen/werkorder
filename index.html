@@ -205,6 +205,15 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px 10px 36px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; }
 .search-wrap input:focus { border-color: var(--accent); }
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
+
+/* COMPACTE KNOPPEN */
+.btn-compact { padding: 9px 8px; border-radius: var(--r); border: 1px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; transition: opacity .15s; }
+.btn-compact:active { opacity: .8; }
+.btn-compact-green { background: var(--green-bg); color: var(--green); border-color: #b0ddc0; }
+.btn-compact-blue { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
+.btn-compact-edit { background: var(--surface2); color: var(--text2); border-color: var(--border2); }
+.btn-compact-danger { background: var(--red-bg); color: var(--red); border-color: #e8c0bc; }
+
 @media print {
   body > * { display: none !important; }
   #printOutput { display: block !important; }
@@ -292,9 +301,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Telefoon aannemer</label><input type="tel" id="f_og_tel"></div>
       <div class="field"><label>Email aannemer</label><input type="email" id="f_og_email"></div>
       <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
+      <div class="field" style="background:var(--surface2)">
+        <label>📎 Opdrachtbevestiging (PDF)</label>
+        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
+        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
     </div>
-
-    <div class="slbl">Locatie & klant</div>
     <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
     <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
     <div class="field"><label>Telefoon bewoner</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
@@ -304,6 +316,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
     <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="f_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..."></textarea></div>
+    <div class="field" style="background:var(--surface2)"><label style="color:var(--text3)">🔒 Intern — niet zichtbaar op werkbon</label><textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:80px"></textarea></div>
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
@@ -328,9 +341,6 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
     <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
     <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
-
-    <div class="slbl">Intern — niet zichtbaar op werkbon</div>
-    <div class="field"><label>Interne notities / ontvangen berichten</label><textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:100px"></textarea></div>
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -666,6 +676,21 @@ async function dbxUploadFoto(path,dataUrl) {
     return r.ok ? path : null;
   } catch(e){return null;}
 }
+async function dbxGetFotoUrl(pad){
+  if(!pad) return null;
+  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data
+  if(!token) return null;
+  const dbxPad=pad.replace('dropbox:','');
+  try {
+    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path:dbxPad})
+    });
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d.link||null;
+  } catch(e){return null;}
+}
 async function dbxShareLink(path) {
   if (!token) return null;
   try {
@@ -897,8 +922,33 @@ async function saveOrder(){
   setSyncStatus("foto's uploaden...",'busy');
   const fotoUrls={voor:[null,null,null,null],na:[null,null,null,null]};
   for(let i=0;i<4;i++){
-    if(newFotos.voor[i]) fotoUrls.voor[i]=await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`,newFotos.voor[i]);
-    if(newFotos.na[i]) fotoUrls.na[i]=await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`,newFotos.na[i]);
+    if(newFotos.voor[i]){
+      const pad=await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`,newFotos.voor[i]);
+      fotoUrls.voor[i]=pad?`dropbox:${mapPad}/voor_${i+1}.jpg`:null;
+    }
+    if(newFotos.na[i]){
+      const pad=await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`,newFotos.na[i]);
+      fotoUrls.na[i]=pad?`dropbox:${mapPad}/na_${i+1}.jpg`:null;
+    }
+  }
+
+  // PDF bijlage uploaden
+  let bijlagePad=null;
+  const bijlageFile=document.getElementById('f_og_bijlage').files[0];
+  if(bijlageFile&&token){
+    setSyncStatus('bijlage uploaden...','busy');
+    const reader=new FileReader();
+    bijlagePad=await new Promise(res=>{
+      reader.onload=async e=>{
+        const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+        const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+          method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`${mapPad}/opdrachtbevestiging.pdf`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
+        });
+        res(r.ok?`${mapPad}/opdrachtbevestiging.pdf`:null);
+      };
+      reader.readAsDataURL(bijlageFile);
+    });
   }
 
   orders.unshift({
@@ -917,6 +967,7 @@ async function saveOrder(){
     omschr:document.getElementById('f_omschr').value.trim(),
     sig:getSig('sigCanvas'),
     fotos:fotoUrls,fotoMap:mapPad,
+    bijlage:bijlagePad,
     intern:document.getElementById('f_intern').value.trim(),
     verzekering:document.getElementById('f_verzekering').checked,
     verzekeraar:document.getElementById('f_verzekeraar').value.trim(),
@@ -1098,7 +1149,7 @@ function renderList(){
 function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
 
 // ── DETAIL ───────────────────────────────────────────────────
-function showDetail(id){
+async function showDetail(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
   const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
 
@@ -1106,8 +1157,18 @@ function showDetail(id){
     `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`
   ).join('');
 
-  const fVHTML=o.fotos?[0,1,2,3].map(i=>o.fotos.voor[i]?`<div class="foto-detail-item"><img src="${o.fotos.voor[i]}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}"><div class="foto-detail-label">Voor ${i+1}</div></div>`:'').join(''):'';
-  const fNHTML=o.fotos?[0,1,2,3].map(i=>o.fotos.na[i]?`<div class="foto-detail-item"><img src="${o.fotos.na[i]}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}"><div class="foto-detail-label">Na ${i+1}</div></div>`:'').join(''):'';
+  // Foto URLs ophalen (Dropbox tijdelijke links of bestaande base64)
+  const fotoVoorUrls=[null,null,null,null];
+  const fotoNaUrls=[null,null,null,null];
+  if(o.fotos){
+    for(let i=0;i<4;i++){
+      if(o.fotos.voor[i]) fotoVoorUrls[i]=await dbxGetFotoUrl(o.fotos.voor[i]);
+      if(o.fotos.na[i]) fotoNaUrls[i]=await dbxGetFotoUrl(o.fotos.na[i]);
+    }
+  }
+
+  const fVHTML=fotoVoorUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
+  const fNHTML=fotoNaUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
@@ -1127,6 +1188,7 @@ function showDetail(id){
       ${o.og_tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
       ${o.og_email?`<div class="drow"><div class="drow-l">Email</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
       ${o.og_ref?`<div class="drow"><div class="drow-l">Referentie</div><div class="drow-v">${o.og_ref}</div></div>`:''}
+      ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Opdrachtbevestiging</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
     `:`<div class="drow"><div class="drow-l">Type</div><div class="drow-v">Particulier</div></div>`}
     <div class="slbl">Locatie & klant</div>
     ${o.naam?`<div class="drow"><div class="drow-l">Naam</div><div class="drow-v">${o.naam}</div></div>`:''}
@@ -1142,19 +1204,29 @@ function showDetail(id){
     ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
     <div class="slbl">Tijdregistratie</div>
     <div class="drow">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🚗 Reistijd heen</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div><div class="drow-l">Vertrek</div><input class="time-input" type="time" value="${o.tijd_vertrek||''}" onchange="saveTijd(${id},'tijd_vertrek',this.value)"></div>
         <div><div class="drow-l">Aankomst</div><input class="time-input" type="time" value="${o.tijd_aankomst||''}" onchange="saveTijd(${id},'tijd_aankomst',this.value)"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🔨 Werktijd</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div><div class="drow-l">Werk van</div><input class="time-input" type="time" value="${o.tijd_werk_van||''}" onchange="saveTijd(${id},'tijd_werk_van',this.value)"></div>
         <div><div class="drow-l">Werk tot</div><input class="time-input" type="time" value="${o.tijd_werk_tot||''}" onchange="saveTijd(${id},'tijd_werk_tot',this.value)"></div>
       </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🚗 Terugreis</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="drow-l">Vertrek zaak</div><input class="time-input" type="time" value="${o.tijd_terug_vertrek||''}" onchange="saveTijd(${id},'tijd_terug_vertrek',this.value)"></div>
+        <div><div class="drow-l">Aankomst zaak</div><input class="time-input" type="time" value="${o.tijd_terug_aankomst||''}" onchange="saveTijd(${id},'tijd_terug_aankomst',this.value)"></div>
+      </div>
       ${berekenTijden(o)}
     </div>
-    <div class="slbl">Agenda starttijd</div>
-    <div class="drow"><div class="drow-l">Starttijd afspraak</div>
-      <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
+    <div class="slbl">Agenda</div>
+    <div class="drow" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div>
+        <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
+      </div>
+      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
     </div>
     ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
     ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
@@ -1173,13 +1245,30 @@ function showDetail(id){
     `:''}
     ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
-    <button class="btn btn-green" onclick="savePDF(${id})">📄 Werkbon opslaan als PDF</button>
-    <button class="btn btn-secondary" onclick="mailOrder(${id})" style="margin-bottom:7px">✉️ Mailen</button>
-    <button class="btn btn-blue" onclick="addToAgenda(${id})">📅 Toevoegen aan Google Agenda</button>
-    <button class="btn btn-edit" onclick="openEdit(${id})">✏️ Opdracht bewerken</button>
-    <button class="btn btn-danger" onclick="deleteOrder(${id})">Opdracht verwijderen</button>`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},false)">📄 PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},true)">📸 PDF + foto's</button>
+      <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
+      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
+      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})" style="grid-column:span 2">🗑️ Verwijderen</button>
+    </div>`;
 
   goDetail();
+}
+
+async function openBijlage(pad){
+  const url=await dbxGetFotoUrl(pad.startsWith('dropbox:')?pad:`dropbox:${pad}`);
+  if(url) window.open(url,'_blank');
+  else showToast('Bijlage niet beschikbaar',true);
+}
+
+async function verwijderFoto(id, type, idx){
+  if(!confirm('Foto verwijderen?')) return;
+  const o=orders.find(x=>x.id===id); if(!o||!o.fotos) return;
+  o.fotos[type][idx]=null;
+  await dbxWrite();
+  showToast('Foto verwijderd');
+  showDetail(id);
 }
 
 async function changeStatus(id,status){
@@ -1198,7 +1287,7 @@ async function deleteOrder(id){
 }
 
 // ── EDIT ─────────────────────────────────────────────────────
-function openEdit(id){
+async function openEdit(id){
   resetEditFotos();
   const o=orders.find(x=>x.id===id); if(!o)return;
   document.getElementById('e_id').value=id;
@@ -1245,12 +1334,13 @@ function openEdit(id){
   document.getElementById('e_btwterug').value=o.btwterug||'';
 
   // Bestaande fotos tonen — uitgebreid naar 4
-  ['voor','na'].forEach(type=>{
+  for(const type of ['voor','na']){
     const el=document.getElementById(`e_fotos_${type}_existing`);
     if(o.fotos&&o.fotos[type]&&o.fotos[type].some(f=>f)){
-      el.innerHTML=`<div class="foto-detail-grid">${[0,1].map(i=>o.fotos[type][i]?`<div class="foto-detail-item"><img src="${o.fotos[type][i]}" onclick="openLightbox('${o.fotos[type][i]}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`:'').join('')}</div><div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's toevoegen ter vervanging</div>`;
+      const urls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos[type][i])));
+      el.innerHTML=`<div class="foto-detail-grid">${urls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`:'').join('')}</div><div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's toevoegen ter vervanging</div>`;
     } else { el.innerHTML=''; }
-  });
+  }
 
   if(o.sig){
     document.getElementById('e_sig_existing').style.display='block';
@@ -1307,8 +1397,14 @@ async function saveEdit(){
   while(orders[idx].fotos.na.length<4) orders[idx].fotos.na.push(null);
   if(!orders[idx].fotoMap) orders[idx].fotoMap=`/Fotos/${orders[idx].nr}`;
   for(let i=0;i<4;i++){
-    if(editFotos.voor[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`,editFotos.voor[i]);orders[idx].fotos.voor[i]=editFotos.voor[i];}
-    if(editFotos.na[i]){await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`,editFotos.na[i]);orders[idx].fotos.na[i]=editFotos.na[i];}
+    if(editFotos.voor[i]){
+      const pad=await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`,editFotos.voor[i]);
+      if(pad) orders[idx].fotos.voor[i]=`dropbox:${orders[idx].fotoMap}/voor_${i+1}.jpg`;
+    }
+    if(editFotos.na[i]){
+      const pad=await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`,editFotos.na[i]);
+      if(pad) orders[idx].fotos.na[i]=`dropbox:${orders[idx].fotoMap}/na_${i+1}.jpg`;
+    }
   }
   const newSig=getSig('editSigCanvas');
   if(newSig) orders[idx].sig=newSig;
@@ -1320,11 +1416,16 @@ async function saveEdit(){
 function tijdNaarMin(t){if(!t)return 0;const[u,m]=t.split(':').map(Number);return u*60+m;}
 function minNaarTijd(m){if(!m||m<=0)return '';return `${Math.floor(m/60)}u ${m%60}min`;}
 function berekenTijden(o){
-  const reis=o.tijd_vertrek&&o.tijd_aankomst?tijdNaarMin(o.tijd_aankomst)-tijdNaarMin(o.tijd_vertrek):0;
+  const reisHeen=o.tijd_vertrek&&o.tijd_aankomst?tijdNaarMin(o.tijd_aankomst)-tijdNaarMin(o.tijd_vertrek):0;
   const werk=o.tijd_werk_van&&o.tijd_werk_tot?tijdNaarMin(o.tijd_werk_tot)-tijdNaarMin(o.tijd_werk_van):0;
-  if(!reis&&!werk)return '';
+  const reisTerug=o.tijd_terug_vertrek&&o.tijd_terug_aankomst?tijdNaarMin(o.tijd_terug_aankomst)-tijdNaarMin(o.tijd_terug_vertrek):0;
+  const totaal=reisHeen+werk+reisTerug;
+  if(!totaal) return '';
   return `<div style="font-size:12px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-    ${reis>0?`Reistijd: ${minNaarTijd(reis)} &nbsp;|&nbsp;`:''}${werk>0?`Werktijd: ${minNaarTijd(werk)} &nbsp;|&nbsp;`:''}${reis+werk>0?`Totaal: ${minNaarTijd(reis+werk)}`:''}
+    ${reisHeen>0?`🚗 Heen: ${minNaarTijd(reisHeen)} &nbsp;`:''}
+    ${werk>0?`🔨 Werk: ${minNaarTijd(werk)} &nbsp;`:''}
+    ${reisTerug>0?`🚗 Terug: ${minNaarTijd(reisTerug)} &nbsp;`:''}
+    ${totaal>0?`| <strong>Totaal: ${minNaarTijd(totaal)}</strong>`:''}
   </div>`;
 }
 async function saveTijd(id,veld,waarde){
@@ -1364,25 +1465,37 @@ async function mailOrder(id){
   let fotoTekst='';
   if(o.fotoMap&&token){const link=await dbxShareLink(o.fotoMap);if(link)fotoTekst=`\n\nFoto's voor en na:\n${link}`;}
   const type=o.type.replace('Overig: ','').replace('Overig','');
-  const onderwerp=`Herstelopdracht — ${type}`;
+  const onderwerp=`Herstelopdracht — ${type} — ${o.nr}`;
   const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`Opdrachtgever:      ${o.og_naam}${o.og_contact?' — '+o.og_contact:''}\n`:'';
   const refRegel=o.og_type==='aannemer'&&o.og_ref?`Uw referentie:      ${o.og_ref}\n`:'';
-  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}`;
+  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nRolf Jurgen Schadeservice & Laktechniek\nT: +31(0)45-5350200\nmail@rolfjurgen.nl`;
   try{await navigator.clipboard.writeText(body);}catch(e){}
-  const mailto=`mailto:${emailTo}?subject=${onderwerp.replace(/ /g,'%20').replace(/—/g,'%E2%80%94').replace(/:/g,'%3A')}${emailCC?'&cc='+encodeURIComponent(emailCC):''}`;
+  const onderwerpEnc=encodeURIComponent(onderwerp);
+  const bodyEnc=encodeURIComponent(body);
+  const mailto=`mailto:${emailTo}?subject=${onderwerpEnc}${emailCC?'&cc='+encodeURIComponent(emailCC):''}&body=${bodyEnc}`;
   window.location.href=mailto;
-  showToast('✓ Emailtekst gekopieerd');
+  showToast('✓ Email geopend met tekst ingevuld');
   setSyncStatus('gesynchroniseerd','ok');
 }
 
 // ── PDF ──────────────────────────────────────────────────────
-function savePDF(id){
+async function savePDF(id, metFotos=false){
   const o=orders.find(x=>x.id===id); if(!o)return;
+
+  let fotoVoorHTML='', fotoNaHTML='';
+  if(metFotos && o.fotos){
+    setSyncStatus("foto's laden...",'busy');
+    const vUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.voor[i])));
+    const nUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.na[i])));
+    fotoVoorHTML=vUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
+    fotoNaHTML=nUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
+    setSyncStatus('gesynchroniseerd','ok');
+  }
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
   const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
-  const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`Reistijd: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`Werktijd: ${o.tijd_werk_van} → ${o.tijd_werk_tot}`:''}</td></tr>`:'';
+  const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van||o.tijd_terug_vertrek)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`🚗 Heen: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`🔨 Werk: ${o.tijd_werk_van} → ${o.tijd_werk_tot}<br>`:''}${o.tijd_terug_vertrek&&o.tijd_terug_aankomst?`🚗 Terug: ${o.tijd_terug_vertrek} → ${o.tijd_terug_aankomst}`:''}</td></tr>`:'';
   const cessieHTML=o.verzekering?`
   <div style="margin-top:24px;border-top:2px solid #b5820c;padding-top:16px">
     <div style="font-size:14px;font-weight:700;color:#b5820c;margin-bottom:12px">AKTE VAN CESSIE — Overdracht vorderingsrecht · art. 3:94 BW</div>
@@ -1426,6 +1539,8 @@ function savePDF(id){
   ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
   ${tijdRegel}</table>
   <div style="font-size:12px;color:#666">De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.</div>
+  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's voor werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoVoorHTML}</div></div>`:''}
+  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's na werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
   ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
   ${cessieHTML}
   <div class="footer">R. Jurgen | Rolf Jurgen Schadeservice & Laktechniek | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
