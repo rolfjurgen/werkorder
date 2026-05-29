@@ -1280,7 +1280,7 @@ async function showDetail(id){
     ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},document.getElementById('fotoOptie_${id}'))">📄 PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 PDF</button>
       <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
         <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
       </label>
@@ -1580,13 +1580,13 @@ async function mailOrder(id){
   const bodyEnc=encodeURIComponent(body);
   const mailto=`mailto:${emailTo}?subject=${onderwerpEnc}${emailCC?'&cc='+encodeURIComponent(emailCC):''}&body=${bodyEnc}`;
   window.location.href=mailto;
-  showToast('✓ Email geopend met tekst ingevuld');
+  showToast('✓ Outlook geopend — plak tekst met Ctrl+V als body leeg is');
   setSyncStatus('gesynchroniseerd','ok');
 }
 
 // ── PDF ──────────────────────────────────────────────────────
-async function savePDF(id, checkboxEl){
-  const metFotos = checkboxEl && checkboxEl.checked;
+async function savePDF(id){
+  const metFotos = document.getElementById('fotoOptie_'+id)?.checked || false;
   const o=orders.find(x=>x.id===id); if(!o)return;
 
   let fotoVoorHTML='', fotoNaHTML='';
