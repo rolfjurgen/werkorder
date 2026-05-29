@@ -405,12 +405,13 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <span class="search-icon">🔍</span>
     <input type="text" id="searchField" placeholder="Zoek op naam of adres..." oninput="renderList()">
   </div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
-    <span style="font-size:11px;color:var(--text3);align-self:center">Legenda:</span>
-    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#edf2fc;color:#2055a4;border:1px solid #c0d0f0">🔵 Inbraakschade</span>
-    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#fff3e0;color:#e07b00;border:1px solid #ffcc80">🟠 Keukenblad</span>
-    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#edf7f2;color:#2a7a4e;border:1px solid #b0ddc0">🟢 Opleverpunten</span>
-    <span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#f3eef8;color:#7b4ea6;border:1px solid #d0b8e8">🟣 Overig</span>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center">
+    <span style="font-size:11px;color:var(--text3)">Type:</span>
+    <span id="leg-alle" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);cursor:pointer" onclick="filterOpType('alle')">Alle</span>
+    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#edf2fc;color:#2055a4;border:1px solid #c0d0f0;cursor:pointer" onclick="filterOpType('inbraak')">🔵 Inbraakschade</span>
+    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fff3e0;color:#e07b00;border:1px solid #ffcc80;cursor:pointer" onclick="filterOpType('keuken')">🟠 Keukenblad</span>
+    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#edf7f2;color:#2a7a4e;border:1px solid #b0ddc0;cursor:pointer" onclick="filterOpType('oplever')">🟢 Opleverpunten</span>
+    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#f3eef8;color:#7b4ea6;border:1px solid #d0b8e8;cursor:pointer" onclick="filterOpType('overig')">🟣 Overig</span>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -1025,6 +1026,18 @@ function toggleSortRichting(){
   renderList();
 }
 
+let currentTypeFilter = 'alle';
+
+function filterOpType(type){
+  currentTypeFilter = type;
+  ['alle','inbraak','keuken','oplever','overig'].forEach(k=>{
+    const el=document.getElementById('leg-'+k);
+    if(el) el.style.fontWeight = k===type ? '700' : 'normal';
+    if(el) el.style.boxShadow = k===type ? '0 0 0 2px currentColor' : 'none';
+  });
+  renderList();
+}
+
 function statFilter(type){
   currentStatFilter=type;
   ['totaal','nieuw','gepland','bezig','klaar'].forEach(k=>{
@@ -1079,6 +1092,9 @@ function renderList(){
     else if(fStatus==='klaar') filtered=filtered.filter(o=>o.status==='klaar');
   }
   if(fPrio!=='alle') filtered=filtered.filter(o=>(o.prioriteit||'normaal')===fPrio);
+
+  // Type filter via legenda
+  if(currentTypeFilter!=='alle') filtered=filtered.filter(o=>typeKleur(o.type)===currentTypeFilter);
 
   const fLocatie=document.getElementById('filterLocatie')?.value||'alle';
   if(fLocatie!=='alle') filtered=filtered.filter(o=>(o.locatie||'binnen')===fLocatie);
