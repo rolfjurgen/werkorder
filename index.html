@@ -1404,9 +1404,8 @@ async function slaDetailOp(id){
   Object.assign(orders[idx], detailWijzigingen);
   detailWijzigingen={};
   await dbxWrite();
-  const banner=document.getElementById('opslaanBanner');
-  if(banner) banner.style.display='none';
   showToast('✓ Wijzigingen opgeslagen');
+  goTab('overzicht');
 }
 
 async function handleDetailFoto(input, type, idx, id){
@@ -1438,7 +1437,7 @@ async function slaHandtekeningOp(id){
   orders[idx].sig=sig;
   await dbxWrite();
   showToast('✓ Handtekening opgeslagen');
-  showDetail(id);
+  goTab('overzicht');
 }
 
 function vervangHandtekening(id){
