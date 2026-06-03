@@ -1256,7 +1256,7 @@ async function showDetail(id){
       <div style="font-size:16px;font-weight:600">${hoofdNaam}</div></div>
     </div>
 
-    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between">
       <span style="font-size:13px;color:var(--accent)">⚠️ Er zijn onopgeslagen wijzigingen</span>
       <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
     </div>
@@ -1403,9 +1403,9 @@ async function slaDetailOp(id){
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
   Object.assign(orders[idx], detailWijzigingen);
   detailWijzigingen={};
-  await dbxWrite();
   showToast('✓ Wijzigingen opgeslagen');
   goTab('overzicht');
+  await dbxWrite();
 }
 
 async function handleDetailFoto(input, type, idx, id){
@@ -1435,9 +1435,9 @@ async function slaHandtekeningOp(id){
   if(!sig){showToast('Teken eerst een handtekening',true);return;}
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
   orders[idx].sig=sig;
-  await dbxWrite();
   showToast('✓ Handtekening opgeslagen');
   goTab('overzicht');
+  await dbxWrite();
 }
 
 function vervangHandtekening(id){
