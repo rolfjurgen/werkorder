@@ -1270,21 +1270,38 @@ async function showDetail(id){
     ).join('')}</div>
 
     <div class="slbl">Opdrachtgever</div>
-    ${o.og_type==='aannemer'?`
-      ${o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}</div></div>`:''}
-      ${o.og_contact?`<div class="drow"><div class="drow-l">Contactpersoon</div><div class="drow-v">${o.og_contact}</div></div>`:''}
-      ${o.og_tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
-      ${o.og_email?`<div class="drow"><div class="drow-l">Email</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
-      ${o.og_ref?`<div class="drow"><div class="drow-l">Referentie</div><div class="drow-v">${o.og_ref}</div></div>`:''}
-      ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Opdrachtbevestiging</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
-    `:`<div class="drow"><div class="drow-l">Type</div><div class="drow-v">Particulier</div></div>`}
+    <div class="drow">
+      <div class="drow-l">Type</div>
+      <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_type',this.value);this.closest('.panel').querySelectorAll('.og-aannemer').forEach(el=>el.style.display=this.value==='aannemer'?'block':'none')">
+        <option value="particulier" ${(o.og_type||'particulier')==='particulier'?'selected':''}>Particulier</option>
+        <option value="aannemer" ${o.og_type==='aannemer'?'selected':''}>Via aannemer / bedrijf</option>
+      </select>
+    </div>
+    <div class="og-aannemer" style="display:${o.og_type==='aannemer'?'block':'none'}">
+      <div class="drow"><div class="drow-l">Aannemer</div><input type="text" value="${o.og_naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_naam',this.value)"></div>
+      <div class="drow"><div class="drow-l">Contactpersoon</div><input type="text" value="${o.og_contact||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_contact',this.value)"></div>
+      <div class="drow"><div class="drow-l">Telefoon aannemer</div><input type="tel" value="${o.og_tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_tel',this.value)"></div>
+      <div class="drow"><div class="drow-l">Email aannemer</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_email',this.value)"></div>
+      <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_ref',this.value)"></div>
+    </div>
+    ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Bijlage</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
+    <div class="drow" style="background:var(--surface2)">
+      <div class="drow-l">📎 Opdrachtbevestiging uploaden</div>
+      <div id="det_bijlage_drop_${id}" style="border:2px dashed var(--border2);border-radius:var(--r);padding:10px;text-align:center;margin-top:6px;font-size:12px;color:var(--text3);cursor:pointer"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border2)'"
+        ondrop="handleDetBijlage(event,${id})"
+        onclick="document.getElementById('det_bijlage_${id}').click()">
+        📄 Tik of sleep PDF hiernaartoe
+      </div>
+      <input type="file" id="det_bijlage_${id}" accept=".pdf,application/pdf" style="display:none" onchange="uploadDetBijlage(this,${id})">
+    </div>
 
     <div class="slbl">Locatie & klant</div>
-    ${o.naam?`<div class="drow"><div class="drow-l">Naam</div><div class="drow-v">${o.naam}</div></div>`:''}
-    ${o.adres?`<div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres}</div></div>`:''}
-    ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.tel}" style="color:var(--blue)">${o.tel}</a></div></div>`:''}
-    ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
-
+    <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'naam',this.value)"></div>
+    <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'adres',this.value)"></div>
+    <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'tel',this.value)"></div>
+    <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'email',this.value)"></div>
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
@@ -1367,8 +1384,7 @@ async function showDetail(id){
         <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
       </label>
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
-      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Gegevens bewerken</button>
-      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})" style="grid-column:span 2">🗑️ Verwijderen</button>
+      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
     </div>
     ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
 
@@ -1429,6 +1445,37 @@ function vervangHandtekening(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
   o.sig=null;
   showDetail(id);
+}
+
+function handleDetBijlage(event, id){
+  event.preventDefault();
+  const file=event.dataTransfer.files[0]; if(!file)return;
+  const input=document.createElement('input');
+  input.files=event.dataTransfer.files;
+  uploadDetBijlage({files:event.dataTransfer.files},id);
+}
+
+async function uploadDetBijlage(input, id){
+  const file=input.files[0]; if(!file||!token)return;
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  setSyncStatus('bijlage uploaden...','busy');
+  if(!o.fotoMap) o.fotoMap=`/Fotos/${o.nr}`;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    const pad=`${o.fotoMap}/opdrachtbevestiging.pdf`;
+    const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:pad,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
+    });
+    if(r.ok){
+      o.bijlage=pad;
+      await dbxWrite();
+      showToast('✓ Bijlage opgeslagen');
+      showDetail(id);
+    } else { showToast('Upload mislukt',true); }
+  };
+  reader.readAsDataURL(file);
 }
 
 function handleBijlageDrop(event, inputId, dropId){
