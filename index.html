@@ -1306,6 +1306,14 @@ async function showDetail(id){
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     <div class="drow">
+      <div class="drow-l">Omschrijving</div>
+      <textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea>
+    </div>
+    <div class="drow" style="background:var(--surface2)">
+      <div class="drow-l">🔒 Intern (niet op werkbon)</div>
+      <textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea>
+    </div>
+    <div class="drow">
       <div class="drow-l">Datum afspraak</div>
       <input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'datum',this.value)">
     </div>
@@ -1313,13 +1321,13 @@ async function showDetail(id){
       <div class="drow-l">Uiterlijk klaar op</div>
       <input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'datum_deadline',this.value)">
     </div>
-    <div class="drow">
-      <div class="drow-l">Omschrijving</div>
-      <textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea>
-    </div>
-    <div class="drow" style="background:var(--surface2)">
-      <div class="drow-l">🔒 Intern (niet op werkbon)</div>
-      <textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea>
+
+    <div class="slbl">Agenda</div>
+    <div class="drow" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div>
+        <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
+      </div>
+      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
     </div>
 
     <div class="slbl">Tijdregistratie</div>
@@ -1340,14 +1348,6 @@ async function showDetail(id){
         <div><div class="drow-l">Aankomst zaak</div><input class="time-input" type="time" value="${o.tijd_terug_aankomst||''}" onchange="saveTijd(${id},'tijd_terug_aankomst',this.value)"></div>
       </div>
       ${berekenTijden(o)}
-    </div>
-
-    <div class="slbl">Agenda</div>
-    <div class="drow" style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div>
-        <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
-      </div>
-      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
     </div>
 
     <div class="slbl">Foto's voor <span style="font-size:10px;color:var(--text3)">(tik op lege slot om toe te voegen)</span></div>
@@ -1410,6 +1410,9 @@ async function slaDetailOp(id){
 
 async function handleDetailFoto(input, type, idx, id){
   const f=input.files[0]; if(!f)return;
+  // Toon direct uploading status in het slot
+  const slotId=type==='voor'?`detailFotoVoor${idx}`:`detailFotoNa${idx}`;
+  showToast('📷 Foto uploaden...');
   const r=new FileReader();
   r.onload=async e=>compressImg(e.target.result,async compressed=>{
     setSyncStatus("foto uploaden...",'busy');
@@ -1421,10 +1424,11 @@ async function handleDetailFoto(input, type, idx, id){
     if(pad){
       o.fotos[type][idx]=`dropbox:${o.fotoMap}/${type}_${idx+1}.jpg`;
       await dbxWrite();
-      showToast(`✓ Foto opgeslagen`);
+      showToast(`✅ Foto ${type==='voor'?'voor':'na'} ${idx+1} opgeslagen in Dropbox`);
       showDetail(id);
     } else {
-      showToast('Foto upload mislukt',true);
+      showToast('❌ Foto upload mislukt — probeer opnieuw',true);
+      setSyncStatus('upload mislukt','err');
     }
   });
   r.readAsDataURL(f);
