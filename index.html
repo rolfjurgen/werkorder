@@ -251,20 +251,21 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="tab" data-tab="print" onclick="goTab('print')">Printen</div>
 </div>
 
+<!-- LOGIN OVERLAY -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center">
+  <div class="login-icon">RJ</div>
+  <div class="login-title">RJ Oppervlakteherstel</div>
+  <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
+  <button class="btn-dbx" onclick="startAuth()">
+    <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+    Inloggen met Dropbox
+  </button>
+  <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
+</div>
+
 <!-- NIEUW -->
 <div class="panel" id="panel-nieuw">
-  <div id="loginScreen" class="login-screen">
-    <div class="login-icon">RJ</div>
-    <div class="login-title">RJ Oppervlakteherstel</div>
-    <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
-    <button class="btn-dbx" onclick="startAuth()">
-      <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
-      Inloggen met Dropbox
-    </button>
-    <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
-  </div>
-
-  <div id="newForm" style="display:none">
+  <div id="newForm">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
       <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
@@ -645,9 +646,9 @@ function handleCallback() {
 }
 function logout() {
   localStorage.removeItem('dbx_token'); token = null; orders = [];
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('newForm').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('newForm').style.display='none';
+  document.getElementById('logoutBtn').style.display='none';
   setSyncStatus('niet verbonden','busy');
 }
 
@@ -761,6 +762,8 @@ async function init() {
     goTab('overzicht');
     renderQueueBanner();
     setInterval(async()=>{ if(token){await dbxRead();renderList();} }, 45*60*1000);
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
   }
   initSigPad('sigCanvas');
 }
