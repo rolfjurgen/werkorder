@@ -101,8 +101,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-family: inherit; }
 .foto-input { display: none; }
 .foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
-.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); aspect-ratio: 4/3; background: var(--surface2); }
-.foto-detail-item img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
+.foto-detail-item img { width: 100%; display: block; cursor: pointer; }
 .foto-detail-label { font-size: 11px; color: var(--text3); padding: 4px 8px; background: var(--surface2); }
 
 /* BADGES */
@@ -679,24 +679,17 @@ async function dbxUploadFoto(path,dataUrl) {
 }
 async function dbxGetFotoUrl(pad){
   if(!pad) return null;
-  if(!pad.startsWith('dropbox:')) return pad;
+  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data
   if(!token) return null;
   const dbxPad=pad.replace('dropbox:','');
   try {
-    const r=await fetch('https://content.dropboxapi.com/2/files/download',{
-      method:'POST',
-      headers:{
-        'Authorization':'Bearer '+token,
-        'Dropbox-API-Arg':JSON.stringify({path:dbxPad})
-      }
+    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path:dbxPad})
     });
     if(!r.ok) return null;
-    const blob=await r.blob();
-    return new Promise(res=>{
-      const reader=new FileReader();
-      reader.onload=e=>res(e.target.result);
-      reader.readAsDataURL(blob);
-    });
+    const d=await r.json();
+    return d.link||null;
   } catch(e){return null;}
 }
 async function dbxShareLink(path) {
@@ -1190,14 +1183,8 @@ async function showDetail(id){
     }
   }
 
-  const fVHTML=fotoVoorUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
-    `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`
-  ).join('');
-  const fNHTML=fotoNaUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
-    `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`
-  ).join('');
+  const fVHTML=fotoVoorUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
+  const fNHTML=fotoNaUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
@@ -1257,10 +1244,8 @@ async function showDetail(id){
       </div>
       <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
     </div>
-    <div class="slbl">Foto's voor <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
-    <div class="foto-detail-grid">${fVHTML}</div>
-    <div class="slbl">Foto's na <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
-    <div class="foto-detail-grid">${fNHTML}</div>
+    ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
+    ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
     ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
     ${o.verzekering?`<div class="slbl">Verzekeringsgeval — Akte van Cessie</div>
       ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
@@ -1293,29 +1278,6 @@ async function openBijlage(pad){
   const url=await dbxGetFotoUrl(pad.startsWith('dropbox:')?pad:`dropbox:${pad}`);
   if(url) window.open(url,'_blank');
   else showToast('Bijlage niet beschikbaar',true);
-}
-
-async function handleDetailFoto(input, type, idx, id){
-  const f=input.files[0]; if(!f)return;
-  showToast('📷 Foto uploaden...');
-  const r=new FileReader();
-  r.onload=async e=>compressImg(e.target.result,async compressed=>{
-    setSyncStatus("foto uploaden...",'busy');
-    const o=orders.find(x=>x.id===id); if(!o)return;
-    if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
-    while(o.fotos[type].length<4) o.fotos[type].push(null);
-    if(!o.fotoMap) o.fotoMap=`/Fotos/${o.nr}`;
-    const pad=await dbxUploadFoto(`${o.fotoMap}/${type}_${idx+1}.jpg`,compressed);
-    if(pad){
-      o.fotos[type][idx]=`dropbox:${o.fotoMap}/${type}_${idx+1}.jpg`;
-      await dbxWrite();
-      showToast(`✅ Foto ${type==='voor'?'voor':'na'} ${idx+1} opgeslagen`);
-      showDetail(id);
-    } else {
-      showToast('❌ Foto upload mislukt — probeer opnieuw',true);
-    }
-  });
-  r.readAsDataURL(f);
 }
 
 async function verwijderFoto(id, type, idx){
