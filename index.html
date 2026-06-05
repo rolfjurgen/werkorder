@@ -267,10 +267,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
@@ -476,10 +476,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="e_overig"></div>
@@ -679,17 +679,24 @@ async function dbxUploadFoto(path,dataUrl) {
 }
 async function dbxGetFotoUrl(pad){
   if(!pad) return null;
-  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data
+  if(!pad.startsWith('dropbox:')) return pad;
   if(!token) return null;
   const dbxPad=pad.replace('dropbox:','');
   try {
-    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{
-      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({path:dbxPad})
+    const r=await fetch('https://content.dropboxapi.com/2/files/download',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path:dbxPad})
+      }
     });
     if(!r.ok) return null;
-    const d=await r.json();
-    return d.link||null;
+    const blob=await r.blob();
+    return new Promise(res=>{
+      const reader=new FileReader();
+      reader.onload=e=>res(e.target.result);
+      reader.readAsDataURL(blob);
+    });
   } catch(e){return null;}
 }
 async function dbxShareLink(path) {
