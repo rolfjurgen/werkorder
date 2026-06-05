@@ -703,17 +703,21 @@ async function dbxUploadFoto(path,dataUrl) {
 }
 async function dbxGetFotoUrl(pad){
   if(!pad) return null;
-  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data
+  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data — direct gebruiken
   if(!token) return null;
   const dbxPad=pad.replace('dropbox:','');
   try {
-    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{
-      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({path:dbxPad})
+    // Download foto als blob en converteer naar object URL — werkt altijd
+    const r=await fetch('https://content.dropboxapi.com/2/files/download',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path:dbxPad})
+      }
     });
     if(!r.ok) return null;
-    const d=await r.json();
-    return d.link||null;
+    const blob=await r.blob();
+    return URL.createObjectURL(blob);
   } catch(e){return null;}
 }
 async function dbxShareLink(path) {
@@ -1849,7 +1853,7 @@ async function savePDF(id){
 async function openLightbox(src){
   document.getElementById('lightboxImg').src='';
   document.getElementById('lightbox').classList.add('open');
-  // Haal verse link op als het een dropbox pad is
+  // Als het een dropbox pad is, haal verse download op
   const url = src.startsWith('dropbox:') ? await dbxGetFotoUrl(src) : src;
   if(url) document.getElementById('lightboxImg').src=url;
   else { closeLightbox(); showToast('Foto niet beschikbaar',true); }
