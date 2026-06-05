@@ -1236,8 +1236,8 @@ async function showDetail(id){
     <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}
     <button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button>
     </div></div>`:
-    `<div class="foto-slot has-foto" style="aspect-ratio:4/3;background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer" onclick="document.getElementById('detailFotoVoor${i}').click()">
-    <span style="font-size:20px">📷</span><span style="font-size:10px;color:var(--text3);margin-top:4px">Voor ${i+1} toevoegen</span>
+    `<div class="foto-slot" onclick="document.getElementById('detailFotoVoor${i}').click()">
+    <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span>
     <input type="file" id="detailFotoVoor${i}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})">
     </div>`
   ).join('');
@@ -1247,8 +1247,8 @@ async function showDetail(id){
     <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}
     <button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button>
     </div></div>`:
-    `<div class="foto-slot" style="aspect-ratio:4/3;background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer" onclick="document.getElementById('detailFotoNa${i}').click()">
-    <span style="font-size:20px">📷</span><span style="font-size:10px;color:var(--text3);margin-top:4px">Na ${i+1} toevoegen</span>
+    `<div class="foto-slot" onclick="document.getElementById('detailFotoNa${i}').click()">
+    <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span>
     <input type="file" id="detailFotoNa${i}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})">
     </div>`
   ).join('');
@@ -1842,7 +1842,14 @@ async function savePDF(id){
 }
 
 // ── LIGHTBOX ─────────────────────────────────────────────────
-function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+async function openLightbox(src){
+  document.getElementById('lightboxImg').src='';
+  document.getElementById('lightbox').classList.add('open');
+  // Haal verse link op als het een dropbox pad is
+  const url = src.startsWith('dropbox:') ? await dbxGetFotoUrl(src) : src;
+  if(url) document.getElementById('lightboxImg').src=url;
+  else { closeLightbox(); showToast('Foto niet beschikbaar',true); }
+}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
 // ── PRINT ────────────────────────────────────────────────────
