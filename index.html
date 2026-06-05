@@ -1231,8 +1231,10 @@ async function showDetail(id){
     }
   }
 
-  const fVHTML=fotoVoorUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}">
+  const fVHTML=fotoVoorUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.voor[i]?o.fotos.voor[i]:'';
+    return url?
+    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${pad}')" alt="Voor ${i+1}">
     <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}
     <button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button>
     </div></div>`:
@@ -1240,10 +1242,12 @@ async function showDetail(id){
     <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span>
     <input type="file" id="detailFotoVoor${i}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})">
     </div>`
-  ).join('');
+  }).join('');
 
-  const fNHTML=fotoNaUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}">
+  const fNHTML=fotoNaUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.na[i]?o.fotos.na[i]:'';
+    return url?
+    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${pad}')" alt="Na ${i+1}">
     <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}
     <button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button>
     </div></div>`:
@@ -1251,7 +1255,7 @@ async function showDetail(id){
     <span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span>
     <input type="file" id="detailFotoNa${i}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})">
     </div>`
-  ).join('');
+  }).join('');
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
