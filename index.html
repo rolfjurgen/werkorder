@@ -101,8 +101,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-family: inherit; }
 .foto-input { display: none; }
 .foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
-.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
-.foto-detail-item img { width: 100%; display: block; cursor: pointer; }
+.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); aspect-ratio: 4/3; background: var(--surface2); }
+.foto-detail-item img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
 .foto-detail-label { font-size: 11px; color: var(--text3); padding: 4px 8px; background: var(--surface2); }
 
 /* BADGES */
@@ -245,25 +245,26 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 </div>
 
 <div class="tabs" id="tabBar">
-  <div class="tab active" data-tab="nieuw" onclick="goTab('nieuw')">+ Nieuw</div>
-  <div class="tab" data-tab="overzicht" onclick="goTab('overzicht')">Opdrachten</div>
+  <div class="tab active" data-tab="overzicht" onclick="goTab('overzicht')">Opdrachten</div>
+  <div class="tab" data-tab="nieuw" onclick="goTab('nieuw')">+ Nieuw</div>
   <div class="tab" data-tab="detail" id="detailTab" style="display:none" onclick="goTab('detail')">Detail</div>
   <div class="tab" data-tab="print" onclick="goTab('print')">Printen</div>
 </div>
 
-<!-- NIEUW -->
-<div class="panel active" id="panel-nieuw">
-  <div id="loginScreen" class="login-screen">
-    <div class="login-icon">RJ</div>
-    <div class="login-title">RJ Oppervlakteherstel</div>
-    <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
-    <button class="btn-dbx" onclick="startAuth()">
-      <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
-      Inloggen met Dropbox
-    </button>
-    <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
-  </div>
+<!-- LOGIN OVERLAY -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center">
+  <div class="login-icon">RJ</div>
+  <div class="login-title">RJ Oppervlakteherstel</div>
+  <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
+  <button class="btn-dbx" onclick="startAuth()">
+    <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+    Inloggen met Dropbox
+  </button>
+  <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
+</div>
 
+<!-- NIEUW -->
+<div class="panel" id="panel-nieuw">
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
@@ -374,7 +375,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 </div>
 
 <!-- OVERZICHT -->
-<div class="panel" id="panel-overzicht">
+<div class="panel active" id="panel-overzicht">
   <div class="queue-banner hidden" id="queueBanner">
     <span>📤 Opdrachten wachten op synchronisatie</span>
     <button class="btn-queue" onclick="syncQueue()">Nu synchroniseren</button>
@@ -627,9 +628,9 @@ function handleCallback() {
 }
 function logout() {
   localStorage.removeItem('dbx_token'); token = null; orders = [];
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('newForm').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('newForm').style.display='none';
+  document.getElementById('logoutBtn').style.display='none';
   setSyncStatus('niet verbonden','busy');
 }
 
@@ -655,6 +656,15 @@ async function dbxWrite() {
   localStorage.setItem(BACKUP_KEY,body);
   if (!token) { addToQueue(); return; }
   try {
+    const vandaag=new Date().toISOString().slice(0,10);
+    const lastBackup=localStorage.getItem('rj_last_backup');
+    if(lastBackup!==vandaag){
+      try {
+        const rb=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}});
+        if(rb.ok){const data=await rb.text();await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Backup/werkorders_${vandaag}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:data});}
+      } catch(e){}
+      localStorage.setItem('rj_last_backup',vandaag);
+    }
     const r = await fetch('https://content.dropboxapi.com/2/files/upload',{
       method:'POST', headers:{
         'Authorization':'Bearer '+token,
@@ -735,8 +745,11 @@ async function init() {
     document.getElementById('newForm').style.display='block';
     document.getElementById('logoutBtn').style.display='inline-block';
     await dbxRead();
-    renderList(); renderPrintSelect(); renderQueueBanner();
+    goTab('overzicht');
+    renderQueueBanner();
     setInterval(async()=>{ if(token){await dbxRead();renderList();} }, 45*60*1000);
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
   }
   initSigPad('sigCanvas');
 }
@@ -1165,15 +1178,91 @@ function renderList(){
 function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
 
 // ── DETAIL ───────────────────────────────────────────────────
+let detailWijzigingen={};
+let detailId=null;
+
+function markeerWijziging(id,veld,waarde){
+  detailWijzigingen[veld]=waarde;
+  const banner=document.getElementById('opslaanBanner');
+  if(banner){banner.style.display='flex';}
+}
+
+async function slaDetailOp(id){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  Object.assign(orders[idx],detailWijzigingen);
+  detailWijzigingen={};
+  showToast('✓ Wijzigingen opgeslagen');
+  goTab('overzicht');
+  await dbxWrite();
+}
+
+async function handleDetailFoto(input,type,idx,id){
+  const f=input.files[0]; if(!f)return;
+  showToast('📷 Foto uploaden...');
+  const r=new FileReader();
+  r.onload=async e=>compressImg(e.target.result,async compressed=>{
+    setSyncStatus('foto uploaden...','busy');
+    const o=orders.find(x=>x.id===id); if(!o)return;
+    if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+    while(o.fotos[type].length<4) o.fotos[type].push(null);
+    if(!o.fotoMap) o.fotoMap=`/Fotos/${o.nr}`;
+    const pad=await dbxUploadFoto(`${o.fotoMap}/${type}_${idx+1}.jpg`,compressed);
+    if(pad){
+      o.fotos[type][idx]=`dropbox:${o.fotoMap}/${type}_${idx+1}.jpg`;
+      await dbxWrite();
+      showToast(`✅ Foto ${type==='voor'?'voor':'na'} ${idx+1} opgeslagen`);
+      showDetail(id);
+    } else { showToast('❌ Foto upload mislukt',true); }
+  });
+  r.readAsDataURL(f);
+}
+
+async function slaHandtekeningOp(id){
+  const sig=getSig('detailSigCanvas');
+  if(!sig){showToast('Teken eerst een handtekening',true);return;}
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].sig=sig;
+  showToast('✓ Handtekening opgeslagen');
+  goTab('overzicht');
+  await dbxWrite();
+}
+
+function vervangHandtekening(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  o.sig=null; showDetail(id);
+}
+
+async function archiveerOrder(id){
+  if(!confirm('Opdracht archiveren? Hij verdwijnt uit het overzicht.')) return;
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  if(token){
+    try {
+      const archief={...o,gearchiveerd:new Date().toISOString()};
+      await fetch('https://content.dropboxapi.com/2/files/upload',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Archief/${o.nr}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},
+        body:JSON.stringify(archief,null,2)
+      });
+    } catch(e){}
+  }
+  const del=JSON.parse(localStorage.getItem('rj_deleted_v3')||'[]');
+  del.push(id); localStorage.setItem('rj_deleted_v3',JSON.stringify(del));
+  orders=orders.filter(x=>x.id!==id);
+  await dbxWrite();
+  goTab('overzicht');
+  showToast(`✓ ${o.nr} gearchiveerd`);
+}
+
+async function openBijlage(pad){
+  const url=await dbxGetFotoUrl(pad.startsWith('dropbox:')?pad:`dropbox:${pad}`);
+  if(url) window.open(url,'_blank');
+  else showToast('Bijlage niet beschikbaar',true);
+}
+
 async function showDetail(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
+  detailId=id; detailWijzigingen={};
   const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
 
-  const sopts=['nieuw','bezig','klaar'].map(s=>
-    `<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`
-  ).join('');
-
-  // Foto URLs ophalen (Dropbox tijdelijke links of bestaande base64)
   const fotoVoorUrls=[null,null,null,null];
   const fotoNaUrls=[null,null,null,null];
   if(o.fotos){
@@ -1183,41 +1272,60 @@ async function showDetail(id){
     }
   }
 
-  const fVHTML=fotoVoorUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
-  const fNHTML=fotoNaUrls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:'').join('');
+  const fVHTML=fotoVoorUrls.map((url,i)=>url?
+    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
+    `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`
+  ).join('');
+  const fNHTML=fotoNaUrls.map((url,i)=>url?
+    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
+    `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`
+  ).join('');
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
       <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
       <div><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
-      <div style="font-size:16px;font-weight:600">${hoofdNaam}</div></div>
+      <div style="font-size:16px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+    </div>
+    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between">
+      <span style="font-size:13px;color:var(--accent)">⚠️ Er zijn onopgeslagen wijzigingen</span>
+      <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
     </div>
     <div class="slbl" style="margin-top:0">Status</div>
-    <div class="status-row">${sopts}</div>
-    <div class="status-row">
-      ${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}
-    </div>
+    <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
+    <div class="status-row">${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}</div>
     <div class="slbl">Opdrachtgever</div>
-    ${o.og_type==='aannemer'?`
-      ${o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}</div></div>`:''}
-      ${o.og_contact?`<div class="drow"><div class="drow-l">Contactpersoon</div><div class="drow-v">${o.og_contact}</div></div>`:''}
-      ${o.og_tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.og_tel}" style="color:var(--blue)">${o.og_tel}</a></div></div>`:''}
-      ${o.og_email?`<div class="drow"><div class="drow-l">Email</div><div class="drow-v"><a href="mailto:${o.og_email}" style="color:var(--blue)">${o.og_email}</a></div></div>`:''}
-      ${o.og_ref?`<div class="drow"><div class="drow-l">Referentie</div><div class="drow-v">${o.og_ref}</div></div>`:''}
-      ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Opdrachtbevestiging</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
-    `:`<div class="drow"><div class="drow-l">Type</div><div class="drow-v">Particulier</div></div>`}
+    <div class="drow"><div class="drow-l">Type</div>
+      <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value)">
+        <option value="particulier" ${(o.og_type||'particulier')==='particulier'?'selected':''}>Particulier</option>
+        <option value="aannemer" ${o.og_type==='aannemer'?'selected':''}>Via aannemer / bedrijf</option>
+      </select>
+    </div>
+    <div style="display:${o.og_type==='aannemer'?'block':'none'}" id="ogAannemerBlok_${id}">
+      <div class="drow"><div class="drow-l">Aannemer</div><input type="text" value="${o.og_naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_naam',this.value)"></div>
+      <div class="drow"><div class="drow-l">Contactpersoon</div><input type="text" value="${o.og_contact||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_contact',this.value)"></div>
+      <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.og_tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_tel',this.value)"></div>
+      <div class="drow"><div class="drow-l">Email</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_email',this.value)"></div>
+      <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_ref',this.value)"></div>
+    </div>
+    ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Bijlage</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
     <div class="slbl">Locatie & klant</div>
-    ${o.naam?`<div class="drow"><div class="drow-l">Naam</div><div class="drow-v">${o.naam}</div></div>`:''}
-    ${o.adres?`<div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres}</div></div>`:''}
-    ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v"><a href="tel:${o.tel}" style="color:var(--blue)">${o.tel}</a></div></div>`:''}
-    ${o.email?`<div class="drow"><div class="drow-l">E-mail</div><div class="drow-v"><a href="mailto:${o.email}" style="color:var(--blue)">${o.email}</a></div></div>`:''}
+    <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'naam',this.value)"></div>
+    <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'adres',this.value)"></div>
+    <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'tel',this.value)"></div>
+    <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'email',this.value)"></div>
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
-    ${o.locatie?`<div class="drow"><div class="drow-l">Locatie werk</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
-    ${o.datum?`<div class="drow"><div class="drow-l">Datum afspraak</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
-
-    ${o.datum_deadline?`<div class="drow"><div class="drow-l">Uiterlijk klaar</div><div class="drow-v" style="color:var(--red);font-weight:500">⚠️ ${fmtDate(o.datum_deadline)}</div></div>`:''}
-    ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
+    ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
+    <div class="drow"><div class="drow-l">Omschrijving</div><textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea></div>
+    <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
+    <div class="drow"><div class="drow-l">Datum afspraak</div><input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum',this.value)"></div>
+    <div class="drow"><div class="drow-l">Uiterlijk klaar op</div><input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum_deadline',this.value)"></div>
+    <div class="slbl">Agenda</div>
+    <div class="drow" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div><input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)"></div>
+      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
+    </div>
     <div class="slbl">Tijdregistratie</div>
     <div class="drow">
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🚗 Reistijd heen</div>
@@ -1237,16 +1345,18 @@ async function showDetail(id){
       </div>
       ${berekenTijden(o)}
     </div>
-    <div class="slbl">Agenda</div>
-    <div class="drow" style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div>
-        <input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)">
-      </div>
-      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
+    <div class="slbl">Foto's voor <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
+    <div class="foto-detail-grid">${fVHTML}</div>
+    <div class="slbl">Foto's na <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
+    <div class="foto-detail-grid">${fNHTML}</div>
+    <div class="slbl">Handtekening klant</div>
+    ${o.sig?`<div style="margin-bottom:7px"><img src="${o.sig}" class="sig-preview" alt="Handtekening"></div>
+    <button onclick="vervangHandtekening(${id})" style="width:100%;padding:9px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:7px">✍️ Handtekening vervangen</button>`
+    :`<div class="sig-wrap" id="detailSigWrap">
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
+      <canvas id="detailSigCanvas" class="sigpad"></canvas>
     </div>
-    ${fVHTML?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fVHTML}</div>`:''}
-    ${fNHTML?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fNHTML}</div>`:''}
-    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:`<div class="slbl">Handtekening</div><div class="drow" style="color:var(--text3);font-size:13px">Geen handtekening vastgelegd</div>`}
+    <button onclick="slaHandtekeningOp(${id})" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:7px">✅ Handtekening opslaan</button>`}
     ${o.verzekering?`<div class="slbl">Verzekeringsgeval — Akte van Cessie</div>
       ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
       ${o.volmacht?`<div class="drow"><div class="drow-l">Volmacht</div><div class="drow-v">${o.volmacht}</div></div>`:''}
@@ -1256,28 +1366,20 @@ async function showDetail(id){
       ${o.btw?`<div class="drow"><div class="drow-l">BTW</div><div class="drow-v">€ ${parseFloat(o.btw).toFixed(2)}</div></div>`:''}
       ${(o.schadebedrag&&o.btw)?`<div class="drow"><div class="drow-l"><strong>Totaal incl. BTW</strong></div><div class="drow-v"><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></div></div>`:''}
       ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
-      ${o.btwterug?`<div class="drow"><div class="drow-l">Af: BTW terug</div><div class="drow-v">€ ${parseFloat(o.btwterug).toFixed(2)}</div></div>`:''}
-      <div class="drow" style="background:var(--accent-bg);border-color:#e8d090"><div class="drow-l">Status cessie</div><div class="drow-v" style="font-size:12px">✓ Handtekening geldt als akkoord akte van cessie</div></div>
     `:''}
-    ${o.intern?`<div class="slbl">Intern (niet op werkbon)</div><div class="drow" style="background:var(--surface2)"><div class="drow-v" style="font-size:13px;white-space:pre-wrap">${o.intern}</div></div>`:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},fotoOptie_${id})" id="pdfBtn_${id}">📄 PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 PDF</button>
       <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
         <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
       </label>
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
-      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
-      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})" style="grid-column:span 2">🗑️ Verwijderen</button>
-    </div>`;
+      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
+    </div>
+    ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
 
   goDetail();
-}
-
-async function openBijlage(pad){
-  const url=await dbxGetFotoUrl(pad.startsWith('dropbox:')?pad:`dropbox:${pad}`);
-  if(url) window.open(url,'_blank');
-  else showToast('Bijlage niet beschikbaar',true);
+  if(!o.sig) setTimeout(()=>initSigPad('detailSigCanvas'),100);
 }
 
 async function verwijderFoto(id, type, idx){
