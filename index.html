@@ -268,10 +268,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div id="newForm">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
@@ -483,10 +483,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade kozijn/deur')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukenblad herstellen')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten herstellen')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overig')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
+      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
+      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
+      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="e_overig"></div>
@@ -1276,43 +1276,43 @@ async function showDetail(id){
     <div class="slbl">Opdrachtgever</div>
     <div class="drow">
       <div class="drow-l">Type</div>
-      <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_type',this.value);this.closest('.panel').querySelectorAll('.og-aannemer').forEach(el=>el.style.display=this.value==='aannemer'?'block':'none')">
+      <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value);this.closest('.panel').querySelectorAll('.og-aannemer').forEach(el=>el.style.display=this.value==='aannemer'?'block':'none')">
         <option value="particulier" ${(o.og_type||'particulier')==='particulier'?'selected':''}>Particulier</option>
         <option value="aannemer" ${o.og_type==='aannemer'?'selected':''}>Via aannemer / bedrijf</option>
       </select>
     </div>
     <div class="og-aannemer" style="display:${o.og_type==='aannemer'?'block':'none'}">
-      <div class="drow"><div class="drow-l">Aannemer</div><input type="text" value="${o.og_naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_naam',this.value)"></div>
-      <div class="drow"><div class="drow-l">Contactpersoon</div><input type="text" value="${o.og_contact||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_contact',this.value)"></div>
-      <div class="drow"><div class="drow-l">Telefoon aannemer</div><input type="tel" value="${o.og_tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_tel',this.value)"></div>
-      <div class="drow"><div class="drow-l">Email aannemer</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_email',this.value)"></div>
-      <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'og_ref',this.value)"></div>
+      <div class="drow"><div class="drow-l">Aannemer</div><input type="text" value="${o.og_naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_naam',this.value)"></div>
+      <div class="drow"><div class="drow-l">Contactpersoon</div><input type="text" value="${o.og_contact||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_contact',this.value)"></div>
+      <div class="drow"><div class="drow-l">Telefoon aannemer</div><input type="tel" value="${o.og_tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_tel',this.value)"></div>
+      <div class="drow"><div class="drow-l">Email aannemer</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_email',this.value)"></div>
+      <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_ref',this.value)"></div>
     </div>
     ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Bijlage</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
 
     <div class="slbl">Locatie & klant</div>
-    <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'naam',this.value)"></div>
-    <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'adres',this.value)"></div>
-    <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'tel',this.value)"></div>
-    <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'email',this.value)"></div>
+    <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'naam',this.value)"></div>
+    <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'adres',this.value)"></div>
+    <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'tel',this.value)"></div>
+    <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'email',this.value)"></div>
     <div class="slbl">Opdracht</div>
     <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     <div class="drow">
       <div class="drow-l">Omschrijving</div>
-      <textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea>
+      <textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea>
     </div>
     <div class="drow" style="background:var(--surface2)">
       <div class="drow-l">🔒 Intern (niet op werkbon)</div>
-      <textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" onchange="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea>
+      <textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea>
     </div>
     <div class="drow">
       <div class="drow-l">Datum afspraak</div>
-      <input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'datum',this.value)">
+      <input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum',this.value)">
     </div>
     <div class="drow">
       <div class="drow-l">Uiterlijk klaar op</div>
-      <input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" onchange="markeerWijziging(${id},'datum_deadline',this.value)">
+      <input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum_deadline',this.value)">
     </div>
 
     <div class="slbl">Agenda</div>
@@ -1573,13 +1573,13 @@ async function openEdit(id){
   else bijlageHuidig.innerHTML='';
 
   editTypeVal=o.type||'';
-  const isOverig=editTypeVal.startsWith('Overig');
+  const isOverig=editTypeVal.startsWith('Overige');
   document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>{
     const bType=b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
-    b.classList.toggle('sel',isOverig?bType==='Overig':bType===editTypeVal);
+    b.classList.toggle('sel',isOverig?bType==='Overige werkzaamheden':bType===editTypeVal);
   });
   document.getElementById('e_overig_wrap').style.display=isOverig?'block':'none';
-  if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overig: ','').replace('Overig','');
+  if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overige werkzaamheden: ','').replace('Overige werkzaamheden','');
 
   editLocVal=o.locatie||'binnen';
   document.getElementById('elocBinnen').classList.toggle('sel',editLocVal==='binnen');
@@ -1664,7 +1664,7 @@ async function saveEdit(){
   }
   orders[idx].prioriteit=editPrioVal;
   orders[idx].locatie=editLocVal;
-  if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
+  if(editTypeVal) orders[idx].type=(editTypeVal==='Overige werkzaamheden'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
 
   // Nieuwe fotos
   orders[idx].intern=document.getElementById('e_intern').value.trim();
@@ -1735,7 +1735,7 @@ function addToAgenda(id){
   const startStr=`${d}T${String(uur).padStart(2,'0')}${minStr}00`;
   const eindStr=`${d}T${String(uur+1).padStart(2,'0')}${minStr}00`;
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
-  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const type=o.type.replace('Overige werkzaamheden: ','').replace('Overige werkzaamheden','');
   const titel=encodeURIComponent(`${hoofd} — ${type}`);
   const loc=encodeURIComponent(o.adres||'');
   const det=encodeURIComponent(`Werkorder: ${o.nr}\nKlant: ${o.naam||''}\n${o.adres?'Adres: '+o.adres+'\n':''}${o.omschr?'Omschrijving: '+o.omschr:''}`);
@@ -1753,7 +1753,7 @@ async function mailOrder(id){
   // Stap 2 - Outlook openen met onderwerp en korte tekst
   const emailTo=o.og_type==='aannemer'?(o.og_email||''):(o.email||'');
   const emailCC=o.og_type==='aannemer'?(o.email||''):'';
-  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const type=o.type.replace('Overige werkzaamheden: ','').replace('Overige werkzaamheden','');
   const onderwerp=`Herstelopdracht — ${type} — ${o.nr}`;
   const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
   const body=`${aanhef},\n\nIn de bijlage vindt u de werkbon voor de uitgevoerde werkzaamheden.\n\nMet vriendelijke groet,\n\nRolf Jurgen\nRolf Jurgen Schadeservice & Laktechniek\nT: +31(0)45-5350200\nmail@rolfjurgen.nl`;
