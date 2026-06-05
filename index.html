@@ -703,21 +703,32 @@ async function dbxUploadFoto(path,dataUrl) {
 }
 async function dbxGetFotoUrl(pad){
   if(!pad) return null;
-  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data — direct gebruiken
+  if(!pad.startsWith('dropbox:')) return pad;
   if(!token) return null;
   const dbxPad=pad.replace('dropbox:','');
   try {
-    // Download foto als blob en converteer naar object URL — werkt altijd
-    const r=await fetch('https://content.dropboxapi.com/2/files/download',{
+    // Maak een publieke sharing link en vervang ?dl=0 door ?raw=1 voor directe weergave
+    const r=await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',{
       method:'POST',
-      headers:{
-        'Authorization':'Bearer '+token,
-        'Dropbox-API-Arg':JSON.stringify({path:dbxPad})
-      }
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path:dbxPad,settings:{requested_visibility:{'.tag':'public'}}})
     });
-    if(!r.ok) return null;
-    const blob=await r.blob();
-    return URL.createObjectURL(blob);
+    let url=null;
+    if(r.status===409){
+      const r2=await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body:JSON.stringify({path:dbxPad})
+      });
+      const d2=await r2.json();
+      url=d2.links?.[0]?.url||null;
+    } else if(r.ok){
+      const d=await r.json();
+      url=d.url||null;
+    }
+    // Vervang ?dl=0 door ?raw=1 zodat de afbeelding direct laadt
+    if(url) url=url.replace('?dl=0','?raw=1').replace('www.dropbox.com','dl.dropboxusercontent.com');
+    return url;
   } catch(e){return null;}
 }
 async function dbxShareLink(path) {
