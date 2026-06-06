@@ -268,10 +268,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div id="newForm" style="display:none">
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
+      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
+      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
@@ -477,10 +477,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
-      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade<br>kozijn / deur</button>
-      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukenblad<br>herstellen</button>
-      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten<br>herstellen</button>
-      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overig</button>
+      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
+      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
+      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="e_overig"></div>
@@ -929,7 +929,7 @@ async function saveOrder(){
   if(!selTypeVal){showToast('Kies een type werkzaamheden',true);return;}
 
   const overig=document.getElementById('f_overig').value.trim();
-  const typeLabel=selTypeVal==='Overig'&&overig?`Overig: ${overig}`:selTypeVal;
+  const typeLabel=selTypeVal==='Overige werkzaamheden'&&overig?`Overige werkzaamheden: ${overig}`:selTypeVal;
   const nr='RJ-'+String(orders.length+1).padStart(4,'0');
   const mapPad=`/Fotos/${nr}`;
 
