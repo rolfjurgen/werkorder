@@ -266,6 +266,32 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 <!-- NIEUW -->
 <div class="panel" id="panel-nieuw">
   <div id="newForm" style="display:none">
+
+    <div class="slbl" style="margin-top:0">Opdrachtgever</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button class="tbtn" id="ogParticulier" onclick="selOGType('particulier')" style="padding:12px 8px"><span class="ti">👤</span>Particulier</button>
+      <button class="tbtn" id="ogBedrijf" onclick="selOGType('bedrijf')" style="padding:12px 8px"><span class="ti">🏢</span>Bedrijf</button>
+    </div>
+
+    <div id="f_og_extra" style="display:none">
+      <input type="hidden" id="f_og_type" value="particulier">
+      <div class="field"><label>Naam bedrijf</label><input type="text" id="f_og_naam" autocomplete="off"></div>
+      <div class="field"><label>Contactpersoon</label><input type="text" id="f_og_contact" autocomplete="off"></div>
+      <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
+      <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
+      <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
+      <div class="field" style="background:var(--surface2)">
+        <label>📎 Opdrachtbevestiging (PDF)</label>
+        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
+        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
+    </div>
+
+    <div class="field"><label>Naam bewoner</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
+    <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
+    <div class="field"><label>Telefoon</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
+
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
       <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
@@ -277,41 +303,15 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
     </div>
 
-    <div class="slbl">Prioriteit</div>
-    <div class="prio-grid">
-      <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
-      <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
-    </div>
-
-    <div class="slbl">Locatie werk</div>
-    <div class="loc-grid">
+    <div class="slbl">Locatie & prioriteit</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
       <button class="tbtn" id="locBinnen" onclick="selLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
       <button class="tbtn" id="locBuiten" onclick="selLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
     </div>
-
-    <div class="slbl">Opdrachtgever</div>
-    <div class="field"><label>Type</label>
-      <select id="f_og_type" onchange="toggleOG()">
-        <option value="particulier">Particulier (opdrachtgever = bewoner)</option>
-        <option value="aannemer">Via aannemer / bedrijf</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
     </div>
-    <div id="f_og_extra" style="display:none">
-      <div class="field"><label>Naam aannemer / bedrijf</label><input type="text" id="f_og_naam" autocomplete="off"></div>
-      <div class="field"><label>Contactpersoon</label><input type="text" id="f_og_contact" autocomplete="off"></div>
-      <div class="field"><label>Telefoon aannemer</label><input type="tel" id="f_og_tel"></div>
-      <div class="field"><label>Email aannemer</label><input type="email" id="f_og_email"></div>
-      <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
-      <div class="field" style="background:var(--surface2)">
-        <label>📎 Opdrachtbevestiging (PDF)</label>
-        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
-        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
-      </div>
-    </div>
-    <div class="field"><label>Naam bewoner (optioneel)</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
-    <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
-    <div class="field"><label>Telefoon bewoner</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
-    <div class="field"><label>E-mailadres bewoner</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Opdracht</div>
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
@@ -323,8 +323,19 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       </div>
     </div>
     <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="f_datum_deadline"></div>
-    <div class="field"><label>Omschrijving</label><textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..."></textarea></div>
-    <div class="field" style="background:var(--surface2)"><label style="color:var(--text3)">🔒 Intern — niet zichtbaar op werkbon</label><textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:80px"></textarea></div>
+    <div class="field">
+      <label>Omschrijving</label>
+      <div style="position:relative">
+        <textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..." style="padding-right:44px"></textarea>
+        <button type="button" onclick="startSpeech('f_omschr')" style="position:absolute;right:8px;bottom:8px;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:5px 8px;font-size:16px;cursor:pointer;line-height:1">🎤</button>
+      </div>
+    </div>
+    <div class="field" style="background:var(--surface2)"><label style="color:var(--text3)">🔒 Intern — niet zichtbaar op werkbon</label>
+      <div style="position:relative">
+        <textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:80px;padding-right:44px"></textarea>
+        <button type="button" onclick="startSpeech('f_intern')" style="position:absolute;right:8px;bottom:8px;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:5px 8px;font-size:16px;cursor:pointer;line-height:1">🎤</button>
+      </div>
+    </div>
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
@@ -333,10 +344,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="foto-slot" id="slotVoor2" onclick="document.getElementById('fotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
       <div class="foto-slot" id="slotVoor3" onclick="document.getElementById('fotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
     </div>
-    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
-    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
-    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" onchange="handleFoto(this,'slotVoor2','voor',2)">
-    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" onchange="handleFoto(this,'slotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
@@ -345,10 +356,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="foto-slot" id="slotNa2" onclick="document.getElementById('fotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
       <div class="foto-slot" id="slotNa3" onclick="document.getElementById('fotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
     </div>
-    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
-    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
-    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
-    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
+    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa3','na',3)">
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -386,6 +397,13 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="queue-banner hidden" id="queueBanner">
     <span>📤 Opdrachten wachten op synchronisatie</span>
     <button class="btn-queue" onclick="syncQueue()">Nu synchroniseren</button>
+  </div>
+  <div id="bulkBalk" style="display:none;background:var(--red-bg);border:1px solid #e8c0bc;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between">
+    <span id="bulkTeller" style="font-size:13px;color:var(--red);font-weight:500">0 geselecteerd</span>
+    <div style="display:flex;gap:8px">
+      <button onclick="bulkDeselecteer()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit">Annuleren</button>
+      <button onclick="bulkVerwijder()" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🗑️ Verwijderen</button>
+    </div>
   </div>
   <div class="stats">
     <div class="stat" id="stat-totaal" onclick="statFilter('alle')">
@@ -907,6 +925,63 @@ function selPrio(btn,prio){
 function toggleOG(){
   document.getElementById('f_og_extra').style.display=document.getElementById('f_og_type').value==='aannemer'?'block':'none';
 }
+
+// ── OPDRACHTGEVER TYPE SELECTIE ───────────────────────────────
+function selOGType(type){
+  document.getElementById('ogParticulier').classList.toggle('sel', type==='particulier');
+  document.getElementById('ogBedrijf').classList.toggle('sel', type==='bedrijf');
+  document.getElementById('f_og_extra').style.display = type==='bedrijf'?'block':'none';
+  document.getElementById('f_og_type').value = type==='bedrijf'?'aannemer':'particulier';
+}
+
+// ── SPRAAK INVOER ─────────────────────────────────────────────
+function startSpeech(fieldId){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    showToast('Spraakherkenning niet beschikbaar in deze browser',true); return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();
+  rec.lang='nl-NL'; rec.continuous=false; rec.interimResults=false;
+  rec.onresult=e=>{
+    const tekst=e.results[0][0].transcript;
+    const el=document.getElementById(fieldId);
+    el.value=(el.value?el.value+' ':'')+tekst;
+    el.dispatchEvent(new Event('input'));
+  };
+  rec.onerror=()=>showToast('Spraakherkenning mislukt',true);
+  rec.start();
+  showToast('🎤 Spreek nu...');
+}
+
+// ── BULK VERWIJDEREN ──────────────────────────────────────────
+let bulkSelectie=new Set();
+
+function toggleBulk(id, el){
+  if(bulkSelectie.has(id)) bulkSelectie.delete(id);
+  else bulkSelectie.add(id);
+  document.getElementById('bulkTeller').textContent=`${bulkSelectie.size} geselecteerd`;
+  const balk=document.getElementById('bulkBalk');
+  balk.style.display=bulkSelectie.size>0?'flex':'none';
+  // Checkbox uiterlijk bijwerken
+  const cb=document.getElementById('cb_'+id);
+  if(cb) cb.checked=bulkSelectie.has(id);
+}
+
+function bulkDeselecteer(){
+  bulkSelectie.clear();
+  document.getElementById('bulkBalk').style.display='none';
+  renderList();
+}
+
+async function bulkVerwijder(){
+  if(!confirm(`${bulkSelectie.size} opdracht(en) definitief verwijderen?`)) return;
+  orders=orders.filter(o=>!bulkSelectie.has(o.id));
+  bulkSelectie.clear();
+  document.getElementById('bulkBalk').style.display='none';
+  await dbxWrite();
+  renderList();
+  showToast('✓ Geselecteerde opdrachten verwijderd');
+}
 function selEditType(btn,type){
   document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); editTypeVal=type;
@@ -1157,14 +1232,16 @@ function renderList(){
     const loc=o.locatie||'binnen';
     const locLabel=loc==='buiten'?'<span style="font-size:11px;color:#e07b00">🌤️ Buiten</span>':'<span style="font-size:11px;color:#2055a4">🏠 Binnen</span>';
     return `
-    <div class="ocard type-${tk}" onclick="showDetail(${o.id})">
+    <div class="ocard type-${tk}" style="position:relative">
+      <input type="checkbox" id="cb_${o.id}" ${bulkSelectie.has(o.id)?'checked':''} onclick="event.stopPropagation();toggleBulk(${o.id},this)" style="position:absolute;top:10px;right:10px;width:20px;height:20px;cursor:pointer;z-index:2">
+      <div onclick="showDetail(${o.id})">
       <div class="ocard-top">
         <div>
           <div class="onr">${o.nr}</div>
           <div class="oname">${hoofdNaam(o)}</div>
           ${o.og_type==='aannemer'&&o.naam?`<div class="osub">Bewoner: ${o.naam}</div>`:''}
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-right:28px">
           <span class="badge ${badgeCls(o)}">${statusLabel(o.status,o)}</span>
           ${pBadge(o)}
         </div>
@@ -1180,6 +1257,7 @@ function renderList(){
       </div>
       ${hasFotos(o)?'<div class="foto-ok">📷 Foto\'s aanwezig</div>':''}
       ${o.sig?'<div class="sig-ok">✓ Handtekening</div>':''}
+      </div>
     </div>`;
   }).join('');
 }
