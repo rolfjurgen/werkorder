@@ -277,11 +277,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div id="f_og_extra" style="display:none">
       <input type="hidden" id="f_og_type" value="particulier">
-      <div class="field"><label>Naam bedrijf</label><input type="text" id="f_og_naam" autocomplete="off"></div>
-      <div class="field"><label>Contactpersoon</label><input type="text" id="f_og_contact" autocomplete="off"></div>
+      <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field"><label>Contactpersoon</label><div style="position:relative"><input type="text" id="f_og_contact" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_contact')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
       <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
       <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
-      <div class="field"><label>Referentie / opdrachtnummer</label><input type="text" id="f_og_ref" autocomplete="off"></div>
+      <div class="field"><label>Referentie / opdrachtnummer</label><div style="position:relative"><input type="text" id="f_og_ref" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_ref')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
       <div class="field" style="background:var(--surface2)">
         <label>📎 Opdrachtbevestiging (PDF)</label>
         <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
@@ -289,8 +289,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       </div>
     </div>
 
-    <div class="field"><label>Naam bewoner</label><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off"></div>
-    <div class="field"><label>Adres werklocatie</label><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off"></div>
+    <div class="field"><label>Naam bewoner</label><div style="position:relative"><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+    <div class="field"><label>Adres werklocatie</label><div style="position:relative"><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_adres')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
     <div class="field"><label>Telefoon</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
     <div class="field"><label>E-mailadres</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
