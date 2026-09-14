@@ -1,6 +1,6 @@
 {
   "name": "RJ Werkorder",
-  "short_name": "RJ",
+  "short_name": "RJ Werkorder",
   "start_url": "/werkorder/",
   "scope": "/werkorder/",
   "display": "standalone",
