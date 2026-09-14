@@ -3,28 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>RJ Werkorder</title>
+<title>REPAFIN Werkorder</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root {
-  --bg: #f4f1ec;
+  --bg: #f0f2f4;
   --surface: #ffffff;
-  --surface2: #f9f7f4;
-  --border: #e2ddd7;
-  --border2: #ccc7bf;
-  --text: #1c1916;
-  --text2: #6b6560;
-  --text3: #9c9790;
-  --accent: #b5820c;
-  --accent-bg: #fef8e7;
-  --green: #2a7a4e;
-  --green-bg: #edf7f2;
+  --surface2: #f5f7f8;
+  --border: #dde2e8;
+  --border2: #c4cdd6;
+  --text: #0F1B2A;
+  --text2: #4a5a6a;
+  --text3: #8a9aaa;
+  --accent: #3A6B4B;
+  --accent-bg: #eaf2ed;
+  --accent-dark: #0F1B2A;
+  --green: #3A6B4B;
+  --green-bg: #eaf2ed;
   --red: #c0392b;
   --red-bg: #fdf0ee;
-  --blue: #2055a4;
-  --blue-bg: #edf2fc;
+  --blue: #1a4a8a;
+  --blue-bg: #eaf0fc;
   --r: 10px;
   --rlg: 16px;
 }
@@ -32,20 +33,21 @@
 body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 15px; min-height: 100vh; }
 
 /* HEADER */
-.hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo-wrap { display: flex; align-items: center; gap: 10px; }
-.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
-.logo-text { font-size: 12px; color: var(--accent); font-weight: 600; font-family: monospace; letter-spacing: .05em; }
-.sync-ok { font-size: 11px; color: var(--green); font-family: monospace; }
-.sync-err { font-size: 11px; color: var(--red); font-family: monospace; }
-.sync-busy { font-size: 11px; color: var(--text3); font-family: monospace; }
-.btn-logout { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: inherit; display: none; }
+.hdr { background: #0F1B2A; border-bottom: none; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo-wrap { display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.logo-text { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: .05em; }
+.sync-ok { font-size: 11px; color: #7bc49a; font-family: monospace; }
+.sync-err { font-size: 11px; color: #ff8a80; font-family: monospace; }
+.sync-busy { font-size: 11px; color: rgba(255,255,255,0.5); font-family: monospace; }
+.btn-logout { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; display: none; }
+.btn-logout:hover { background: rgba(255,255,255,0.1); }
 
 /* TABS */
-.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.tabs { display: flex; background: #0F1B2A; border-bottom: 2px solid #1e3040; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab { padding: 11px 16px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; transition: color .2s; }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab { padding: 11px 16px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; transition: color .2s; margin-bottom: -2px; }
+.tab.active { color: #ffffff; border-bottom-color: #3A6B4B; }
 
 /* PANELS */
 .panel { display: none; padding: 16px; padding-bottom: 60px; }
@@ -67,10 +69,10 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 .tbtn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
 .tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
 .tbtn.sel { font-weight: 700; box-shadow: 0 0 0 2px var(--accent); }
-.typelabel-inbraak.sel { box-shadow: 0 0 0 2px #2055a4; }
-.typelabel-keuken.sel { box-shadow: 0 0 0 2px #e07b00; }
-.typelabel-oplever.sel { box-shadow: 0 0 0 2px #2a7a4e; }
-.typelabel-overig.sel { box-shadow: 0 0 0 2px #7b4ea6; }
+.typelabel-inbraak.sel { box-shadow: 0 0 0 2px #1a3a6a; }
+.typelabel-keuken.sel { box-shadow: 0 0 0 2px #2a5a3a; }
+.typelabel-oplever.sel { box-shadow: 0 0 0 2px #1a4a7a; }
+.typelabel-overig.sel { box-shadow: 0 0 0 2px #2a3a4a; }
 
 /* BUTTONS */
 .btn { width: 100%; padding: 12px; border-radius: var(--r); border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: opacity .15s; }
@@ -160,10 +162,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .mclose { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text2); }
 
 /* LOGIN */
-.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; }
-.login-icon { width: 70px; height: 70px; background: var(--accent); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; margin: 0 auto 16px; }
-.login-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; max-width: 300px; }
+.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; background: var(--bg); }
+.login-icon { width: 100px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.login-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #0F1B2A; letter-spacing: 0.02em; }
+.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 28px; max-width: 300px; }
 .btn-dbx { background: #0061FF; color: #fff; border: none; border-radius: var(--r); padding: 14px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 10px; }
 .login-note { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.6; }
 
@@ -188,14 +190,14 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* TYPEWERK KLEUREN */
-.type-inbraak { border-left: 4px solid #2055a4; }
-.type-keuken { border-left: 4px solid #e07b00; }
-.type-oplever { border-left: 4px solid #2a7a4e; }
-.type-overig { border-left: 4px solid #7b4ea6; }
-.typelabel-inbraak { background: #edf2fc; color: #2055a4; border-color: #c0d0f0; }
-.typelabel-keuken { background: #fff3e0; color: #e07b00; border-color: #ffcc80; }
-.typelabel-oplever { background: #edf7f2; color: #2a7a4e; border-color: #b0ddc0; }
-.typelabel-overig { background: #f3eef8; color: #7b4ea6; border-color: #d0b8e8; }
+.type-inbraak { border-left: 4px solid #1a3a6a; }
+.type-keuken { border-left: 4px solid #3A6B4B; }
+.type-oplever { border-left: 4px solid #1a4a7a; }
+.type-overig { border-left: 4px solid #0F1B2A; }
+.typelabel-inbraak { background: #e8edf5; color: #1a3a6a; border-color: #b0c0dc; }
+.typelabel-keuken { background: #e8f2ec; color: #2a5a3a; border-color: #a0c8b0; }
+.typelabel-oplever { background: #e8f0f8; color: #1a4a7a; border-color: #a0b8d8; }
+.typelabel-overig { background: #eceef0; color: #2a3a4a; border-color: #b0bac4; }
 
 /* BINNEN/BUITEN */
 .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
@@ -235,7 +237,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
 <div class="hdr">
   <div class="logo-wrap">
-    <div class="logo-icon">RJ</div>
+    <div class="logo-icon"><svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="32" height="34"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#fff"/></svg></div>
     <div class="logo-text">WERKORDER</div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
@@ -253,8 +255,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
 <!-- LOGIN OVERLAY -->
 <div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center">
-  <div class="login-icon">RJ</div>
-  <div class="login-title">RJ Oppervlakteherstel</div>
+  <div class="login-icon"><svg viewBox="0 0 532.2 149.6" xmlns="http://www.w3.org/2000/svg" width="200" height="56"><path d="M125.7,54.9c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V54.9Z" fill="#3a6b4b"/><path d="M0,7.8v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V7.8H0Z" fill="#0F1B2A"/><rect x="168.3" width="3" height="149.6" fill="#3a6b4b"/><path d="M213.9,9.3c0-.8.6-1.3,1.3-1.3h21.6c6.1,0,11.2,5,11.2,11.2v24.3c0,4.8-3,8.7-7,10.4l7.6,29.1c.4,1.3-.7,1.3-.7,1.3h-11s-1,0-1.3-1.3l-7.4-28.3h-1.5v28.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3ZM235.2,23c0-1.5-1.2-2.8-2.8-2.8h-5.6v22.4h5.6c1.5,0,2.8-1.2,2.8-2.8v-16.9Z" fill="#0F1B2A"/><path d="M279.2,71.9h18c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-29.6c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h29c.8,0,1.3.6,1.3,1.3v9.7c0,.8-.6,1.3-1.3,1.3h-17.4v17.5h13.6c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-13.6v21.7Z" fill="#0F1B2A"/><path d="M315.6,9.3c0-.8.6-1.3,1.3-1.3h21.6c6.1,0,11.2,5,11.2,11.2v24.3c0,6.2-5.1,11.2-11.2,11.2h-10.1v28.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3ZM336.9,23c0-1.5-1.2-2.8-2.8-2.8h-5.6v22.4h5.6c1.5,0,2.8-1.2,2.8-2.8v-16.9Z" fill="#0F1B2A"/><path d="M385,8s1.2,0,1.4,1.3l12.7,73.6c.2,1.3-.8,1.3-.8,1.3h-11s-1,0-1.1-1.3l-1.3-9.2h-8.6l-1.3,9.2c-.2,1.3-1.1,1.3-1.1,1.3h-11s-1,0-.8-1.3l12.7-73.6c.2-1.3,1.4-1.3,1.4-1.3h8.8ZM378,61.3h5.4l-2.8-28.2-2.7,28.2Z" fill="#0F1B2A"/><path d="M428.7,82.9c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h29c.8,0,1.3.6,1.3,1.3v9.7c0,.8-.6,1.3-1.3,1.3h-17.4v17.5h13.6c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-13.6v32.7Z" fill="#3a6b4b"/><path d="M476.5,82.9c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h10.2c.8,0,1.3.6,1.3,1.3v73.6Z" fill="#3a6b4b"/><path d="M496.3,8h10.1s1,0,1.4,1.3l9.3,32.4V9.3c0-.8.6-1.3,1.3-1.3h10.2c.8,0,1.3.6,1.3,1.3v73.6c0,.8-.6,1.3-1.3,1.3h-9.6s-1,0-1.4-1.3l-9.8-31.3v31.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3Z" fill="#3a6b4b"/></svg></div>
+  <div class="login-title">Werkorder</div>
   <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
   <button class="btn-dbx" onclick="startAuth()">
     <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
@@ -434,10 +436,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center">
     <span style="font-size:11px;color:var(--text3)">Type:</span>
     <span id="leg-alle" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);cursor:pointer" onclick="filterOpType('alle')">Alle</span>
-    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#edf2fc;color:#2055a4;border:1px solid #c0d0f0;cursor:pointer" onclick="filterOpType('inbraak')">🔵 Inbraakschade</span>
-    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fff3e0;color:#e07b00;border:1px solid #ffcc80;cursor:pointer" onclick="filterOpType('keuken')">🟠 Keukenblad</span>
-    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#edf7f2;color:#2a7a4e;border:1px solid #b0ddc0;cursor:pointer" onclick="filterOpType('oplever')">🟢 Opleverpunten</span>
-    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#f3eef8;color:#7b4ea6;border:1px solid #d0b8e8;cursor:pointer" onclick="filterOpType('overig')">🟣 Overig</span>
+    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8edf5;color:#1a3a6a;border:1px solid #b0c0dc;cursor:pointer" onclick="filterOpType('inbraak')">🔷 Inbraakschade</span>
+    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f2ec;color:#2a5a3a;border:1px solid #a0c8b0;cursor:pointer" onclick="filterOpType('keuken')">🟩 Keukens/Tegels</span>
+    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f0f8;color:#1a4a7a;border:1px solid #a0b8d8;cursor:pointer" onclick="filterOpType('oplever')">🔹 Opleverpunten</span>
+    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#eceef0;color:#2a3a4a;border:1px solid #b0bac4;cursor:pointer" onclick="filterOpType('overig')">◾ Overig</span>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
