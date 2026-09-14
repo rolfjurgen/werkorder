@@ -4,8 +4,8 @@
   "start_url": "/werkorder/",
   "scope": "/werkorder/",
   "display": "standalone",
-  "background_color": "#f4f1ec",
-  "theme_color": "#b5820c",
+  "background_color": "#0F1B2A",
+  "theme_color": "#0F1B2A",
   "icons": [
     {
       "src": "/werkorder/icon-192.png",
