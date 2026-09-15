@@ -1453,6 +1453,11 @@ async function showDetail(id){
       <span style="font-size:13px;color:var(--accent)">⚠️ Er zijn onopgeslagen wijzigingen</span>
       <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
     </div>
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px">
+      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
+      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
+    </div>
     <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
     <div class="status-row">${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}</div>
@@ -1535,13 +1540,15 @@ async function showDetail(id){
     `:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 Werkbon</button>
       <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
         <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
       </label>
+      ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="grid-column:span 2">📋 Akte van Cessie PDF</button>`:''}
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
+      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')" style="grid-column:span 2">← Terug naar overzicht</button>
     </div>
     ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
 
@@ -1785,6 +1792,66 @@ async function mailOrder(id){
 }
 
 // ── PDF ──────────────────────────────────────────────────────
+async function saveCessiePDF(id){
+  const o=orders.find(x=>x.id===id); if(!o||!o.verzekering) return;
+  const taal=o.cessie_taal||'nl';
+  const t=cessieTekst[taal];
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.titel} ${o.nr}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#0F1B2A;margin:0;padding:32px}
+  .hdr{display:flex;justify-content:space-between;border-bottom:3px solid #3A6B4B;padding-bottom:14px;margin-bottom:24px}
+  .bedrijf{font-size:16px;font-weight:700;color:#0F1B2A}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}
+  .nr{font-size:12px;color:#666;text-align:right;line-height:1.8}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}
+  td:first-child{font-weight:600;width:40%;background:#f5f7f8;color:#4a5a6a}
+  .cessie-tekst{font-size:12px;color:#444;line-height:1.8;margin:16px 0;padding:12px;border:1px solid #ddd;background:#eaf2ed}
+  .sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px}
+  .sig-lbl{font-size:11px;color:#666;margin-bottom:50px}
+  .sig-lijn{border-top:1px solid #333;padding-top:4px;font-size:11px}
+  .footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666}
+  @media print{body{padding:0}}</style>
+  </head><body>
+  <div class="hdr">
+    <div>
+      <svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="36" height="39" style="display:block;margin-bottom:6px"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#0F1B2A"/></svg>
+      <div class="bedrijf">REPAFIN by Rolf Jurgen</div>
+      <div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@repafin.nl | www.repafin.nl</div>
+    </div>
+    <div class="nr"><strong>${t.titel}</strong><br>Ref: ${o.nr}<br>Datum: ${new Date().toLocaleDateString('nl-NL')}</div>
+  </div>
+  <table>
+    ${o.naam?`<tr><td>${taal==='de'?'Kunde / Bewohner':'Klant / bewoner'}</td><td>${o.naam}</td></tr>`:''}
+    ${o.adres?`<tr><td>${taal==='de'?'Adresse':'Adres'}</td><td>${o.adres}</td></tr>`:''}
+    ${o.verzekeraar?`<tr><td>${t.verzekeraar}</td><td>${o.verzekeraar}</td></tr>`:''}
+    ${o.volmacht?`<tr><td>${t.volmacht}</td><td>${o.volmacht}</td></tr>`:''}
+    ${o.polisnr?`<tr><td>${t.polisnr}</td><td>${o.polisnr}</td></tr>`:''}
+    ${o.schadesnr?`<tr><td>${t.schadesnr}</td><td>${o.schadesnr}</td></tr>`:''}
+    ${o.schadebedrag?`<tr><td>${t.schadebedrag}</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
+    ${o.btw?`<tr><td>BTW / MwSt.</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
+    ${(o.schadebedrag&&o.btw)?`<tr><td><strong>${taal==='de'?'Gesamt inkl. MwSt.':'Totaal incl. BTW'}</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
+    ${o.eigenrisico?`<tr><td>${t.eigenrisico}</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
+  </table>
+  <div class="cessie-tekst">${t.tekst}</div>
+  <div class="sig-grid">
+    <div>
+      <div class="sig-lbl">${t.handtekening} / ${o.naam||''}</div>
+      ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:''}
+      <div class="sig-lijn">${o.naam||''} — ${t.datum}: ___________</div>
+    </div>
+    <div>
+      <div class="sig-lbl">${t.uitvoerder}</div>
+      <div class="sig-lijn">R. Jurgen — REPAFIN by Rolf Jurgen</div>
+    </div>
+  </div>
+  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win){win.onload=()=>setTimeout(()=>win.print(),500);}
+  else{const a=document.createElement('a');a.href=url;a.download=`Cessie-${o.nr}.html`;a.click();}
+}
+
 async function savePDF(id, checkboxEl){
   const metFotos = checkboxEl && checkboxEl.checked;
   const o=orders.find(x=>x.id===id); if(!o)return;
@@ -1862,7 +1929,6 @@ async function savePDF(id, checkboxEl){
   ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's voor werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoVoorHTML}</div></div>`:''}
   ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's na werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
   ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
-  ${cessieHTML}
   <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
   </body></html>`;
   const blob=new Blob([html],{type:'text/html'});
