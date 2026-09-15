@@ -1548,7 +1548,7 @@ async function showDetail(id){
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
-      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')" style="grid-column:span 2">← Terug naar overzicht</button>
+      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
     </div>
     ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
 
