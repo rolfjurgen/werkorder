@@ -279,8 +279,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <input type="hidden" id="f_og_type" value="particulier">
       <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
       <div class="field"><label>Contactpersoon</label><div style="position:relative"><input type="text" id="f_og_contact" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_contact')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
-      <div class="field"><label>Telefoon bedrijf</label><div style="position:relative"><input type="tel" id="f_og_tel" placeholder="" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_tel')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
-      <div class="field"><label>Email bedrijf</label><div style="position:relative"><input type="email" id="f_og_email" placeholder="" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_email')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
+      <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
       <div class="field"><label>Referentie / opdrachtnummer</label><div style="position:relative"><input type="text" id="f_og_ref" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_ref')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
       <div class="field" style="background:var(--surface2)">
         <label>📎 Opdrachtbevestiging (PDF)</label>
@@ -291,8 +291,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div class="field"><label>Naam bewoner</label><div style="position:relative"><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
     <div class="field"><label>Adres werklocatie</label><div style="position:relative"><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_adres')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
-    <div class="field"><label>Telefoon</label><div style="position:relative"><input type="tel" id="f_tel" placeholder="06 12345678" style="padding-right:44px"><button type="button" onclick="startSpeech('f_tel')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
-    <div class="field"><label>E-mailadres</label><div style="position:relative"><input type="email" id="f_email" placeholder="bewoner@email.nl" style="padding-right:44px"><button type="button" onclick="startSpeech('f_email')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+    <div class="field"><label>Telefoon</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
 
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
@@ -386,6 +386,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div id="sigHint" style="font-size:12px;color:var(--text3);margin-bottom:6px">Klant tekent voor akkoord uitvoering werkzaamheden.</div>
     <div id="sigHintCessie" style="display:none;font-size:12px;color:var(--accent);margin-bottom:6px;font-weight:500">+ Handtekening geldt tevens als akkoord akte van cessie.</div>
+    <div style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
+      <strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
+      <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.
+    </div>
     <div class="sig-wrap">
       <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
       <canvas id="sigCanvas" class="sigpad"></canvas>
@@ -578,17 +582,37 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
       <input type="checkbox" id="e_verzekering" style="width:20px;height:20px;cursor:pointer" onchange="toggleEditVerzekering()">
-      <label for="e_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie</label>
+      <label for="e_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie / Abtretungserklärung</label>
     </div>
     <div id="e_verzekering_wrap" style="display:none">
-      <div class="field"><label>Maatschappij (verzekeraar)</label><input type="text" id="e_verzekeraar"></div>
-      <div class="field"><label>Volmacht</label><input type="text" id="e_volmacht"></div>
-      <div class="field"><label>Polisnummer</label><input type="text" id="e_polisnr"></div>
-      <div class="field"><label>Schadedossiernummer</label><input type="text" id="e_schadesnr"></div>
-      <div class="field"><label>Schadebedrag excl. BTW (€)</label><input type="number" id="e_schadebedrag" step="0.01" min="0"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <button type="button" id="e_cessie_nl" onclick="selCessieTaal('nl')" class="tbtn sel" style="padding:8px">🇳🇱 Nederlands</button>
+        <button type="button" id="e_cessie_de" onclick="selCessieTaal('de')" class="tbtn" style="padding:8px">🇩🇪 Deutsch</button>
+      </div>
+      <button type="button" onclick="vulCessieVanOG()" style="width:100%;padding:9px;background:var(--green-bg);color:var(--green);border:1px solid #a0c8b0;border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px">📋 Gegevens opdrachtgever overnemen</button>
+
+      <div class="field"><label id="e_lbl_verzekeraar">Maatschappij (verzekeraar)</label>
+        <div style="position:relative"><input type="text" id="e_verzekeraar" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_verzekeraar')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_volmacht">Volmacht</label>
+        <div style="position:relative"><input type="text" id="e_volmacht" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_volmacht')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_polisnr">Polisnummer</label>
+        <div style="position:relative"><input type="text" id="e_polisnr" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_polisnr')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_schadesnr">Schadedossiernummer</label>
+        <div style="position:relative"><input type="text" id="e_schadesnr" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_schadesnr')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_schadebedrag">Schadebedrag excl. BTW (€)</label><input type="number" id="e_schadebedrag" step="0.01" min="0"></div>
       <div class="field"><label>BTW (€)</label><input type="number" id="e_btw" step="0.01" min="0"></div>
-      <div class="field"><label>Eigen risico (€)</label><input type="number" id="e_eigenrisico" step="0.01" min="0"></div>
+      <div class="field"><label id="e_lbl_eigenrisico">Eigen risico (€)</label><input type="number" id="e_eigenrisico" step="0.01" min="0"></div>
       <div class="field"><label>BTW terug (€)</label><input type="number" id="e_btwterug" step="0.01" min="0"></div>
+
+      <div id="e_cessie_preview" style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px"></div>
     </div>
 
     <div class="slbl">Handtekening</div>
@@ -890,9 +914,58 @@ function toggleVerzekering(){
   wrap.style.display=cb.checked?'block':'none';
   hint.style.display=cb.checked?'block':'none';
 }
+// ── CESSIE TAAL & AUTO-INVULLEN ───────────────────────────────
+let cessieTaal = 'nl';
+
+const cessieTekst = {
+  nl: {
+    titel: 'CESSIE / OVERDRACHT VORDERINGSRECHT',
+    tekst: 'Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.',
+    verzekeraar: 'Maatschappij (verzekeraar)', volmacht: 'Volmacht', polisnr: 'Polisnummer',
+    schadesnr: 'Schadedossiernummer', schadebedrag: 'Schadebedrag excl. BTW (€)', eigenrisico: 'Eigen risico (€)',
+  },
+  de: {
+    titel: 'ABTRETUNGSERKLÄRUNG',
+    tekst: 'Der/Die Unterzeichnende tritt seine/ihre Forderung gegenüber dem Versicherer an <strong>REPAFIN by Rolf Jurgen</strong> ab und erteilt dem Versicherer unwiderruflich Auftrag und Vollmacht, den ihm/ihr zustehenden Betrag direkt auf das auf der Rechnung angegebene Konto auszuzahlen. Falls der Versicherer aus irgendeinem Grund nicht an <strong>REPAFIN by Rolf Jurgen</strong> zahlt, geht die Forderung vollständig zu Lasten des Kunden.',
+    verzekeraar: 'Versicherungsgesellschaft', volmacht: 'Vollmacht', polisnr: 'Versicherungsscheinnummer',
+    schadesnr: 'Schadennummer', schadebedrag: 'Schadenbetrag excl. MwSt. (€)', eigenrisico: 'Selbstbeteiligung (€)',
+  }
+};
+
+function selCessieTaal(taal){
+  cessieTaal = taal;
+  document.getElementById('e_cessie_nl').classList.toggle('sel', taal==='nl');
+  document.getElementById('e_cessie_de').classList.toggle('sel', taal==='de');
+  const t = cessieTekst[taal];
+  document.getElementById('e_lbl_verzekeraar').textContent = t.verzekeraar;
+  document.getElementById('e_lbl_volmacht').textContent = t.volmacht;
+  document.getElementById('e_lbl_polisnr').textContent = t.polisnr;
+  document.getElementById('e_lbl_schadesnr').textContent = t.schadesnr;
+  document.getElementById('e_lbl_schadebedrag').textContent = t.schadebedrag;
+  document.getElementById('e_lbl_eigenrisico').textContent = t.eigenrisico;
+  updateCessiePreview();
+}
+
+function updateCessiePreview(){
+  const t = cessieTekst[cessieTaal];
+  const el = document.getElementById('e_cessie_preview');
+  if(el) el.innerHTML = `<strong style="color:var(--text)">${t.titel}</strong><br>${t.tekst}`;
+}
+
+function vulCessieVanOG(){
+  const idx = orders.findIndex(x=>x.id===parseInt(document.getElementById('e_id').value));
+  if(idx<0) return;
+  const o = orders[idx];
+  if(o.og_naam) document.getElementById('e_verzekeraar').value = o.og_naam;
+  if(o.og_contact) document.getElementById('e_volmacht').value = o.og_contact;
+  if(o.og_ref) document.getElementById('e_schadesnr').value = o.og_ref;
+  showToast('✓ Gegevens opdrachtgever overgenomen');
+}
+
 function toggleEditVerzekering(){
   const cb=document.getElementById('e_verzekering');
   document.getElementById('e_verzekering_wrap').style.display=cb.checked?'block':'none';
+  if(cb.checked){ cessieTaal='nl'; selCessieTaal('nl'); updateCessiePreview(); }
 }
 
 function selLoc(btn,loc){
@@ -1442,7 +1515,11 @@ async function showDetail(id){
     ${o.sig?`<div style="margin-bottom:7px"><img src="${o.sig}" class="sig-preview" alt="Handtekening"></div>
     <button onclick="vervangHandtekening(${id})" style="width:100%;padding:9px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:7px">✍️ Handtekening vervangen</button>`
     :`<div class="sig-wrap" id="detailSigWrap">
-      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
+      <div style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
+        <strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
+        <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.
+      </div>
+      <div class="sig-top"><span>Teken hieronder / Unterschrift</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
       <canvas id="detailSigCanvas" class="sigpad"></canvas>
     </div>
     <button onclick="slaHandtekeningOp(${id})" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:7px">✅ Handtekening opslaan</button>`}
@@ -1533,6 +1610,8 @@ async function openEdit(id){
   document.getElementById('e_intern').value=o.intern||'';
   document.getElementById('e_verzekering').checked=o.verzekering||false;
   document.getElementById('e_verzekering_wrap').style.display=o.verzekering?'block':'none';
+  cessieTaal = o.cessie_taal||'nl';
+  selCessieTaal(cessieTaal);
   document.getElementById('e_verzekeraar').value=o.verzekeraar||'';
   document.getElementById('e_volmacht').value=o.volmacht||'';
   document.getElementById('e_polisnr').value=o.polisnr||'';
@@ -1592,6 +1671,7 @@ async function saveEdit(){
   // Nieuwe fotos
   orders[idx].intern=document.getElementById('e_intern').value.trim();
   orders[idx].verzekering=document.getElementById('e_verzekering').checked;
+  orders[idx].cessie_taal=cessieTaal;
   orders[idx].verzekeraar=document.getElementById('e_verzekeraar').value.trim();
   orders[idx].volmacht=document.getElementById('e_volmacht').value.trim();
   orders[idx].polisnr=document.getElementById('e_polisnr').value.trim();
@@ -1721,39 +1801,53 @@ async function savePDF(id, checkboxEl){
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
   const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
   const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van||o.tijd_terug_vertrek)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`🚗 Heen: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`🔨 Werk: ${o.tijd_werk_van} → ${o.tijd_werk_tot}<br>`:''}${o.tijd_terug_vertrek&&o.tijd_terug_aankomst?`🚗 Terug: ${o.tijd_terug_vertrek} → ${o.tijd_terug_aankomst}`:''}</td></tr>`:'';
+  const cessieTekstPDF = o.cessie_taal==='de' ? {
+    titel: 'ABTRETUNGSERKLÄRUNG',
+    tekst: 'Der/Die Unterzeichnende tritt seine/ihre Forderung gegenüber dem Versicherer an <strong>REPAFIN by Rolf Jurgen</strong> ab und erteilt dem Versicherer unwiderruflich Auftrag und Vollmacht, den ihm/ihr zustehenden Betrag direkt auf das auf der Rechnung angegebene Konto auszuzahlen. Falls der Versicherer aus irgendeinem Grund nicht an <strong>REPAFIN by Rolf Jurgen</strong> zahlt, geht die Forderung vollständig zu Lasten des Kunden.',
+    handtekening: 'Unterschrift Kunde', datum: 'Datum', uitvoerder: 'Unterschrift REPAFIN by Rolf Jurgen'
+  } : {
+    titel: 'CESSIE / OVERDRACHT VORDERINGSRECHT',
+    tekst: 'Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.',
+    handtekening: 'Handtekening klant', datum: 'Datum', uitvoerder: 'Handtekening REPAFIN by Rolf Jurgen'
+  };
   const cessieHTML=o.verzekering?`
-  <div style="margin-top:24px;border-top:2px solid #b5820c;padding-top:16px">
-    <div style="font-size:14px;font-weight:700;color:#b5820c;margin-bottom:12px">AKTE VAN CESSIE — Overdracht vorderingsrecht · art. 3:94 BW</div>
+  <div style="margin-top:24px;border-top:2px solid #3A6B4B;padding-top:16px">
+    <div style="font-size:14px;font-weight:700;color:#3A6B4B;margin-bottom:12px">${cessieTekstPDF.titel}</div>
     <table>
-      ${o.verzekeraar?`<tr><td>Maatschappij</td><td>${o.verzekeraar}</td><td>Volmacht</td><td>${o.volmacht||'—'}</td></tr>`:''}
-      ${o.polisnr?`<tr><td>Polisnummer</td><td>${o.polisnr}</td><td>Schade nr.</td><td>${o.schadesnr||'—'}</td></tr>`:''}
+      ${o.verzekeraar?`<tr><td>${cessieTekstPDF.verzekeraar||'Maatschappij'}</td><td>${o.verzekeraar}</td><td>${cessieTekstPDF.volmacht||'Volmacht'}</td><td>${o.volmacht||'—'}</td></tr>`:''}
+      ${o.polisnr?`<tr><td>${cessieTekstPDF.polisnr||'Polisnummer'}</td><td>${o.polisnr}</td><td>${cessieTekstPDF.schadesnr||'Schade nr.'}</td><td>${o.schadesnr||'—'}</td></tr>`:''}
     </table>
     ${(o.schadebedrag||o.btw||o.eigenrisico)?`<table>
-      ${o.schadebedrag?`<tr><td>Schadebedrag excl. BTW</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
-      ${o.btw?`<tr><td>BTW</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
-      ${(o.schadebedrag&&o.btw)?`<tr><td><strong>Totaal schadebedrag incl. BTW</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
-      ${o.eigenrisico?`<tr><td>Af: eigen risico (voor rekening cliënt)</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
-      ${o.btwterug?`<tr><td>Af: BTW terug te ontvangen</td><td>€ ${parseFloat(o.btwterug).toFixed(2)}</td></tr>`:''}
+      ${o.schadebedrag?`<tr><td>${cessieTekstPDF.schadebedrag||'Schadebedrag'}</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
+      ${o.btw?`<tr><td>BTW / MwSt.</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
+      ${(o.schadebedrag&&o.btw)?`<tr><td><strong>Totaal / Gesamt incl. BTW</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
+      ${o.eigenrisico?`<tr><td>${cessieTekstPDF.eigenrisico||'Eigen risico'}</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
+      ${o.btwterug?`<tr><td>BTW terug / MwSt. Rückerstattung</td><td>€ ${parseFloat(o.btwterug).toFixed(2)}</td></tr>`:''}
     </table>`:''}
-    <div style="font-size:11px;color:#444;line-height:1.8;margin:12px 0;padding:10px;border:1px solid #ddd;background:#fef8e7">
-      Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong>, komt de vordering geheel ten laste van de cliënt.
+    <div style="font-size:11px;color:#444;line-height:1.8;margin:12px 0;padding:10px;border:1px solid #ddd;background:#eaf2ed">
+      ${cessieTekstPDF.tekst}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px">
       <div>
-        <div style="font-size:11px;color:#666;margin-bottom:40px">Handtekening + naam cliënt / opdrachtgever</div>
-        ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:``}
-        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">${o.naam||''}</div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">${cessieTekstPDF.handtekening} / ${o.naam||''}</div>
+        ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:''}
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">${o.naam||''} — ${cessieTekstPDF.datum}: ___________</div>
       </div>
       <div>
-        <div style="font-size:11px;color:#666;margin-bottom:40px">Handtekening Rolf Jurgen Schadeservice & Laktechniek</div>
-        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">R. Jurgen</div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">${cessieTekstPDF.uitvoerder}</div>
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">R. Jurgen — REPAFIN by Rolf Jurgen</div>
       </div>
     </div>
   </div>`:'';
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Werkbon ${o.nr}</title>
-  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#1c1916;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:2px solid #b5820c;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#b5820c}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f9f7f4;color:#666}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
-  </head><body><div class="werkbon-hdr"><div><div class="bedrijf">Rolf Jurgen Schadeservice & Laktechniek</div><div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#0F1B2A;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:3px solid #3A6B4B;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#0F1B2A}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f5f7f8;color:#4a5a6a}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
+  </head><body><div class="werkbon-hdr">
+  <div>
+    <svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="40" height="43" style="display:block;margin-bottom:6px"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#0F1B2A"/></svg>
+    <div class="bedrijf">REPAFIN by Rolf Jurgen</div>
+    <div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@repafin.nl | www.repafin.nl</div>
+  </div>
   <div class="nr"><strong>Werkbon ${o.nr}</strong><br>Datum: ${new Date().toLocaleDateString('nl-NL')}<br>Status: ${statusLabel(o.status,o)}</div></div>
   <table>${ogRegel}${refRegel}<tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
   ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
@@ -1768,7 +1862,7 @@ async function savePDF(id, checkboxEl){
   ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's na werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
   ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
   ${cessieHTML}
-  <div class="footer">R. Jurgen | Rolf Jurgen Schadeservice & Laktechniek | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
+  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
   </body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
