@@ -104,9 +104,9 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-family: inherit; }
 .foto-input { display: none; }
 .foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
-.foto-detail-item { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); aspect-ratio: 4/3; background: var(--surface2); }
-.foto-detail-item img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
-.foto-detail-label { font-size: 11px; color: var(--text3); padding: 4px 8px; background: var(--surface2); }
+.foto-detail-item { border-radius: var(--r); overflow: visible; border: 1px solid var(--border); background: var(--surface2); display: flex; flex-direction: column; }
+.foto-detail-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; cursor: pointer; flex-shrink: 0; border-radius: var(--r) var(--r) 0 0; }
+.foto-detail-label { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text2); background: var(--surface); border-top: 1px solid var(--border); min-height: 30px; flex-shrink: 0; border-radius: 0 0 var(--r) var(--r); }
 
 /* BADGES */
 .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: monospace; }
@@ -1460,15 +1460,19 @@ async function showDetail(id){
     }
   }
 
+  // Sla URLs op in window object zodat we geen base64 in onclick hoeven
+  window._fotoUrls = window._fotoUrls || {};
+  window._fotoUrls[id] = { voor: fotoVoorUrls, na: fotoNaUrls };
+
   const fVHTML=fotoVoorUrls.map((url,i)=>{
     const pad=o.fotos&&o.fotos.voor&&o.fotos.voor[i];
     if(pad){
       return `<div class="foto-detail-item">
-        ${url?`<img src="${url}" onclick="openLightbox('${pad}')" alt="Voor ${i+1}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer">`:
-        `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;cursor:pointer" onclick="openLightbox('${pad}')">🔄 Tik om te laden</div>`}
-        <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">
-          Voor ${i+1}
-          <button onclick="event.stopPropagation();verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">🗑️</button>
+        ${url?`<img src="${url}" onclick="openLightboxIdx(${id},'voor',${i})" alt="Voor ${i+1}">`:
+        `<div style="aspect-ratio:4/3;background:#eee;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">🔄 Laden...</div>`}
+        <div class="foto-detail-label">
+          <span>Voor ${i+1}</span>
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
         </div>
       </div>`;
     }
@@ -1479,11 +1483,11 @@ async function showDetail(id){
     const pad=o.fotos&&o.fotos.na&&o.fotos.na[i];
     if(pad){
       return `<div class="foto-detail-item">
-        ${url?`<img src="${url}" onclick="openLightbox('${pad}')" alt="Na ${i+1}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer">`:
-        `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;cursor:pointer" onclick="openLightbox('${pad}')">🔄 Tik om te laden</div>`}
-        <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">
-          Na ${i+1}
-          <button onclick="event.stopPropagation();verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">🗑️</button>
+        ${url?`<img src="${url}" onclick="openLightboxIdx(${id},'na',${i})" alt="Na ${i+1}">`:
+        `<div style="aspect-ratio:4/3;background:#eee;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">🔄 Laden...</div>`}
+        <div class="foto-detail-label">
+          <span>Na ${i+1}</span>
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
         </div>
       </div>`;
     }
@@ -1988,6 +1992,11 @@ async function savePDF(id, checkboxEl){
 }
 
 // ── LIGHTBOX ─────────────────────────────────────────────────
+function openLightboxIdx(id, type, idx){
+  const urls = window._fotoUrls && window._fotoUrls[id];
+  const url = urls && urls[type] && urls[type][idx];
+  if(url){ document.getElementById('lightboxImg').src=url; document.getElementById('lightbox').classList.add('open'); }
+}
 function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
