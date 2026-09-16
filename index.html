@@ -190,14 +190,16 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* TYPEWERK KLEUREN */
-.type-inbraak { border-left: 4px solid #1a3a6a; }
-.type-keuken { border-left: 4px solid #3A6B4B; }
-.type-oplever { border-left: 4px solid #1a4a7a; }
-.type-overig { border-left: 4px solid #0F1B2A; }
-.typelabel-inbraak { background: #e8edf5; color: #1a3a6a; border-color: #b0c0dc; }
-.typelabel-keuken { background: #e8f2ec; color: #2a5a3a; border-color: #a0c8b0; }
-.typelabel-oplever { background: #e8f0f8; color: #1a4a7a; border-color: #a0b8d8; }
-.typelabel-overig { background: #eceef0; color: #2a3a4a; border-color: #b0bac4; }
+.type-inbraak { border-left: 4px solid #0a2a6e; }
+.type-keuken { border-left: 4px solid #1a5c2e; }
+.type-oplever { border-left: 4px solid #0d3a7a; }
+.type-overig { border-left: 4px solid #1a2a3a; }
+.type-lakschade { border-left: 4px solid #d4800a; }
+.typelabel-inbraak { background: #dce8f8; color: #0a2a6e; border-color: #7a9fd4; font-weight:600; }
+.typelabel-keuken { background: #d4edda; color: #1a5c2e; border-color: #5a9e6e; font-weight:600; }
+.typelabel-oplever { background: #d8eaf8; color: #0d3a7a; border-color: #6a9abf; font-weight:600; }
+.typelabel-overig { background: #e0e4e8; color: #1a2a3a; border-color: #7a8a9a; font-weight:600; }
+.typelabel-lakschade { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight:600; }
 
 /* BINNEN/BUITEN */
 .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
@@ -299,6 +301,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
       <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
       <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-lakschade" onclick="selType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
       <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
@@ -440,10 +443,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center">
     <span style="font-size:11px;color:var(--text3)">Type:</span>
     <span id="leg-alle" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);cursor:pointer" onclick="filterOpType('alle')">Alle</span>
-    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8edf5;color:#1a3a6a;border:1px solid #b0c0dc;cursor:pointer" onclick="filterOpType('inbraak')">🔷 Inbraakschade</span>
-    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f2ec;color:#2a5a3a;border:1px solid #a0c8b0;cursor:pointer" onclick="filterOpType('keuken')">🟩 Keukens/Tegels</span>
-    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f0f8;color:#1a4a7a;border:1px solid #a0b8d8;cursor:pointer" onclick="filterOpType('oplever')">🔹 Opleverpunten</span>
-    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#eceef0;color:#2a3a4a;border:1px solid #b0bac4;cursor:pointer" onclick="filterOpType('overig')">◾ Overig</span>
+    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#dce8f8;color:#0a2a6e;border:1px solid #7a9fd4;cursor:pointer;font-weight:600" onclick="filterOpType('inbraak')">🔒 Inbraakschade</span>
+    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d4edda;color:#1a5c2e;border:1px solid #5a9e6e;cursor:pointer;font-weight:600" onclick="filterOpType('keuken')">🍽️ Keukens/Tegels</span>
+    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d8eaf8;color:#0d3a7a;border:1px solid #6a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('oplever')">🏗️ Opleverpunten</span>
+    <span id="leg-lakschade" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fde8cc;color:#7a3300;border:1px solid #d4800a;cursor:pointer;font-weight:600" onclick="filterOpType('lakschade')">🎨 Lakschade</span>
+    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e0e4e8;color:#1a2a3a;border:1px solid #7a8a9a;cursor:pointer;font-weight:600" onclick="filterOpType('overig')">🔧 Overig</span>
   </div>
   <div class="filter-bar">
     <select id="filterStatus" onchange="renderList()">
@@ -511,6 +515,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
       <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
       <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-lakschade" onclick="selEditType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
       <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
@@ -549,6 +554,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
     <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="e_datum_deadline"></div>
     <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
+    <div class="field" style="background:var(--surface2)"><label>🔒 Intern — niet zichtbaar op werkbon</label><textarea id="e_intern" style="min-height:80px"></textarea></div>
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing"></div>
@@ -575,9 +581,6 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
     <input type="file" class="foto-input" id="eFotoNa2" accept="image/*" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
     <input type="file" class="foto-input" id="eFotoNa3" accept="image/*" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
-
-    <div class="slbl">Intern — niet zichtbaar op werkbon</div>
-    <div class="field"><label>Interne notities</label><textarea id="e_intern" style="min-height:80px"></textarea></div>
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -695,6 +698,15 @@ async function dbxRead() {
     if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); return; }
     if (!r.ok) throw new Error(r.status);
     orders = JSON.parse(await r.text());
+    // Migreer oude type benamingen
+    orders = orders.map(o=>{
+      if(!o.type) return o;
+      if(o.type==='Overig'||o.type==='Overig werkzaamheden') o.type='Overige werkzaamheden';
+      if(o.type==='Inbraakschade kozijn/deur') o.type='Inbraakschade';
+      if(o.type==='Keukenblad herstellen') o.type='Keukens / Tegels';
+      if(o.type==='Opleverpunten herstellen') o.type='Opleverpunten';
+      return o;
+    });
     setSyncStatus('gesynchroniseerd','ok');
   } catch(e) {
     setSyncStatus('offline — lokaal','err');
@@ -980,9 +992,10 @@ function selEditLoc(btn,loc){
 }
 function typeKleur(type){
   if(!type) return 'overig';
-  if(type.includes('Inbraak')||type.includes('kozijn')||type.includes('deur')) return 'inbraak';
-  if(type.includes('Keuken')) return 'keuken';
+  if(type.includes('Inbraak')||type.includes('kozijn')||type.includes('deur')&&type.includes('Inbraak')) return 'inbraak';
+  if(type.includes('Keuken')||type.includes('Tegel')) return 'keuken';
   if(type.includes('Oplever')) return 'oplever';
+  if(type.includes('Lak')||type.includes('lak')||type.includes('Poort')||type.includes('poort')) return 'lakschade';
   return 'overig';
 }
 
@@ -1088,7 +1101,7 @@ async function saveOrder(){
   const overig=document.getElementById('f_overig').value.trim();
   const typeLabel=selTypeVal==='Overige werkzaamheden'&&overig?`Overige werkzaamheden: ${overig}`:selTypeVal;
   const nr='RJ-'+String(orders.length+1).padStart(4,'0');
-  const mapPad=`/Fotos/${nr}`;
+  const mapPad=`/Fotos/${nr}_${Date.now()}`;
 
   setSyncStatus("foto's uploaden...",'busy');
   const fotoUrls={voor:[null,null,null,null],na:[null,null,null,null]};
@@ -1202,10 +1215,10 @@ let currentTypeFilter = 'alle';
 
 function filterOpType(type){
   currentTypeFilter = type;
-  ['alle','inbraak','keuken','oplever','overig'].forEach(k=>{
+  ['alle','inbraak','keuken','oplever','lakschade','overig'].forEach(k=>{
     const el=document.getElementById('leg-'+k);
-    if(el) el.style.fontWeight = k===type ? '700' : 'normal';
-    if(el) el.style.boxShadow = k===type ? '0 0 0 2px currentColor' : 'none';
+    if(el) el.style.fontWeight = k===type ? '900' : '600';
+    if(el) el.style.outline = k===type ? '2px solid currentColor' : 'none';
   });
   renderList();
 }
@@ -1305,7 +1318,12 @@ function renderList(){
   el.innerHTML=filtered.map(o=>{
     const tk=typeKleur(o.type);
     const loc=o.locatie||'binnen';
-    const locLabel=loc==='buiten'?'<span style="font-size:11px;color:#e07b00">🌤️ Buiten</span>':'<span style="font-size:11px;color:#2055a4">🏠 Binnen</span>';
+    const locLabel=loc==='buiten'?'<span style="font-size:11px;color:#c05a00;font-weight:500">🌤️ Buiten</span>':'<span style="font-size:11px;color:#1a4a8a;font-weight:500">🏠 Binnen</span>';
+    const telLink=o.tel?`<a href="tel:${o.tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.tel}</a>`:(o.og_tel?`<a href="tel:${o.og_tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.og_tel}</a>`:'');
+    const indicators=`<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">
+      ${hasFotos(o)?'<span title="Foto\'s aanwezig" style="font-size:16px">📷</span>':''}
+      ${o.sig?'<span title="Handtekening aanwezig" style="font-size:16px">✍️</span>':''}
+    </div>`;
     return `
     <div class="ocard type-${tk}" style="position:relative">
       <input type="checkbox" id="cb_${o.id}" ${bulkSelectie.has(o.id)?'checked':''} onclick="event.stopPropagation();toggleBulk(${o.id},this)" style="position:absolute;top:10px;right:10px;width:20px;height:20px;cursor:pointer;z-index:2">
@@ -1326,12 +1344,14 @@ function renderList(){
         ${o.datum_deadline?`<span style="color:var(--red)">⚠️ ${fmtDate(o.datum_deadline)}</span>`:''}
         ${o.adres?`<span>📍 ${o.adres}</span>`:''}
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">
-        <div class="otype typelabel-${tk}">${o.type}</div>
-        ${locLabel}
+      ${telLink}
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div class="otype typelabel-${tk}">${o.type}</div>
+          ${locLabel}
+        </div>
+        ${indicators}
       </div>
-      ${hasFotos(o)?'<div class="foto-ok">📷 Foto\'s aanwezig</div>':''}
-      ${o.sig?'<div class="sig-ok">✓ Handtekening</div>':''}
       </div>
     </div>`;
   }).join('');
@@ -1346,7 +1366,9 @@ let detailId=null;
 function markeerWijziging(id,veld,waarde){
   detailWijzigingen[veld]=waarde;
   const banner=document.getElementById('opslaanBanner');
-  if(banner){banner.style.display='flex';}
+  if(banner) banner.style.display='flex';
+  const knopTop=document.getElementById('opslaanKnopTop');
+  if(knopTop) knopTop.style.display='block';
 }
 
 async function slaDetailOp(id){
@@ -1446,17 +1468,13 @@ async function showDetail(id){
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
       <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
-      <div><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
+      <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:16px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+      <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
     </div>
-    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between">
-      <span style="font-size:13px;color:var(--accent)">⚠️ Er zijn onopgeslagen wijzigingen</span>
-      <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
-    </div>
-    <div class="divider"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px">
-      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
-      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
+    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
+      <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
     </div>
     <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
