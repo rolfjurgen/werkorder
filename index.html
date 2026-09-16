@@ -65,11 +65,10 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 
 /* TYPE / PRIO GRID */
 .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
-.prio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.prio-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 7px; }
 .tbtn { background: var(--surface); border: 2px solid var(--border2); border-radius: var(--r); padding: 12px 8px; text-align: center; cursor: pointer; font-size: 13px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
-.tbtn.sel { border-width: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transform: scale(1.02); }
+.tbtn.sel { border-width: 3px; box-shadow: 0 0 0 2px var(--accent); font-weight: 700; transform: scale(1.02); }
 .tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
-.tbtn.sel { font-weight: 700; box-shadow: 0 0 0 2px var(--accent); }
 .typelabel-inbraak.sel { box-shadow: 0 0 0 2px #1a3a6a; }
 .typelabel-keuken.sel { box-shadow: 0 0 0 2px #2a5a3a; }
 .typelabel-oplever.sel { box-shadow: 0 0 0 2px #1a4a7a; }
@@ -150,9 +149,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .sopt { flex: 1; padding: 10px 4px; border-radius: var(--r); border: 2px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
 .sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border-color: #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
 .sopt.a-bezig { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
-.sopt.a-spoed { background: #fde8e8; color: #c0392b; border-color: #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
-.sopt.a-prioriteit { background: #fff0e0; color: #c06000; border-color: #e07800; font-weight: 700; box-shadow: 0 2px 6px rgba(224,120,0,0.2); }
-.sopt.a-normaal { background: #fef8e0; color: #8a6000; border-color: #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
+.sopt.a-spoed { background: #fde8e8; color: #c0392b; border: 2px solid #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
+.sopt.a-prioriteit { background: #fff0e0; color: #c06000; border: 2px solid #e07800; font-weight: 700; box-shadow: 0 2px 6px rgba(224,120,0,0.2); }
+.sopt.a-normaal { background: #fef8e0; color: #8a6000; border: 2px solid #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
+.sopt:not(.a-spoed):not(.a-prioriteit):not(.a-normaal) { border: 1px solid var(--border); }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 .time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
 
@@ -319,9 +319,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn" id="locBuiten" onclick="selLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
       <button class="tbtn" id="prioPrioriteit" onclick="selPrio(this,'prioriteit')"><span class="ti">🟠</span>Prioriteit</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+    </div>
     </div>
 
     <div class="slbl">Opdracht</div>
