@@ -66,8 +66,8 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 /* TYPE / PRIO GRID */
 .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
 .prio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
-.tbtn { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 10px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
-.tbtn.sel { border-width: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.tbtn { background: var(--surface); border: 2px solid var(--border2); border-radius: var(--r); padding: 12px 8px; text-align: center; cursor: pointer; font-size: 13px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
+.tbtn.sel { border-width: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transform: scale(1.02); }
 .tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
 .tbtn.sel { font-weight: 700; box-shadow: 0 0 0 2px var(--accent); }
 .typelabel-inbraak.sel { box-shadow: 0 0 0 2px #1a3a6a; }
@@ -150,7 +150,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .sopt { flex: 1; padding: 10px 4px; border-radius: var(--r); border: 2px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
 .sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border-color: #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
 .sopt.a-bezig { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
-.sopt.a-klaar { background: #d4edda; color: #1a5c2e; border-color: #1a5c2e; font-weight: 700; box-shadow: 0 2px 6px rgba(26,92,46,0.2); }
+.sopt.a-spoed { background: #fde8e8; color: #c0392b; border-color: #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
+.sopt.a-normaal { background: #fef8e0; color: #8a6000; border-color: #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 .time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
 
@@ -1476,7 +1477,7 @@ async function showDetail(id){
       <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
       <div style="display:flex;gap:6px">
-        <button onclick="openEdit(${id})" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;font-family:inherit">✏️</button>
+        <button onclick="openEdit(${id})" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;font-family:inherit">✏️ Bewerken</button>
         <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
       </div>
     </div>
@@ -1486,7 +1487,7 @@ async function showDetail(id){
     </div>
     <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
-    <div class="status-row">${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" style="${p==='spoed'?'background:var(--red-bg);color:var(--red);border-color:#e8c0bc':'background:var(--accent-bg);color:var(--accent);border-color:#e8d090'}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}</div>
+    <div class="status-row">${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}</div>
     <div class="slbl">Opdrachtgever</div>
     <div class="drow"><div class="drow-l">Type</div>
       <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value)">
@@ -1584,11 +1585,14 @@ async function showDetail(id){
 
 async function verwijderFoto(id, type, idx){
   if(!confirm('Foto verwijderen?')) return;
-  const o=orders.find(x=>x.id===id); if(!o||!o.fotos) return;
+  const numId = typeof id === 'string' ? parseInt(id) : id;
+  const o=orders.find(x=>x.id===numId);
+  if(!o){ showToast('Opdracht niet gevonden',true); return; }
+  if(!o.fotos){ showToast('Geen foto data',true); return; }
   o.fotos[type][idx]=null;
   await dbxWrite();
-  showToast('Foto verwijderd');
-  showDetail(id);
+  showToast('✓ Foto verwijderd');
+  showDetail(numId);
 }
 
 async function changeStatus(id,status){
