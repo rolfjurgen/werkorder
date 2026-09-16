@@ -1326,8 +1326,12 @@ function renderList(){
   const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
   const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
-  const prio = o.prioriteit||'normaal';
-  const pBadge = o => prio==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':prio==='prioriteit'?'<span class="badge" style="background:#fff0e0;color:#c06000;border:1px solid #e07800">🟠 Prioriteit</span>':'';
+  const pBadge = o => {
+    const p = o.prioriteit||'normaal';
+    if(p==='spoed') return '<span class="badge b-spoed">🔴 Spoed</span>';
+    if(p==='prioriteit') return '<span class="badge" style="background:#fff0e0;color:#c06000;border:1px solid #e07800">🟠 Prioriteit</span>';
+    return '';
+  };
 
   el.innerHTML=filtered.map(o=>{
     const tk=typeKleur(o.type);
