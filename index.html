@@ -151,6 +151,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border-color: #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
 .sopt.a-bezig { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
 .sopt.a-spoed { background: #fde8e8; color: #c0392b; border-color: #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
+.sopt.a-prioriteit { background: #fff0e0; color: #c06000; border-color: #e07800; font-weight: 700; box-shadow: 0 2px 6px rgba(224,120,0,0.2); }
 .sopt.a-normaal { background: #fef8e0; color: #8a6000; border-color: #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 .time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
@@ -201,7 +202,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .typelabel-keuken { background: #d4edda; color: #1a5c2e; border-color: #5a9e6e; font-weight:600; }
 .typelabel-oplever { background: #d8eaf8; color: #0d3a7a; border-color: #6a9abf; font-weight:600; }
 .typelabel-overig { background: #e0e4e8; color: #1a2a3a; border-color: #7a8a9a; font-weight:600; }
-.typelabel-lakschade { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight:600; }
+.typelabel-sanitair { background: #e8f4fd; color: #0a4a7a; border-color: #5a9abf; font-weight:600; }
+.type-sanitair { border-left: 4px solid #0a4a7a; }
 
 /* BINNEN/BUITEN */
 .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
@@ -304,6 +306,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
       <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
       <button class="tbtn typelabel-lakschade" onclick="selType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
+      <button class="tbtn typelabel-sanitair" onclick="selType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
       <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="f_overig_wrap" style="display:none">
@@ -317,6 +320,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
       <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn" id="prioPrioriteit" onclick="selPrio(this,'prioriteit')"><span class="ti">🟠</span>Prioriteit</button>
       <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
     </div>
 
@@ -449,6 +453,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d4edda;color:#1a5c2e;border:1px solid #5a9e6e;cursor:pointer;font-weight:600" onclick="filterOpType('keuken')">🍽️ Keukens/Tegels</span>
     <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d8eaf8;color:#0d3a7a;border:1px solid #6a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('oplever')">🏗️ Opleverpunten</span>
     <span id="leg-lakschade" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fde8cc;color:#7a3300;border:1px solid #d4800a;cursor:pointer;font-weight:600" onclick="filterOpType('lakschade')">🎨 Lakschade</span>
+    <span id="leg-sanitair" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f4fd;color:#0a4a7a;border:1px solid #5a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('sanitair')">🚿 Sanitair</span>
     <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e0e4e8;color:#1a2a3a;border:1px solid #7a8a9a;cursor:pointer;font-weight:600" onclick="filterOpType('overig')">🔧 Overig</span>
   </div>
   <div class="filter-bar">
@@ -518,6 +523,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
       <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
       <button class="tbtn typelabel-lakschade" onclick="selEditType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
+      <button class="tbtn typelabel-sanitair" onclick="selEditType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
       <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
     </div>
     <div id="e_overig_wrap" style="display:none">
@@ -526,6 +532,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Prioriteit</div>
     <div class="prio-grid">
       <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn" id="eprioPrioriteit" onclick="selEditPrio(this,'prioriteit')"><span class="ti">🟠</span>Prioriteit</button>
       <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
     </div>
     <div class="slbl">Locatie werk</div>
@@ -999,6 +1006,7 @@ function typeKleur(type){
   if(type.includes('Inbraak')||type.includes('kozijn')||type.includes('deur')&&type.includes('Inbraak')) return 'inbraak';
   if(type.includes('Keuken')||type.includes('Tegel')) return 'keuken';
   if(type.includes('Oplever')) return 'oplever';
+  if(type.includes('Sanitair')||type.includes('sanitair')) return 'sanitair';
   if(type.includes('Lak')||type.includes('lak')||type.includes('Poort')||type.includes('poort')) return 'lakschade';
   return 'overig';
 }
@@ -1011,6 +1019,7 @@ function selType(btn,type){
 }
 function selPrio(btn,prio){
   document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('prioPrioriteit').classList.remove('sel');
   document.getElementById('prioNormaal').classList.remove('sel');
   btn.classList.add('sel'); selPrioVal=prio;
 }
@@ -1081,6 +1090,7 @@ function selEditType(btn,type){
 }
 function selEditPrio(btn,prio){
   document.getElementById('eprioSpoed').classList.remove('sel');
+  document.getElementById('eprioPrioriteit').classList.remove('sel');
   document.getElementById('eprioNormaal').classList.remove('sel');
   btn.classList.add('sel'); editPrioVal=prio;
 }
@@ -1204,7 +1214,7 @@ function statusLabel(s,o){
   if(s==='nieuw') return (o&&o.datum&&o.datum!=='')?'Gepland':'Nog te plannen';
   return s;
 }
-function prioRank(p){return p==='spoed'?0:1;}
+function prioRank(p){return p==='spoed'?0:p==='prioriteit'?1:2;}
 
 let sortRichting = 'desc'; // desc = nieuwste/hoogste eerst, asc = oudste/laagste eerst
 
@@ -1219,9 +1229,8 @@ let currentTypeFilter = 'alle';
 
 function filterOpType(type){
   currentTypeFilter = type;
-  ['alle','inbraak','keuken','oplever','lakschade','overig'].forEach(k=>{
+  ['alle','inbraak','keuken','oplever','lakschade','sanitair','overig'].forEach(k=>{
     const el=document.getElementById('leg-'+k);
-    if(el) el.style.fontWeight = k===type ? '900' : '600';
     if(el) el.style.outline = k===type ? '2px solid currentColor' : 'none';
   });
   renderList();
@@ -1317,7 +1326,8 @@ function renderList(){
   const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
   const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
-  const pBadge=o=>(o.prioriteit||'normaal')==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':'';
+  const prio = o.prioriteit||'normaal';
+  const pBadge = o => prio==='spoed'?'<span class="badge b-spoed">🔴 Spoed</span>':prio==='prioriteit'?'<span class="badge" style="background:#fff0e0;color:#c06000;border:1px solid #e07800">🟠 Prioriteit</span>':'';
 
   el.innerHTML=filtered.map(o=>{
     const tk=typeKleur(o.type);
@@ -1503,11 +1513,10 @@ async function showDetail(id){
     </div>
     <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
       <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
-      <button onclick="slaDetailOp(${id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Opslaan</button>
     </div>
     <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
-    <div class="status-row">${['spoed','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':'🟡 Normaal'}</div>`).join('')}</div>
+    <div class="status-row">${['spoed','prioriteit','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='prioriteit'?'🟠 Prioriteit':'🟡 Normaal'}</div>`).join('')}</div>
     <div class="slbl">Opdrachtgever</div>
     <div class="drow"><div class="drow-l">Type</div>
       <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value)">
@@ -1593,6 +1602,7 @@ async function showDetail(id){
       </label>
       ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="grid-column:span 2">📋 Akte van Cessie PDF</button>`:''}
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
+      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
       <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
     </div>
