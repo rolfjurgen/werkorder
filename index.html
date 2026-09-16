@@ -351,10 +351,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="foto-slot" id="slotVoor2" onclick="document.getElementById('fotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
       <div class="foto-slot" id="slotVoor3" onclick="document.getElementById('fotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
     </div>
-    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor0','voor',0)">
-    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor1','voor',1)">
-    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor2','voor',2)">
-    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" onchange="handleFoto(this,'slotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
@@ -363,10 +363,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="foto-slot" id="slotNa2" onclick="document.getElementById('fotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
       <div class="foto-slot" id="slotNa3" onclick="document.getElementById('fotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
     </div>
-    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa0','na',0)">
-    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa1','na',1)">
-    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa2','na',2)">
-    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa3','na',3)">
+    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -1498,7 +1498,6 @@ async function showDetail(id){
       <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
       <div style="display:flex;gap:6px">
-        <button onclick="openEdit(${id})" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;font-family:inherit">✏️ Bewerken</button>
         <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
       </div>
     </div>
@@ -1594,7 +1593,6 @@ async function showDetail(id){
       </label>
       ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="grid-column:span 2">📋 Akte van Cessie PDF</button>`:''}
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
-      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
       <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
     </div>
