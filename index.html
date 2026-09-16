@@ -66,7 +66,8 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 /* TYPE / PRIO GRID */
 .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
 .prio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
-.tbtn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
+.tbtn { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 10px 8px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
+.tbtn.sel { border-width: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
 .tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
 .tbtn.sel { font-weight: 700; box-shadow: 0 0 0 2px var(--accent); }
 .typelabel-inbraak.sel { box-shadow: 0 0 0 2px #1a3a6a; }
@@ -146,10 +147,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .drow-l { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
 .drow-v { font-size: 14px; color: var(--text); line-height: 1.5; }
 .status-row { display: flex; gap: 6px; margin-bottom: 12px; }
-.sopt { flex: 1; padding: 8px 4px; border-radius: var(--r); border: 1px solid var(--border); text-align: center; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
-.sopt.a-nieuw { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
-.sopt.a-bezig { background: var(--accent-bg); color: var(--accent); border-color: #e8d090; }
-.sopt.a-klaar { background: var(--green-bg); color: var(--green); border-color: #b0ddc0; }
+.sopt { flex: 1; padding: 10px 4px; border-radius: var(--r); border: 2px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
+.sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border-color: #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
+.sopt.a-bezig { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
+.sopt.a-klaar { background: #d4edda; color: #1a5c2e; border-color: #1a5c2e; font-weight: 700; box-shadow: 0 2px 6px rgba(26,92,46,0.2); }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 .time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
 
@@ -1456,21 +1457,28 @@ async function showDetail(id){
     }
   }
 
-  const fVHTML=fotoVoorUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Voor ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
+  const fVHTML=fotoVoorUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.voor[i];
+    return (url||pad)?
+    `<div class="foto-detail-item">${url?`<img src="${url}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}">`:`<div style="aspect-ratio:4/3;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">Foto laden...</div>`}<div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
     `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`
-  ).join('');
-  const fNHTML=fotoNaUrls.map((url,i)=>url?
-    `<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="Na ${i+1}"><div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
+  }).join('');
+  const fNHTML=fotoNaUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.na[i];
+    return (url||pad)?
+    `<div class="foto-detail-item">${url?`<img src="${url}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}">`:`<div style="aspect-ratio:4/3;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">Foto laden...</div>`}<div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
     `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`
-  ).join('');
+  }).join('');
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
       <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
       <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
-      <div style="font-size:16px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
-      <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
+      <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="openEdit(${id})" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;cursor:pointer;font-family:inherit">✏️</button>
+        <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
+      </div>
     </div>
     <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
       <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
