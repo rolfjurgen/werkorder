@@ -844,6 +844,8 @@ function goDetail() {
   document.getElementById('panel-detail').classList.add('active');
   document.getElementById('detailTab').style.display='block';
   document.getElementById('detailTab').classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('panel-detail').scrollTop=0;
 }
 
 // ── SIGNATURE ────────────────────────────────────────────────
@@ -1459,16 +1461,33 @@ async function showDetail(id){
   }
 
   const fVHTML=fotoVoorUrls.map((url,i)=>{
-    const pad=o.fotos&&o.fotos.voor[i];
-    return (url||pad)?
-    `<div class="foto-detail-item">${url?`<img src="${url}" onclick="openLightbox('${o.fotos.voor[i]}')" alt="Voor ${i+1}">`:`<div style="aspect-ratio:4/3;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">Foto laden...</div>`}<div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Voor ${i+1}<button onclick="verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
-    `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`
+    const pad=o.fotos&&o.fotos.voor&&o.fotos.voor[i];
+    if(pad){
+      return `<div class="foto-detail-item">
+        ${url?`<img src="${url}" onclick="openLightbox('${pad}')" alt="Voor ${i+1}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer">`:
+        `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;cursor:pointer" onclick="openLightbox('${pad}')">🔄 Tik om te laden</div>`}
+        <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">
+          Voor ${i+1}
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">🗑️</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`;
   }).join('');
+
   const fNHTML=fotoNaUrls.map((url,i)=>{
-    const pad=o.fotos&&o.fotos.na[i];
-    return (url||pad)?
-    `<div class="foto-detail-item">${url?`<img src="${url}" onclick="openLightbox('${o.fotos.na[i]}')" alt="Na ${i+1}">`:`<div style="aspect-ratio:4/3;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">Foto laden...</div>`}<div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">Na ${i+1}<button onclick="verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;font-family:inherit">🗑️</button></div></div>`:
-    `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`
+    const pad=o.fotos&&o.fotos.na&&o.fotos.na[i];
+    if(pad){
+      return `<div class="foto-detail-item">
+        ${url?`<img src="${url}" onclick="openLightbox('${pad}')" alt="Na ${i+1}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer">`:
+        `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#999;cursor:pointer" onclick="openLightbox('${pad}')">🔄 Tik om te laden</div>`}
+        <div class="foto-detail-label" style="display:flex;justify-content:space-between;align-items:center">
+          Na ${i+1}
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">🗑️</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`;
   }).join('');
 
   document.getElementById('detailContent').innerHTML=`
