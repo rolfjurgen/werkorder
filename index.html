@@ -701,12 +701,17 @@ function logout() {
 async function dbxRead() {
   setSyncStatus('laden...','busy');
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 30000);
     const r = await fetch('https://content.dropboxapi.com/2/files/download', {
-      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})},
+      signal: controller.signal
     });
-    if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); return; }
+    clearTimeout(timeout);
+    if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); renderList(); return; }
     if (!r.ok) throw new Error(r.status);
-    orders = JSON.parse(await r.text());
+    const text = await r.text();
+    orders = JSON.parse(text);
     // Migreer oude type benamingen
     orders = orders.map(o=>{
       if(!o.type) return o;
@@ -717,9 +722,11 @@ async function dbxRead() {
       return o;
     });
     setSyncStatus('gesynchroniseerd','ok');
+    renderList();
   } catch(e) {
     setSyncStatus('offline — lokaal','err');
     orders = JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]');
+    renderList();
   }
 }
 async function dbxWrite() {
