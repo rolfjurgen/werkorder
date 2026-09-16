@@ -1468,8 +1468,7 @@ async function showDetail(id){
     const pad=o.fotos&&o.fotos.voor&&o.fotos.voor[i];
     if(pad){
       return `<div class="foto-detail-item">
-        ${url?`<img src="${url}" onclick="openLightboxIdx(${id},'voor',${i})" alt="Voor ${i+1}">`:
-        `<div style="aspect-ratio:4/3;background:#eee;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">🔄 Laden...</div>`}
+        <img id="fotoV_${id}_${i}" onclick="openLightboxIdx(${id},'voor',${i})" alt="Voor ${i+1}" style="cursor:pointer">
         <div class="foto-detail-label">
           <span>Voor ${i+1}</span>
           <button onclick="event.stopPropagation();verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
@@ -1483,8 +1482,7 @@ async function showDetail(id){
     const pad=o.fotos&&o.fotos.na&&o.fotos.na[i];
     if(pad){
       return `<div class="foto-detail-item">
-        ${url?`<img src="${url}" onclick="openLightboxIdx(${id},'na',${i})" alt="Na ${i+1}">`:
-        `<div style="aspect-ratio:4/3;background:#eee;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999">🔄 Laden...</div>`}
+        <img id="fotoN_${id}_${i}" onclick="openLightboxIdx(${id},'na',${i})" alt="Na ${i+1}" style="cursor:pointer">
         <div class="foto-detail-label">
           <span>Na ${i+1}</span>
           <button onclick="event.stopPropagation();verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
@@ -1604,6 +1602,11 @@ async function showDetail(id){
 
   goDetail();
   if(!o.sig) setTimeout(()=>initSigPad('detailSigCanvas'),100);
+  // Foto src BUITEN innerHTML zetten zodat grote base64 de DOM niet breekt
+  setTimeout(()=>{
+    fotoVoorUrls.forEach((url,i)=>{ if(url){ const el=document.getElementById(`fotoV_${id}_${i}`); if(el) el.src=url; }});
+    fotoNaUrls.forEach((url,i)=>{ if(url){ const el=document.getElementById(`fotoN_${id}_${i}`); if(el) el.src=url; }});
+  },50);
 }
 
 async function verwijderFoto(id, type, idx){
