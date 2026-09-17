@@ -390,7 +390,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>BTW terug (BTW-plichtige ondernemers) (€)</label><input type="number" id="f_btwterug" placeholder="0.00" step="0.01" min="0"></div>
       <div style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px">
         <strong style="color:var(--text)">CESSIE / OVERDRACHT VORDERINGSRECHT</strong><br>
-        Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>Rolf Jurgen Schadeservice & Laktechniek</strong>, komt de vordering geheel ten laste van de cliënt.
+        Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.
       </div>
     </div>
 
@@ -1638,17 +1638,14 @@ async function showDetail(id){
     `:''}
     <div class="divider"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 Werkbon</button>
-      <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 8px;font-size:12px;cursor:pointer">
-        <input type="checkbox" id="fotoOptie_${id}" style="width:15px;height:15px"> 📸 met foto's
-      </label>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})" style="grid-column:span 2">📄 Werkbon PDF</button>
       ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="grid-column:span 2">📋 Akte van Cessie PDF</button>`:''}
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
       <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
     </div>
-    ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren na facturatie</button>`:''}`;
+    ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren in Dropbox</button>`:''}`;
 
   goDetail();
   if(!o.sig) setTimeout(()=>initSigPad('detailSigCanvas'),100);
@@ -1893,7 +1890,7 @@ async function mailOrder(id){
   const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`Opdrachtgever:      ${o.og_naam}${o.og_contact?' — '+o.og_contact:''}\n`:'';
   const refRegel=o.og_type==='aannemer'&&o.og_ref?`Uw referentie:      ${o.og_ref}\n`:'';
-  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nRolf Jurgen Schadeservice & Laktechniek\nT: +31(0)45-5350200\nmail@rolfjurgen.nl`;
+  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
   try{await navigator.clipboard.writeText(body);}catch(e){}
   const onderwerpEnc=encodeURIComponent(onderwerp);
   const bodyEnc=encodeURIComponent(body);
@@ -2071,7 +2068,7 @@ function printWerkbon(){
   const o=orders.find(x=>x.id===id);if(!o)return;
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   document.getElementById('printOutput').innerHTML=`<div class="werkbon">
-    <div class="werkbon-hdr"><div><div class="werkbon-logo">Rolf Jurgen Schadeservice & Laktechniek</div><div style="font-size:11px;color:#666;margin-top:3px">mail@rolfjurgen.nl | www.rolfjurgen.nl</div></div>
+    <div class="werkbon-hdr"><div><div class="werkbon-logo">REPAFIN by Rolf Jurgen</div><div style="font-size:11px;color:#666;margin-top:3px">mail@repafin.nl | www.repafin.nl</div></div>
     <div style="font-family:monospace;font-size:12px;color:#666">${o.nr}<br>${new Date().toLocaleDateString('nl-NL')}</div></div>
     <table>
       ${o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}</td></tr>`:''}
@@ -2102,7 +2099,7 @@ function printList(){
   const rows=filtered.map(o=>`<tr><td>${o.nr}</td><td>${hoofd(o)}</td><td>${o.adres||''}</td><td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td><td>${statusLabelPrint(o.status,o)}</td></tr>`).join('');
   document.getElementById('printOutput').innerHTML=`<div class="print-list">
     <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #b5820c;padding-bottom:10px">
-      <div><div style="font-size:18px;font-weight:700;color:#b5820c">Rolf Jurgen Schadeservice & Laktechniek</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
+      <div><div style="font-size:18px;font-weight:700;color:#b5820c">REPAFIN by Rolf Jurgen</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
       <div style="font-size:12px;color:#666">${filtered.length} opdrachten</div>
     </div>
     <table><thead><tr><th>Nr</th><th>Opdrachtgever</th><th>Adres</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
