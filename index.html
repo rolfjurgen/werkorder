@@ -90,6 +90,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 .sig-top span { font-size: 12px; color: var(--text3); }
 .sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: inherit; }
 canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair; background: #fafaf8; }
+@media (min-width: 700px) {
+  canvas.sigpad { height: 90px; }
+}
 .sig-hint { padding: 6px 12px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
 .sig-preview { width: 100%; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
 
@@ -256,6 +259,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="tab active" data-tab="overzicht" onclick="goTab('overzicht')">Opdrachten</div>
   <div class="tab" data-tab="nieuw" onclick="goTab('nieuw')">+ Nieuw</div>
   <div class="tab" data-tab="detail" id="detailTab" style="display:none" onclick="goTab('detail')">Detail</div>
+  <div class="tab" data-tab="archief" onclick="goTab('archief')">Archief</div>
   <div class="tab" data-tab="print" onclick="goTab('print')">Printen</div>
 </div>
 
@@ -492,6 +496,23 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div id="detailContent"></div>
 </div>
 
+<!-- ARCHIEF -->
+<div class="panel" id="panel-archief">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="archiefSearchField" placeholder="Zoek in archief op naam of adres..." oninput="renderArchief()">
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button class="btn-compact btn-compact-edit" style="flex:1" onclick="laadArchiefIndex(true)">↻ Archief opnieuw indexeren</button>
+  </div>
+  <div id="archiefList"><div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Open dit tabblad om het archief te laden.</div></div></div>
+</div>
+
+<!-- ARCHIEF DETAIL -->
+<div class="panel" id="panel-archiefdetail">
+  <div id="archiefDetailContent"></div>
+</div>
+
 <!-- PRINTEN -->
 <div class="panel" id="panel-print">
   <div class="slbl" style="margin-top:0">Werkbon afdrukken</div>
@@ -660,6 +681,9 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 const DBX_APP_KEY = '1kdk0mz2o7kqea8';
 const DBX_REDIRECT = 'https://rolfjurgen.github.io/werkorder';
 const DBX_FILE = '/werkorders.json';
+const DBX_ARCHIEF_INDEX = '/Archief/_index.json';
+const DBX_TELLER = '/Config/teller.json';
+const TELLER_LOCAL_KEY = 'rj_teller_v1';
 const BACKUP_KEY = 'rj_backup_v3';
 const QUEUE_KEY = 'rj_queue_v3';
 const DELETED_KEY = 'rj_deleted_v3';
@@ -675,6 +699,9 @@ let newFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
 let editFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
 let currentStatFilter = 'alle'; // 'alle','nogteplannen','bezig','klaar'
 const sigStates = {};
+let archiveIndex = null;       // null = nog niet geladen, array = geladen
+let archiefBezigOpbouw = false;
+let laatsteNr = null;          // permanente opdrachtnummer-teller, null = nog niet geladen
 
 // ── AUTH ─────────────────────────────────────────────────────
 function startAuth() {
@@ -693,6 +720,7 @@ function handleCallback() {
 }
 function logout() {
   localStorage.removeItem('dbx_token'); token = null; orders = [];
+  archiveIndex = null; laatsteNr = null;
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('newForm').style.display='none';
   document.getElementById('logoutBtn').style.display='none';
@@ -799,6 +827,64 @@ async function dbxShareLink(path) {
     const d=await r.json(); return d.url||null;
   } catch(e){return null;}
 }
+async function dbxListFolder(path) {
+  if (!token) return [];
+  let entries = [];
+  try {
+    let r = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({ path, recursive:false })
+    });
+    if (r.status===409) return []; // map bestaat nog niet — leeg archief
+    if (!r.ok) throw new Error(r.status);
+    let d = await r.json();
+    entries = entries.concat(d.entries||[]);
+    while (d.has_more) {
+      r = await fetch('https://api.dropboxapi.com/2/files/list_folder/continue', {
+        method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body: JSON.stringify({ cursor:d.cursor })
+      });
+      if (!r.ok) break;
+      d = await r.json();
+      entries = entries.concat(d.entries||[]);
+    }
+  } catch(e) { return entries; }
+  return entries;
+}
+async function dbxDelete(path) {
+  if (!token) return false;
+  try {
+    const r = await fetch('https://api.dropboxapi.com/2/files/delete_v2', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({ path })
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function dbxReadJSON(path) {
+  if (!token) return null;
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path})}
+    });
+    if (!r.ok) return null;
+    const text = await r.text();
+    return JSON.parse(text);
+  } catch(e) { return null; }
+}
+async function dbxWriteJSON(path, data) {
+  if (!token) return false;
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
+      method:'POST', headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path,mode:'overwrite',autorename:false}),
+        'Content-Type':'application/octet-stream'
+      }, body: JSON.stringify(data,null,2)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
 function setSyncStatus(msg,type) {
   const el=document.getElementById('syncStatus');
   el.textContent=msg;
@@ -815,6 +901,46 @@ async function syncQueue() {
   const q=localStorage.getItem(QUEUE_KEY); if(!q||!token) return;
   orders=JSON.parse(q); await dbxWrite();
   localStorage.removeItem(QUEUE_KEY); renderQueueBanner(); showToast('✓ Gesynchroniseerd'); renderList();
+}
+
+// ── NUMMERING (permanente teller, voorkomt dubbele RJ-nummers na archiveren) ──
+function nrGetal(nr){ const m=/RJ-(\d+)/.exec(nr||''); return m?parseInt(m[1],10):0; }
+async function haalHoogsteNrUitArchief(){
+  const entries = await dbxListFolder('/Archief');
+  let hoogste = 0;
+  entries.forEach(e=>{
+    const m=/^RJ-(\d+)\.json$/.exec(e.name||'');
+    if(m) hoogste=Math.max(hoogste,parseInt(m[1],10));
+  });
+  return hoogste;
+}
+async function zorgTeller(){
+  if (laatsteNr!==null) return laatsteNr;
+  const lokaal = parseInt(localStorage.getItem(TELLER_LOCAL_KEY)||'0',10) || 0;
+  let dbxWaarde = 0;
+  if (token) {
+    const d = await dbxReadJSON(DBX_TELLER);
+    if (d && typeof d.laatsteNr==='number') dbxWaarde = d.laatsteNr;
+  }
+  if (dbxWaarde>0 || lokaal>0) {
+    laatsteNr = Math.max(dbxWaarde, lokaal);
+  } else {
+    // Eerste keer: teller bestaat nog nergens — bepaal hoogste al gebruikte nummer
+    // uit actieve opdrachten én het archief, zodat we nooit een nummer hergebruiken.
+    const hoogsteActief = orders.reduce((m,o)=>Math.max(m,nrGetal(o.nr)),0);
+    const hoogsteArchief = token ? await haalHoogsteNrUitArchief() : 0;
+    laatsteNr = Math.max(hoogsteActief, hoogsteArchief);
+  }
+  localStorage.setItem(TELLER_LOCAL_KEY, String(laatsteNr));
+  if (token) await dbxWriteJSON(DBX_TELLER, {laatsteNr});
+  return laatsteNr;
+}
+async function volgendNr(){
+  await zorgTeller();
+  laatsteNr = laatsteNr + 1;
+  localStorage.setItem(TELLER_LOCAL_KEY, String(laatsteNr));
+  if (token) await dbxWriteJSON(DBX_TELLER, {laatsteNr});
+  return 'RJ-'+String(laatsteNr).padStart(4,'0');
 }
 
 // ── INIT ─────────────────────────────────────────────────────
@@ -846,12 +972,15 @@ function goTab(tab) {
     document.getElementById('detailContent').innerHTML='';
     document.getElementById('detailTab').style.display='none';
   }
+  const archDetEl=document.getElementById('archiefDetailContent');
+  if (archDetEl) archDetEl.innerHTML='';
 
   document.getElementById('panel-'+tab).classList.add('active');
   document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
 
   if (tab==='overzicht') renderList();
   if (tab==='print') renderPrintSelect();
+  if (tab==='archief') renderArchief();
 }
 
 function goDetail() {
@@ -864,11 +993,22 @@ function goDetail() {
   document.getElementById('panel-detail').scrollTop=0;
 }
 
+function goArchiefDetail() {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-archiefdetail').classList.add('active');
+  const archTab=document.querySelector('[data-tab="archief"]');
+  if(archTab) archTab.classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('panel-archiefdetail').scrollTop=0;
+}
+
 // ── SIGNATURE ────────────────────────────────────────────────
 function initSigPad(id) {
   const c=document.getElementById(id); if(!c)return;
   const dpr=window.devicePixelRatio||1, rect=c.getBoundingClientRect();
-  c.width=(rect.width||320)*dpr; c.height=140*dpr;
+  const sigH=rect.height||140;
+  c.width=(rect.width||320)*dpr; c.height=sigH*dpr;
   const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
   ctx.strokeStyle='#1c1916'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
   sigStates[id]={ctx,drawing:false,hasSig:false};
@@ -1139,7 +1279,7 @@ async function saveOrder(){
 
   const overig=document.getElementById('f_overig').value.trim();
   const typeLabel=selTypeVal==='Overige werkzaamheden'&&overig?`Overige werkzaamheden: ${overig}`:selTypeVal;
-  const nr='RJ-'+String(orders.length+1).padStart(4,'0');
+  const nr=await volgendNr();
   const mapPad=`/Fotos/${nr}_${Date.now()}`;
 
   setSyncStatus("foto's uploaden...",'busy');
@@ -1348,8 +1488,9 @@ function renderList(){
   });
 
   const el=document.getElementById('orderList');
-  if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>';return;}
-  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen opdrachten gevonden<br>met deze filters.</div></div>';return;}
+  const archiefHTML = zoek ? renderArchiefZoekResultaten(zoek) : '';
+  if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>'+archiefHTML;return;}
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen actieve opdrachten gevonden<br>met deze filters.</div></div>'+archiefHTML;return;}
 
   const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
@@ -1400,7 +1541,7 @@ function renderList(){
       </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('')+archiefHTML;
 }
 
 function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
@@ -1471,13 +1612,20 @@ function vervangHandtekening(id){
 async function archiveerOrder(id){
   if(!confirm('Opdracht archiveren? Hij verdwijnt uit het overzicht.')) return;
   const o=orders.find(x=>x.id===id); if(!o)return;
+  const archief={...o,gearchiveerd:new Date().toISOString()};
   if(token){
     try {
-      const archief={...o,gearchiveerd:new Date().toISOString()};
       await fetch('https://content.dropboxapi.com/2/files/upload',{
         method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Archief/${o.nr}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},
         body:JSON.stringify(archief,null,2)
       });
+      // Zoekindex bijwerken zodat de opdracht meteen vindbaar/terugvindbaar is
+      if(archiveIndex===null) await laadArchiefIndex();
+      if(archiveIndex){
+        archiveIndex=archiveIndex.filter(r=>r.nr!==o.nr);
+        archiveIndex.unshift(archiefIndexRecord(archief));
+        await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex);
+      }
     } catch(e){}
   }
   const del=JSON.parse(localStorage.getItem('rj_deleted_v3')||'[]');
@@ -1486,6 +1634,156 @@ async function archiveerOrder(id){
   await dbxWrite();
   goTab('overzicht');
   showToast(`✓ ${o.nr} gearchiveerd`);
+}
+
+// ── ARCHIEF (index, zoeken, terugzetten) ────────────────────
+function archiefIndexRecord(o){
+  return {
+    id:o.id, nr:o.nr, naam:o.naam||'', og_naam:o.og_naam||'', og_type:o.og_type||'particulier',
+    adres:o.adres||'', type:o.type||'', status:o.status||'', prioriteit:o.prioriteit||'normaal',
+    locatie:o.locatie||'binnen', datum:o.datum||'', gearchiveerd:o.gearchiveerd||new Date().toISOString()
+  };
+}
+async function laadArchiefIndex(forceer){
+  if(!token){ showToast('Verbind eerst met Dropbox',true); return archiveIndex||[]; }
+  if(archiveIndex && !forceer) return archiveIndex;
+  if(archiefBezigOpbouw) return archiveIndex||[];
+  archiefBezigOpbouw=true;
+  try{
+    if(!forceer){
+      const d = await dbxReadJSON(DBX_ARCHIEF_INDEX);
+      if(Array.isArray(d)){ archiveIndex=d; return archiveIndex; }
+    }
+    // Index ontbreekt (of handmatig herindexeren gevraagd) — volledige opbouw uit /Archief
+    showToast('📦 Archief indexeren, even geduld...');
+    setSyncStatus('archief indexeren...','busy');
+    const entries = (await dbxListFolder('/Archief')).filter(e=>e['.tag']==='file' && /^RJ-\d+\.json$/.test(e.name||''));
+    const nieuweIndex=[];
+    const CONCURRENCY=6;
+    for(let i=0;i<entries.length;i+=CONCURRENCY){
+      const batch=entries.slice(i,i+CONCURRENCY);
+      const resultaten=await Promise.all(batch.map(e=>dbxReadJSON('/Archief/'+e.name)));
+      resultaten.forEach(data=>{ if(data) nieuweIndex.push(archiefIndexRecord(data)); });
+    }
+    nieuweIndex.sort((a,b)=>new Date(b.gearchiveerd||0)-new Date(a.gearchiveerd||0));
+    archiveIndex=nieuweIndex;
+    await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex);
+    setSyncStatus('gesynchroniseerd','ok');
+    showToast(`✓ Archief geïndexeerd (${archiveIndex.length} opdrachten)`);
+  } finally {
+    archiefBezigOpbouw=false;
+  }
+  return archiveIndex||[];
+}
+function renderArchief(){
+  const el=document.getElementById('archiefList'); if(!el) return;
+  if(!token){ el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Verbind eerst met Dropbox.</div></div>'; return; }
+  if(archiveIndex===null){
+    el.innerHTML='<div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Archief laden...</div></div>';
+    laadArchiefIndex().then(()=>renderArchief());
+    return;
+  }
+  const zoek=(document.getElementById('archiefSearchField')?.value||'').toLowerCase().trim();
+  let lijst=[...archiveIndex];
+  if(zoek) lijst=lijst.filter(o=>archiefMatch(o,zoek));
+  if(!archiveIndex.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Nog geen gearchiveerde opdrachten.</div></div>'; return; }
+  if(!lijst.length){ el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen gearchiveerde opdrachten gevonden.</div></div>'; return; }
+  el.innerHTML=lijst.map(archiefKaartHTML).join('');
+}
+function archiefMatch(o,zoek){
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  return (hoofd||'').toLowerCase().includes(zoek)||(o.naam||'').toLowerCase().includes(zoek)||(o.adres||'').toLowerCase().includes(zoek)||(o.nr||'').toLowerCase().includes(zoek);
+}
+function archiefKaartHTML(o){
+  const tk=typeKleur(o.type);
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  return `<div class="ocard type-${tk}" style="opacity:.85" onclick="showArchiefDetail('${o.nr}')">
+    <div class="ocard-top">
+      <div><div class="onr">${o.nr}</div><div class="oname">${hoofd||'—'}</div></div>
+      <span class="badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2)">📦 Archief</span>
+    </div>
+    <div class="ometa">
+      ${o.datum?`<span>📅 ${fmtDate(o.datum)}</span>`:''}
+      ${o.adres?`<span>📍 ${o.adres}</span>`:''}
+      ${o.gearchiveerd?`<span>Gearchiveerd: ${fmtDate(o.gearchiveerd.slice(0,10))}</span>`:''}
+    </div>
+    ${o.type?`<div class="otype typelabel-${tk}" style="margin-top:5px">${o.type}</div>`:''}
+  </div>`;
+}
+function renderArchiefZoekResultaten(zoek){
+  if(!token) return `<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0">📦 Archief niet doorzoekbaar zonder Dropbox-verbinding</div>`;
+  if(archiveIndex===null){
+    if(!archiefBezigOpbouw) laadArchiefIndex().then(()=>renderList());
+    return `<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0">📦 Archief doorzoeken...</div>`;
+  }
+  const gevonden=archiveIndex.filter(o=>archiefMatch(o,zoek));
+  if(!gevonden.length) return '';
+  return `<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">📦 Gevonden in archief (${gevonden.length})</div>`
+    + gevonden.map(archiefKaartHTML).join('');
+}
+async function showArchiefDetail(nr){
+  if(!token){ showToast('Verbind eerst met Dropbox',true); return; }
+  setSyncStatus('archiefrecord laden...','busy');
+  const o=await dbxReadJSON('/Archief/'+nr+'.json');
+  setSyncStatus('gesynchroniseerd','ok');
+  if(!o){ showToast('Archiefrecord niet gevonden',true); return; }
+  const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+
+  const fotoVoorUrls=[null,null,null,null], fotoNaUrls=[null,null,null,null];
+  if(o.fotos){
+    for(let i=0;i<4;i++){
+      if(o.fotos.voor&&o.fotos.voor[i]) fotoVoorUrls[i]=await dbxGetFotoUrl(o.fotos.voor[i]);
+      if(o.fotos.na&&o.fotos.na[i]) fotoNaUrls[i]=await dbxGetFotoUrl(o.fotos.na[i]);
+    }
+  }
+  const fotoHTML=(urls,label)=>urls.filter(u=>u).map(url=>`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="${label}" style="cursor:pointer"></div>`).join('');
+
+  document.getElementById('archiefDetailContent').innerHTML=`
+    <div class="det-hdr">
+      <button class="back-btn" onclick="goTab('archief')">← Terug</button>
+      <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
+      <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2)">
+      📦 Alleen-lezen archiefweergave — gearchiveerd op ${o.gearchiveerd?fmtDate(o.gearchiveerd.slice(0,10)):'onbekende datum'}
+    </div>
+    <div class="slbl" style="margin-top:0">Opdrachtgever</div>
+    ${o.og_type==='aannemer'&&o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</div></div>`:''}
+    <div class="slbl">Locatie & klant</div>
+    <div class="drow"><div class="drow-l">Naam bewoner</div><div class="drow-v">${o.naam||'—'}</div></div>
+    <div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres||'—'}</div></div>
+    ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v">${o.tel}</div></div>`:''}
+    <div class="slbl">Opdracht</div>
+    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type||''}</div></div>
+    ${o.datum?`<div class="drow"><div class="drow-l">Datum uitvoering</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
+    ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
+    ${o.intern?`<div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern</div><div class="drow-v">${o.intern}</div></div>`:''}
+    ${fotoVoorUrls.some(u=>u)?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoHTML(fotoVoorUrls,'Voor')}</div>`:''}
+    ${fotoNaUrls.some(u=>u)?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoHTML(fotoNaUrls,'Na')}</div>`:''}
+    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:''}
+    ${o.verzekering?`<div class="slbl">Verzekeringsgeval</div>
+      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+      ${o.polisnr?`<div class="drow"><div class="drow-l">Polisnummer</div><div class="drow-v">${o.polisnr}</div></div>`:''}
+      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier nr.</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
+    `:''}
+    <div class="divider"></div>
+    <button class="btn btn-primary" onclick="herstelOrder('${o.nr}')">↩️ Terugzetten naar actief</button>
+    <button class="btn btn-secondary" onclick="goTab('archief')">← Terug naar archief</button>
+  `;
+  goArchiefDetail();
+}
+async function herstelOrder(nr){
+  if(!confirm(`Opdracht ${nr} terugzetten naar actief?`)) return;
+  const o=await dbxReadJSON('/Archief/'+nr+'.json');
+  if(!o){ showToast('Archiefrecord niet gevonden',true); return; }
+  delete o.gearchiveerd;
+  if(orders.some(x=>x.id===o.id)) o.id=Date.now(); // zeer uitzonderlijke id-botsing voorkomen
+  orders.unshift(o);
+  await dbxWrite();
+  await dbxDelete('/Archief/'+nr+'.json');
+  if(archiveIndex){ archiveIndex=archiveIndex.filter(r=>r.nr!==nr); await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex); }
+  showToast(`✓ ${nr} teruggezet naar actief`);
+  goTab('overzicht');
 }
 
 async function openBijlage(pad){
