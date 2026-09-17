@@ -303,8 +303,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Type werkzaamheden</div>
     <div class="type-grid">
       <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
-      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
-      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keuken/Tegel')"><span class="ti">🍽️</span>Keuken/Tegel</button>
+      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunt')"><span class="ti">🏗️</span>Opleverpunt</button>
       <button class="tbtn typelabel-lakschade" onclick="selType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
       <button class="tbtn typelabel-sanitair" onclick="selType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
       <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
@@ -397,9 +397,9 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Handtekening klant voor akkoord</div>
     <div id="sigHint" style="font-size:12px;color:var(--text3);margin-bottom:6px">Klant tekent voor akkoord uitvoering werkzaamheden.</div>
     <div id="sigHintCessie" style="display:none;font-size:12px;color:var(--accent);margin-bottom:6px;font-weight:500">+ Handtekening geldt tevens als akkoord akte van cessie.</div>
-    <div style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
-      <strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
-      <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.
+    <div id="sigTekstWrap" style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
+      <div id="sigTekstNL"></div>
+      <div id="sigTekstDE" style="margin-top:4px"></div>
     </div>
     <div class="sig-wrap">
       <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
@@ -452,9 +452,9 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <span style="font-size:11px;color:var(--text3)">Type:</span>
     <span id="leg-alle" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);cursor:pointer" onclick="filterOpType('alle')">Alle</span>
     <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#dce8f8;color:#0a2a6e;border:1px solid #7a9fd4;cursor:pointer;font-weight:600" onclick="filterOpType('inbraak')">🔒 Inbraakschade</span>
-    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d4edda;color:#1a5c2e;border:1px solid #5a9e6e;cursor:pointer;font-weight:600" onclick="filterOpType('keuken')">🍽️ Keukens/Tegels</span>
-    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d8eaf8;color:#0d3a7a;border:1px solid #6a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('oplever')">🏗️ Opleverpunten</span>
     <span id="leg-lakschade" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fde8cc;color:#7a3300;border:1px solid #d4800a;cursor:pointer;font-weight:600" onclick="filterOpType('lakschade')">🎨 Lakschade</span>
+    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d4edda;color:#1a5c2e;border:1px solid #5a9e6e;cursor:pointer;font-weight:600" onclick="filterOpType('keuken')">🍽️ Keuken/Tegel</span>
+    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d8eaf8;color:#0d3a7a;border:1px solid #6a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('oplever')">🏗️ Opleverpunt</span>
     <span id="leg-sanitair" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f4fd;color:#0a4a7a;border:1px solid #5a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('sanitair')">🚿 Sanitair</span>
     <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e0e4e8;color:#1a2a3a;border:1px solid #7a8a9a;cursor:pointer;font-weight:600" onclick="filterOpType('overig')">🔧 Overig</span>
   </div>
@@ -522,8 +522,8 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
       <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
-      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keukens / Tegels')"><span class="ti">🍽️</span>Keukens / Tegels</button>
-      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunten')"><span class="ti">🏗️</span>Opleverpunten</button>
+      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keuken/Tegel')"><span class="ti">🍽️</span>Keuken/Tegel</button>
+      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunt')"><span class="ti">🏗️</span>Opleverpunt</button>
       <button class="tbtn typelabel-lakschade" onclick="selEditType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
       <button class="tbtn typelabel-sanitair" onclick="selEditType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
       <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
@@ -719,8 +719,8 @@ async function dbxRead() {
       if(!o.type) return o;
       if(o.type==='Overig'||o.type==='Overig werkzaamheden') o.type='Overige werkzaamheden';
       if(o.type==='Inbraakschade kozijn/deur') o.type='Inbraakschade';
-      if(o.type==='Keukenblad herstellen') o.type='Keukens / Tegels';
-      if(o.type==='Opleverpunten herstellen') o.type='Opleverpunten';
+      if(o.type==='Keukenblad herstellen') o.type='Keuken/Tegel';
+      if(o.type==='Opleverpunt herstellen') o.type='Opleverpunt';
       return o;
     });
     setSyncStatus('gesynchroniseerd','ok');
@@ -1037,11 +1037,27 @@ function toggleOG(){
 }
 
 // ── OPDRACHTGEVER TYPE SELECTIE ───────────────────────────────
+function updateSigTekst(){
+  const ogType = document.getElementById('f_og_type') ? document.getElementById('f_og_type').value : 'particulier';
+  const metBetaling = ogType !== 'aannemer';
+  const nlTekst = metBetaling
+    ? '<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.'
+    : '<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden. (Betalingsverplichting ligt bij de opdrachtgever.)';
+  const deTekst = metBetaling
+    ? '<strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.'
+    : '<strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten. (Die Zahlungsverpflichtung liegt beim Auftraggeber.)';
+  const nl = document.getElementById('sigTekstNL');
+  const de = document.getElementById('sigTekstDE');
+  if(nl) nl.innerHTML = nlTekst;
+  if(de) de.innerHTML = deTekst;
+}
+
 function selOGType(type){
   document.getElementById('ogParticulier').classList.toggle('sel', type==='particulier');
   document.getElementById('ogBedrijf').classList.toggle('sel', type==='bedrijf');
   document.getElementById('f_og_extra').style.display = type==='bedrijf'?'block':'none';
   document.getElementById('f_og_type').value = type==='bedrijf'?'aannemer':'particulier';
+  updateSigTekst();
 }
 
 // ── SPRAAK INVOER ─────────────────────────────────────────────
@@ -1196,6 +1212,9 @@ async function saveOrder(){
   document.getElementById('f_datum').value=new Date().toISOString().split('T')[0];
   document.getElementById('f_agenda_tijd').value='08:00';
   document.getElementById('f_og_type').value='particulier'; toggleOG();
+  document.getElementById('ogParticulier').classList.add('sel');
+  document.getElementById('ogBedrijf').classList.remove('sel');
+  updateSigTekst();
   document.getElementById('f_overig_wrap').style.display='none';
   document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
   selTypeVal=''; selPrioVal='normaal';
@@ -1420,6 +1439,12 @@ async function handleDetailFoto(input,type,idx,id){
     const pad=await dbxUploadFoto(`${o.fotoMap}/${type}_${idx+1}.jpg`,compressed);
     if(pad){
       o.fotos[type][idx]=`dropbox:${o.fotoMap}/${type}_${idx+1}.jpg`;
+      // Sla ook eventuele onopgeslagen tekstveldwijzigingen op
+      if(Object.keys(detailWijzigingen).length>0){
+        const idx2=orders.findIndex(x=>x.id===id);
+        if(idx2>=0) Object.assign(orders[idx2],detailWijzigingen);
+        detailWijzigingen={};
+      }
       await dbxWrite();
       showToast(`✅ Foto ${type==='voor'?'voor':'na'} ${idx+1} opgeslagen`);
       showDetail(id);
@@ -1590,8 +1615,12 @@ async function showDetail(id){
     <button onclick="vervangHandtekening(${id})" style="width:100%;padding:9px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:7px">✍️ Handtekening vervangen</button>`
     :`<div class="sig-wrap" id="detailSigWrap">
       <div style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
-        <strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
-        <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.
+        ${o.og_type==='aannemer'
+          ? `<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden. <em>(Betalingsverplichting ligt bij de opdrachtgever.)</em><br>
+             <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten. <em>(Die Zahlungsverpflichtung liegt beim Auftraggeber.)</em>`
+          : `<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
+             <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.`
+        }
       </div>
       <div class="sig-top"><span>Teken hieronder / Unterschrift</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
       <canvas id="detailSigCanvas" class="sigpad"></canvas>
@@ -1636,6 +1665,12 @@ async function verwijderFoto(id, type, idx){
   const o=orders.find(x=>x.id===numId);
   if(!o){ showToast('Opdracht niet gevonden',true); return; }
   if(!o.fotos){ showToast('Geen foto data',true); return; }
+  // Sla onopgeslagen wijzigingen eerst op
+  if(Object.keys(detailWijzigingen).length>0){
+    const idx2=orders.findIndex(x=>x.id===numId);
+    if(idx2>=0) Object.assign(orders[idx2],detailWijzigingen);
+    detailWijzigingen={};
+  }
   o.fotos[type][idx]=null;
   await dbxWrite();
   showToast('✓ Foto verwijderd');
@@ -2083,7 +2118,7 @@ function showToast(msg,isErr){
 }
 
 // ── START ────────────────────────────────────────────────────
-window.addEventListener('load',init);
+window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); });
 </script>
 </body>
 </html>
