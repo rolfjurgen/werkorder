@@ -1980,7 +1980,7 @@ async function savePDF(id, checkboxEl){
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
   const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
   const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
-  const tijdRegel=(o.tijd_vertrek||o.tijd_werk_van||o.tijd_terug_vertrek)?`<tr><td>Tijdregistratie</td><td>${o.tijd_vertrek&&o.tijd_aankomst?`🚗 Heen: ${o.tijd_vertrek} → ${o.tijd_aankomst}<br>`:''}${o.tijd_werk_van&&o.tijd_werk_tot?`🔨 Werk: ${o.tijd_werk_van} → ${o.tijd_werk_tot}<br>`:''}${o.tijd_terug_vertrek&&o.tijd_terug_aankomst?`🚗 Terug: ${o.tijd_terug_vertrek} → ${o.tijd_terug_aankomst}`:''}</td></tr>`:'';
+  const tijdRegel='';
   const cessieTekstPDF = o.cessie_taal==='de' ? {
     titel: 'ABTRETUNGSERKLÄRUNG',
     tekst: 'Der/Die Unterzeichnende tritt seine/ihre Forderung gegenüber dem Versicherer an <strong>REPAFIN by Rolf Jurgen</strong> ab und erteilt dem Versicherer unwiderruflich Auftrag und Vollmacht, den ihm/ihr zustehenden Betrag direkt auf das auf der Rechnung angegebene Konto auszuzahlen. Falls der Versicherer aus irgendeinem Grund nicht an <strong>REPAFIN by Rolf Jurgen</strong> zahlt, geht die Forderung vollständig zu Lasten des Kunden.',
