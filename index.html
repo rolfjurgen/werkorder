@@ -153,12 +153,13 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .drow-v { font-size: 14px; color: var(--text); line-height: 1.5; }
 .status-row { display: flex; gap: 6px; margin-bottom: 12px; }
 .sopt { flex: 1; padding: 10px 4px; border-radius: var(--r); border: 2px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
-.sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border-color: #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
-.sopt.a-bezig { background: #fde8cc; color: #7a3300; border-color: #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
+.sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border: 2px solid #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
+.sopt.a-bezig { background: #fde8cc; color: #7a3300; border: 2px solid #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
+.sopt.a-klaar { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); font-weight: 700; box-shadow: 0 2px 6px rgba(58,107,75,0.2); }
 .sopt.a-spoed { background: #fde8e8; color: #c0392b; border: 2px solid #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
 .sopt.a-prioriteit { background: #fff0e0; color: #c06000; border: 2px solid #e07800; font-weight: 700; box-shadow: 0 2px 6px rgba(224,120,0,0.2); }
 .sopt.a-normaal { background: #fef8e0; color: #8a6000; border: 2px solid #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
-.sopt:not(.a-spoed):not(.a-prioriteit):not(.a-normaal) { border: 1px solid var(--border); }
+.sopt:not(.a-spoed):not(.a-prioriteit):not(.a-normaal):not(.a-nieuw):not(.a-bezig):not(.a-klaar) { border: 1px solid var(--border); }
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 .time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
 
@@ -199,17 +200,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* TYPEWERK KLEUREN */
-.type-inbraak { border-left: 4px solid #0a2a6e; }
-.type-keuken { border-left: 4px solid #1a5c2e; }
-.type-oplever { border-left: 4px solid #0d3a7a; }
-.type-overig { border-left: 4px solid #1a2a3a; }
-.type-lakschade { border-left: 4px solid #d4800a; }
+.type-inbraak, .type-keuken, .type-oplever, .type-overig, .type-lakschade, .type-sanitair { border-left: 1px solid var(--border); }
 .typelabel-inbraak { background: #dce8f8; color: #0a2a6e; border-color: #7a9fd4; font-weight:600; }
 .typelabel-keuken { background: #d4edda; color: #1a5c2e; border-color: #5a9e6e; font-weight:600; }
 .typelabel-oplever { background: #d8eaf8; color: #0d3a7a; border-color: #6a9abf; font-weight:600; }
 .typelabel-overig { background: #e0e4e8; color: #1a2a3a; border-color: #7a8a9a; font-weight:600; }
 .typelabel-sanitair { background: #e8f4fd; color: #0a4a7a; border-color: #5a9abf; font-weight:600; }
-.type-sanitair { border-left: 4px solid #0a4a7a; }
 
 /* BINNEN/BUITEN */
 .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
@@ -227,6 +223,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 .btn-compact-blue { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
 .btn-compact-edit { background: var(--surface2); color: var(--text2); border-color: var(--border2); }
 .btn-compact-danger { background: var(--red-bg); color: var(--red); border-color: #e8c0bc; }
+.btn-compact-accent { background: var(--accent-bg); color: var(--accent); border-color: #e8d090; }
 
 @media print {
   body > * { display: none !important; }
@@ -488,6 +485,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <option value="ontvangen">Aanmaakdatum (nr.)</option>
       <option value="deadline">Deadline</option>
       <option value="datum">Datum afspraak</option>
+      <option value="naam">Alfabetisch (naam)</option>
     </select>
     <button id="sortRichtingBtn" onclick="toggleSortRichting()" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:7px 12px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--text);flex-shrink:0" title="Volgorde omdraaien">↓</button>
   </div>
@@ -1425,6 +1423,17 @@ function statFilter(type){
 function isNogTePlannen(o){ return o.status==='nieuw' && (!o.datum||o.datum===''); }
 function isGepland(o){ return o.status==='nieuw' && o.datum && o.datum!==''; }
 
+// Sorteersleutel voor "Alfabetisch": bij een bedrijf (via aannemer) het eerste woord
+// van de bedrijfsnaam, bij een particulier het laatste woord van de naam (de achternaam,
+// ook bij tussenvoegsels zoals "van der Berg" of "de Vries").
+function sorteerNaamSleutel(o){
+  const isBedrijf = o.og_type==='aannemer' && o.og_naam;
+  const naam = isBedrijf ? o.og_naam : (o.naam||'');
+  const delen = naam.trim().split(/\s+/).filter(Boolean);
+  if(!delen.length) return '';
+  return (isBedrijf ? delen[0] : delen[delen.length-1]).toLowerCase();
+}
+
 function renderList(){
   // Tellers — gebaseerd op datum afspraak en status
   const nogTeP = orders.filter(o=>isNogTePlannen(o)).length;
@@ -1486,6 +1495,7 @@ function renderList(){
     }
     else if(sort==='deadline'){if(!a.datum_deadline&&!b.datum_deadline)res=0;else if(!a.datum_deadline)res=1;else if(!b.datum_deadline)res=-1;else res=new Date(a.datum_deadline)-new Date(b.datum_deadline);}
     else if(sort==='datum'){if(!a.datum&&!b.datum)res=0;else if(!a.datum)res=1;else if(!b.datum)res=-1;else res=new Date(a.datum)-new Date(b.datum);}
+    else if(sort==='naam'){res=sorteerNaamSleutel(a).localeCompare(sorteerNaamSleutel(b),'nl',{sensitivity:'base'});}
     else res=new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);
     return sortRichting==='asc'?-res:res;
   });
@@ -1508,7 +1518,7 @@ function renderList(){
   el.innerHTML=filtered.map(o=>{
     const tk=typeKleur(o.type);
     const loc=o.locatie||'binnen';
-    const locLabel=loc==='buiten'?'<span style="font-size:11px;color:#c05a00;font-weight:500">🌤️ Buiten</span>':'<span style="font-size:11px;color:#1a4a8a;font-weight:500">🏠 Binnen</span>';
+    const locLabel=loc==='buiten'?'<span style="font-size:11px;color:var(--text2);font-weight:500">🌤️ Buiten</span>':'<span style="font-size:11px;color:var(--text2);font-weight:500">🏠 Binnen</span>';
     const telLink=o.tel?`<a href="tel:${o.tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.tel}</a>`:(o.og_tel?`<a href="tel:${o.og_tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.og_tel}</a>`:'');
     const indicators=`<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">
       ${hasFotos(o)?'<span title="Foto\'s aanwezig" style="font-size:16px">📷</span>':''}
@@ -1537,7 +1547,7 @@ function renderList(){
       ${telLink}
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <div class="otype typelabel-${tk}">${o.type}</div>
+          <div class="otype">${o.type}</div>
           ${locLabel}
         </div>
         ${indicators}
@@ -1710,7 +1720,7 @@ function archiefKaartHTML(o){
       ${o.adres?`<span>📍 ${o.adres}</span>`:''}
       ${o.gearchiveerd?`<span>Gearchiveerd: ${fmtDate(o.gearchiveerd.slice(0,10))}</span>`:''}
     </div>
-    ${o.type?`<div class="otype typelabel-${tk}" style="margin-top:5px">${o.type}</div>`:''}
+    ${o.type?`<div class="otype" style="margin-top:5px">${o.type}</div>`:''}
   </div>`;
 }
 function renderArchiefZoekResultaten(zoek){
@@ -1938,15 +1948,15 @@ async function showDetail(id){
       ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
     `:''}
     <div class="divider"></div>
+    ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="width:100%;margin-bottom:7px">📋 Akte van Cessie PDF</button>`:''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})" style="grid-column:span 2">📄 Werkbon PDF</button>
-      ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="grid-column:span 2">📋 Akte van Cessie PDF</button>`:''}
-      <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 Werkbon PDF</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
+      <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
+      ${o.status==='klaar'?`<button class="btn-compact btn-compact-accent" onclick="archiveerOrder(${id})">📦 Archiveren</button>`:''}
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
-      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')">← Terug</button>
-    </div>
-    ${o.status==='klaar'?`<button onclick="archiveerOrder(${id})" style="width:100%;padding:10px;background:var(--accent-bg);color:var(--accent);border:1px solid #e8d090;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px">📦 Archiveren in Dropbox</button>`:''}`;
+      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')"${o.status!=='klaar'?' style="grid-column:span 2"':''}>← Terug</button>
+    </div>`;
 
   goDetail();
   if(!o.sig) setTimeout(()=>initSigPad('detailSigCanvas'),100);
@@ -2160,8 +2170,17 @@ function addToAgendaNieuw(){
   window.open(url,'_blank');
 }
 
-function addToAgenda(id){
-  const o=orders.find(x=>x.id===id); if(!o)return;
+async function addToAgenda(id){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  // Nog niet opgeslagen wijzigingen (bv. een net ingevulde datum) eerst bewaren,
+  // anders leest deze knop de oude/lege datum uit het laatst opgeslagen exemplaar.
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+    await dbxWrite();
+    showToast('✓ Wijzigingen opgeslagen');
+  }
+  const o=orders[idx];
   const datum=o.datum;
   if(!datum){showToast('Vul eerst een datum in',true);return;}
   const d=datum.replace(/-/g,'');
@@ -2175,7 +2194,7 @@ function addToAgenda(id){
   const titel=encodeURIComponent(`${hoofd} — ${type}`);
   const loc=encodeURIComponent(o.adres||'');
   const det=encodeURIComponent(`Werkorder: ${o.nr}\nKlant: ${o.naam||''}\n${o.adres?'Adres: '+o.adres+'\n':''}${o.omschr?'Omschrijving: '+o.omschr:''}`);
-  window.location.href=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${loc}&details=${det}`;
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${loc}&details=${det}`, '_blank');
 }
 
 // ── MAIL ─────────────────────────────────────────────────────
