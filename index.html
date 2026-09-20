@@ -285,6 +285,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <button class="tbtn" id="ogBedrijf" onclick="selOGType('bedrijf')" style="padding:12px 8px"><span class="ti">🏢</span>Bedrijf</button>
     </div>
 
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" class="tbtn sel" id="f_cessie_nl" onclick="selCessieTaal('nl')" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" class="tbtn" id="f_cessie_de" onclick="selCessieTaal('de')" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
+
     <div id="f_og_extra" style="display:none">
       <input type="hidden" id="f_og_type" value="particulier">
       <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
@@ -392,18 +398,15 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <label for="f_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie toevoegen</label>
     </div>
     <div id="f_verzekering_wrap" style="display:none">
-      <div class="field"><label>Maatschappij (verzekeraar)</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
-      <div class="field"><label>Volmacht</label><input type="text" id="f_volmacht" autocomplete="off"></div>
-      <div class="field"><label>Polisnummer</label><input type="text" id="f_polisnr" autocomplete="off"></div>
-      <div class="field"><label>Schadedossiernummer</label><input type="text" id="f_schadesnr" autocomplete="off"></div>
-      <div class="field"><label>Schadebedrag excl. BTW (€)</label><input type="number" id="f_schadebedrag" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label id="f_lbl_verzekeraar">Maatschappij (verzekeraar)</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_volmacht">Volmacht</label><input type="text" id="f_volmacht" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_polisnr">Polisnummer</label><input type="text" id="f_polisnr" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_schadesnr">Schadedossiernummer</label><input type="text" id="f_schadesnr" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_schadebedrag">Schadebedrag excl. BTW (€)</label><input type="number" id="f_schadebedrag" placeholder="0.00" step="0.01" min="0"></div>
       <div class="field"><label>BTW (€)</label><input type="number" id="f_btw" placeholder="0.00" step="0.01" min="0"></div>
-      <div class="field"><label>Eigen risico (€)</label><input type="number" id="f_eigenrisico" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label id="f_lbl_eigenrisico">Eigen risico (€)</label><input type="number" id="f_eigenrisico" placeholder="0.00" step="0.01" min="0"></div>
       <div class="field"><label>BTW terug (BTW-plichtige ondernemers) (€)</label><input type="number" id="f_btwterug" placeholder="0.00" step="0.01" min="0"></div>
-      <div style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px">
-        <strong style="color:var(--text)">CESSIE / OVERDRACHT VORDERINGSRECHT</strong><br>
-        Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.
-      </div>
+      <div id="f_cessie_preview" style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px"></div>
     </div>
 
     <div class="slbl">Handtekening klant voor akkoord</div>
@@ -631,16 +634,18 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <input type="file" class="foto-input" id="eFotoNa3" accept="image/*" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
     <input type="file" class="foto-input" id="eFotoNa3_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
 
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" id="e_cessie_nl" onclick="selCessieTaal('nl')" class="tbtn sel" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" id="e_cessie_de" onclick="selCessieTaal('de')" class="tbtn" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
+
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
       <input type="checkbox" id="e_verzekering" style="width:20px;height:20px;cursor:pointer" onchange="toggleEditVerzekering()">
       <label for="e_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie / Abtretungserklärung</label>
     </div>
     <div id="e_verzekering_wrap" style="display:none">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <button type="button" id="e_cessie_nl" onclick="selCessieTaal('nl')" class="tbtn sel" style="padding:8px">🇳🇱 Nederlands</button>
-        <button type="button" id="e_cessie_de" onclick="selCessieTaal('de')" class="tbtn" style="padding:8px">🇩🇪 Deutsch</button>
-      </div>
       <button type="button" onclick="vulCessieVanOG()" style="width:100%;padding:9px;background:var(--green-bg);color:var(--green);border:1px solid #a0c8b0;border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px">📋 Gegevens opdrachtgever overnemen</button>
 
       <div class="field"><label id="e_lbl_verzekeraar">Maatschappij (verzekeraar)</label>
@@ -1106,6 +1111,7 @@ function toggleVerzekering(){
   const hint=document.getElementById('sigHintCessie');
   wrap.style.display=cb.checked?'block':'none';
   hint.style.display=cb.checked?'block':'none';
+  if(cb.checked) selCessieTaal(cessieTaal);
 }
 // ── CESSIE TAAL & AUTO-INVULLEN ───────────────────────────────
 let cessieTaal = 'nl';
@@ -1127,22 +1133,32 @@ const cessieTekst = {
 
 function selCessieTaal(taal){
   cessieTaal = taal;
-  document.getElementById('e_cessie_nl').classList.toggle('sel', taal==='nl');
-  document.getElementById('e_cessie_de').classList.toggle('sel', taal==='de');
+  const zet=(id,fn)=>{const el=document.getElementById(id); if(el) fn(el);};
+  zet('f_cessie_nl',el=>el.classList.toggle('sel', taal==='nl'));
+  zet('f_cessie_de',el=>el.classList.toggle('sel', taal==='de'));
+  zet('e_cessie_nl',el=>el.classList.toggle('sel', taal==='nl'));
+  zet('e_cessie_de',el=>el.classList.toggle('sel', taal==='de'));
   const t = cessieTekst[taal];
-  document.getElementById('e_lbl_verzekeraar').textContent = t.verzekeraar;
-  document.getElementById('e_lbl_volmacht').textContent = t.volmacht;
-  document.getElementById('e_lbl_polisnr').textContent = t.polisnr;
-  document.getElementById('e_lbl_schadesnr').textContent = t.schadesnr;
-  document.getElementById('e_lbl_schadebedrag').textContent = t.schadebedrag;
-  document.getElementById('e_lbl_eigenrisico').textContent = t.eigenrisico;
+  zet('f_lbl_verzekeraar',el=>el.textContent=t.verzekeraar);
+  zet('e_lbl_verzekeraar',el=>el.textContent=t.verzekeraar);
+  zet('f_lbl_volmacht',el=>el.textContent=t.volmacht);
+  zet('e_lbl_volmacht',el=>el.textContent=t.volmacht);
+  zet('f_lbl_polisnr',el=>el.textContent=t.polisnr);
+  zet('e_lbl_polisnr',el=>el.textContent=t.polisnr);
+  zet('f_lbl_schadesnr',el=>el.textContent=t.schadesnr);
+  zet('e_lbl_schadesnr',el=>el.textContent=t.schadesnr);
+  zet('f_lbl_schadebedrag',el=>el.textContent=t.schadebedrag);
+  zet('e_lbl_schadebedrag',el=>el.textContent=t.schadebedrag);
+  zet('f_lbl_eigenrisico',el=>el.textContent=t.eigenrisico);
+  zet('e_lbl_eigenrisico',el=>el.textContent=t.eigenrisico);
   updateCessiePreview();
 }
 
 function updateCessiePreview(){
   const t = cessieTekst[cessieTaal];
-  const el = document.getElementById('e_cessie_preview');
-  if(el) el.innerHTML = `<strong style="color:var(--text)">${t.titel}</strong><br>${t.tekst}`;
+  const html = `<strong style="color:var(--text)">${t.titel}</strong><br>${t.tekst}`;
+  const fEl = document.getElementById('f_cessie_preview'); if(fEl) fEl.innerHTML = html;
+  const eEl = document.getElementById('e_cessie_preview'); if(eEl) eEl.innerHTML = html;
 }
 
 function vulCessieVanOG(){
@@ -1158,7 +1174,7 @@ function vulCessieVanOG(){
 function toggleEditVerzekering(){
   const cb=document.getElementById('e_verzekering');
   document.getElementById('e_verzekering_wrap').style.display=cb.checked?'block':'none';
-  if(cb.checked){ cessieTaal='nl'; selCessieTaal('nl'); updateCessiePreview(); }
+  if(cb.checked){ selCessieTaal(cessieTaal); }
 }
 
 function selLoc(btn,loc){
@@ -1354,6 +1370,7 @@ async function saveOrder(){
     fotos:fotoUrls,fotoMap:mapPad,
     bijlage:bijlagePad,
     intern:document.getElementById('f_intern').value.trim(),
+    cessie_taal:cessieTaal,
     verzekering:document.getElementById('f_verzekering').checked,
     verzekeraar:document.getElementById('f_verzekeraar').value.trim(),
     volmacht:document.getElementById('f_volmacht').value.trim(),
@@ -1386,6 +1403,7 @@ async function saveOrder(){
   document.getElementById('f_verzekering_wrap').style.display='none';
   ['f_verzekeraar','f_volmacht','f_polisnr','f_schadesnr','f_schadebedrag','f_btw','f_eigenrisico','f_btwterug'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('sigHintCessie').style.display='none';
+  cessieTaal='nl'; selCessieTaal('nl');
   selLocVal='';
   document.getElementById('locBinnen').classList.remove('sel');
   document.getElementById('locBuiten').classList.remove('sel');
@@ -1886,6 +1904,11 @@ async function showDetail(id){
     <div class="slbl" style="margin-top:0">Status</div>
     <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
     <div class="status-row">${['spoed','prioriteit','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='prioriteit'?'🟠 Prioriteit':'🟡 Normaal'}</div>`).join('')}</div>
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" class="tbtn ${(o.cessie_taal||'nl')==='nl'?'sel':''}" onclick="changeTaal(${id},'nl')" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" class="tbtn ${o.cessie_taal==='de'?'sel':''}" onclick="changeTaal(${id},'de')" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
     <div class="slbl">Opdrachtgever</div>
     <div class="drow"><div class="drow-l">Type</div>
       <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value)">
@@ -2013,6 +2036,14 @@ async function changeStatus(id,status){
 async function changePrio(id,prio){
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
   orders[idx].prioriteit=prio; await dbxWrite(); showDetail(id);
+}
+async function changeTaal(id,taal){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
+  orders[idx].cessie_taal=taal; await dbxWrite(); showDetail(id);
 }
 async function deleteOrder(id){
   if(!confirm('Opdracht verwijderen?'))return;
@@ -2319,8 +2350,32 @@ async function savePDF(id, checkboxEl, btnEl){
     setSyncStatus('gesynchroniseerd','ok');
   }
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
-  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
-  const refRegel=o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:'';
+  const taalPDF=o.cessie_taal==='de'?'de':'nl';
+  const L=taalPDF==='de'?{
+    werkbon:'Arbeitsschein', datum:'Datum', status:'Status', opdrachtgever:'Auftraggeber',
+    referentie:'Referenz', typeWerk:'Art der Arbeiten', datumUitvoering:'Ausführungsdatum',
+    uiterlijkKlaar:'Fertigstellung spätestens', klantBewoner:'Kunde / Bewohner', adres:'Adresse',
+    telefoon:'Telefon', omschrijving:'Beschreibung',
+    akkoordZin:'Die Arbeiten wurden gemäß Auftrag ausgeführt und vom Kunden / Bewohner durch Unterschrift bestätigt.',
+    fotoVoor:'Fotos vor den Arbeiten', fotoNa:'Fotos nach den Arbeiten', handtekening:'Unterschrift Kunde',
+    kvk:'Handelsreg.-Nr.', btwLabel:'USt-IdNr.'
+  }:{
+    werkbon:'Werkbon', datum:'Datum', status:'Status', opdrachtgever:'Opdrachtgever',
+    referentie:'Referentie', typeWerk:'Type werkzaamheden', datumUitvoering:'Datum uitvoering',
+    uiterlijkKlaar:'Uiterlijk klaar', klantBewoner:'Klant / bewoner', adres:'Adres',
+    telefoon:'Telefoon', omschrijving:'Omschrijving',
+    akkoordZin:'De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.',
+    fotoVoor:"Foto's voor werkzaamheden", fotoNa:"Foto's na werkzaamheden", handtekening:'Handtekening klant',
+    kvk:'KvK', btwLabel:'BTW'
+  };
+  let statusTekstPDF=statusLabel(o.status,o);
+  if(taalPDF==='de'){
+    if(o.status==='klaar') statusTekstPDF='Abschlussbereit (Rechnung)';
+    else if(o.status==='bezig') statusTekstPDF='In Bearbeitung';
+    else if(o.status==='nieuw') statusTekstPDF=(o.datum&&o.datum!=='')?'Geplant':'Noch zu planen';
+  }
+  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>${L.opdrachtgever}</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
+  const refRegel=o.og_ref?`<tr><td>${L.referentie}</td><td>${o.og_ref}</td></tr>`:'';
   const tijdRegel='';
   const cessieTekstPDF = o.cessie_taal==='de' ? {
     titel: 'ABTRETUNGSERKLÄRUNG',
@@ -2361,7 +2416,7 @@ async function savePDF(id, checkboxEl, btnEl){
     </div>
   </div>`:'';
 
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Werkbon ${o.nr}</title>
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${L.werkbon} ${o.nr}</title>
   <style>body{font-family:Arial,sans-serif;font-size:13px;color:#0F1B2A;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:3px solid #3A6B4B;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#0F1B2A}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f5f7f8;color:#4a5a6a}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
   </head><body><div class="werkbon-hdr">
   <div>
@@ -2369,20 +2424,20 @@ async function savePDF(id, checkboxEl, btnEl){
     <div class="bedrijf">REPAFIN by Rolf Jurgen</div>
     <div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@repafin.nl | www.repafin.nl</div>
   </div>
-  <div class="nr"><strong>Werkbon ${o.nr}</strong><br>Datum: ${new Date().toLocaleDateString('nl-NL')}<br>Status: ${statusLabel(o.status,o)}</div></div>
-  <table>${ogRegel}${refRegel}<tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
-  ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
-  ${o.datum_deadline?`<tr><td>Uiterlijk klaar</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
-  <tr><td>Klant / bewoner</td><td>${o.naam||'—'}</td></tr>
-  ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
-  ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
-  ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
+  <div class="nr"><strong>${L.werkbon} ${o.nr}</strong><br>${L.datum}: ${new Date().toLocaleDateString(taalPDF==='de'?'de-DE':'nl-NL')}<br>${L.status}: ${statusTekstPDF}</div></div>
+  <table>${ogRegel}${refRegel}<tr><td>${L.typeWerk}</td><td>${o.type}</td></tr>
+  ${o.datum?`<tr><td>${L.datumUitvoering}</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+  ${o.datum_deadline?`<tr><td>${L.uiterlijkKlaar}</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
+  <tr><td>${L.klantBewoner}</td><td>${o.naam||'—'}</td></tr>
+  ${o.adres?`<tr><td>${L.adres}</td><td>${o.adres}</td></tr>`:''}
+  ${o.tel?`<tr><td>${L.telefoon}</td><td>${o.tel}</td></tr>`:''}
+  ${o.omschr?`<tr><td>${L.omschrijving}</td><td>${o.omschr}</td></tr>`:''}
   ${tijdRegel}</table>
-  <div style="font-size:12px;color:#666">De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.</div>
-  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's voor werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoVoorHTML}</div></div>`:''}
-  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Foto's na werkzaamheden</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
-  ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
-  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
+  <div style="font-size:12px;color:#666">${L.akkoordZin}</div>
+  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoVoor}</div><div style="display:flex;flex-wrap:wrap">${fotoVoorHTML}</div></div>`:''}
+  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoNa}</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
+  ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.handtekening}</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
+  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | ${L.kvk}: 140.80.696 | ${L.btwLabel}: NL 0018.20.226.B78</div>
   </body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
