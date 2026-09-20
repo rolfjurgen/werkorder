@@ -2344,8 +2344,8 @@ async function savePDF(id, checkboxEl, btnEl){
     setSyncStatus("foto's laden...",'busy');
     const vUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.voor[i])));
     const nUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.na[i])));
-    fotoVoorHTML=vUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
-    fotoNaHTML=nUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
+    fotoVoorHTML=vUrls.filter(u=>u).map(url=>`<div style="display:inline-block;width:48%;margin:1%;vertical-align:top;page-break-inside:avoid;break-inside:avoid"><img src="${url}" style="width:100%;display:block;border-radius:4px;border:1px solid #ddd"></div>`).join('');
+    fotoNaHTML=nUrls.filter(u=>u).map(url=>`<div style="display:inline-block;width:48%;margin:1%;vertical-align:top;page-break-inside:avoid;break-inside:avoid"><img src="${url}" style="width:100%;display:block;border-radius:4px;border:1px solid #ddd"></div>`).join('');
     if(!fotoVoorHTML && !fotoNaHTML){ showToast("Geen foto's beschikbaar om toe te voegen",true); }
     setSyncStatus('gesynchroniseerd','ok');
   }
@@ -2434,8 +2434,8 @@ async function savePDF(id, checkboxEl, btnEl){
   ${o.omschr?`<tr><td>${L.omschrijving}</td><td>${o.omschr}</td></tr>`:''}
   ${tijdRegel}</table>
   <div style="font-size:12px;color:#666">${L.akkoordZin}</div>
-  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoVoor}</div><div style="display:flex;flex-wrap:wrap">${fotoVoorHTML}</div></div>`:''}
-  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoNa}</div><div style="display:flex;flex-wrap:wrap">${fotoNaHTML}</div></div>`:''}
+  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoVoor}</div><div>${fotoVoorHTML}</div></div>`:''}
+  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoNa}</div><div>${fotoNaHTML}</div></div>`:''}
   ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.handtekening}</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
   <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | ${L.kvk}: 140.80.696 | ${L.btwLabel}: NL 0018.20.226.B78</div>
   </body></html>`;
