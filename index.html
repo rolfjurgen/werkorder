@@ -356,27 +356,35 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotVoor0" onclick="document.getElementById('fotoVoor0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
-      <div class="foto-slot" id="slotVoor1" onclick="document.getElementById('fotoVoor1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
-      <div class="foto-slot" id="slotVoor2" onclick="document.getElementById('fotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
-      <div class="foto-slot" id="slotVoor3" onclick="document.getElementById('fotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
+      <div class="foto-slot" id="slotVoor0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="slotVoor1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="slotVoor2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="slotVoor3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 4</span></div>
     </div>
     <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor0_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor0','voor',0)">
     <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor1_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor1','voor',1)">
     <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor2_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor2','voor',2)">
     <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" onchange="handleFoto(this,'slotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="fotoVoor3_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div class="foto-grid">
-      <div class="foto-slot" id="slotNa0" onclick="document.getElementById('fotoNa0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
-      <div class="foto-slot" id="slotNa1" onclick="document.getElementById('fotoNa1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
-      <div class="foto-slot" id="slotNa2" onclick="document.getElementById('fotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
-      <div class="foto-slot" id="slotNa3" onclick="document.getElementById('fotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
+      <div class="foto-slot" id="slotNa0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="slotNa1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="slotNa2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="slotNa3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 4</span></div>
     </div>
     <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa0_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa0','na',0)">
     <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa1_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa1','na',1)">
     <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa2_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa2','na',2)">
     <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
+    <input type="file" class="foto-input" id="fotoNa3_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa3','na',3)">
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -592,28 +600,36 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     <div class="slbl">Foto's voor werkzaamheden</div>
     <div id="e_fotos_voor_existing"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotVoor0" onclick="document.getElementById('eFotoVoor0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 1</span></div>
-      <div class="foto-slot" id="eSlotVoor1" onclick="document.getElementById('eFotoVoor1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 2</span></div>
-      <div class="foto-slot" id="eSlotVoor2" onclick="document.getElementById('eFotoVoor2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 3</span></div>
-      <div class="foto-slot" id="eSlotVoor3" onclick="document.getElementById('eFotoVoor3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor 4</span></div>
+      <div class="foto-slot" id="eSlotVoor0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="eSlotVoor1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="eSlotVoor2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="eSlotVoor3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 4</span></div>
     </div>
     <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="eFotoVoor0_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
     <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="eFotoVoor1_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
     <input type="file" class="foto-input" id="eFotoVoor2" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="eFotoVoor2_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor2','voor',2)">
     <input type="file" class="foto-input" id="eFotoVoor3" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="eFotoVoor3_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor3','voor',3)">
 
     <div class="slbl">Foto's na werkzaamheden</div>
     <div id="e_fotos_na_existing"></div>
     <div class="foto-grid">
-      <div class="foto-slot" id="eSlotNa0" onclick="document.getElementById('eFotoNa0').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 1</span></div>
-      <div class="foto-slot" id="eSlotNa1" onclick="document.getElementById('eFotoNa1').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 2</span></div>
-      <div class="foto-slot" id="eSlotNa2" onclick="document.getElementById('eFotoNa2').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 3</span></div>
-      <div class="foto-slot" id="eSlotNa3" onclick="document.getElementById('eFotoNa3').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na 4</span></div>
+      <div class="foto-slot" id="eSlotNa0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="eSlotNa1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="eSlotNa2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="eSlotNa3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 4</span></div>
     </div>
     <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
+    <input type="file" class="foto-input" id="eFotoNa0_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
     <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
+    <input type="file" class="foto-input" id="eFotoNa1_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
     <input type="file" class="foto-input" id="eFotoNa2" accept="image/*" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
+    <input type="file" class="foto-input" id="eFotoNa2_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
     <input type="file" class="foto-input" id="eFotoNa3" accept="image/*" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
+    <input type="file" class="foto-input" id="eFotoNa3_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
 
     <div class="slbl">Verzekeringsgeval</div>
     <div class="field" style="display:flex;align-items:center;gap:12px">
@@ -1046,14 +1062,15 @@ function removeFoto(ev,slotId,type,idx){
   ev.stopPropagation(); newFotos[type][idx]=null;
   const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
   const lbl=type==='voor'?`Voor ${idx+1}`:`Na ${idx+1}`;
-  slot.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${lbl}</span>`;
-  slot.onclick=()=>document.getElementById(type==='voor'?`fotoVoor${idx}`:`fotoNa${idx}`).click();
+  const inp=type==='voor'?`fotoVoor${idx}`:`fotoNa${idx}`;
+  slot.innerHTML=`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${lbl}</span>`;
 }
 function resetFotos(){
   newFotos={voor:[null,null,null,null],na:[null,null,null,null]};
-  ['Voor 1','Voor 2','Voor 3','Voor 4'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoVoor${i}`).click();});
-  ['Na 1','Na 2','Na 3','Na 4'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${l}</span>`;s.onclick=()=>document.getElementById(`fotoNa${i}`).click();});
-  ['fotoVoor0','fotoVoor1','fotoVoor2','fotoVoor3','fotoNa0','fotoNa1','fotoNa2','fotoNa3'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const slotHTML=(inp,l)=>`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${l}</span>`;
+  ['Voor 1','Voor 2','Voor 3','Voor 4'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=slotHTML(`fotoVoor${i}`,l);});
+  ['Na 1','Na 2','Na 3','Na 4'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=slotHTML(`fotoNa${i}`,l);});
+  ['fotoVoor0','fotoVoor0_cam','fotoVoor1','fotoVoor1_cam','fotoVoor2','fotoVoor2_cam','fotoVoor3','fotoVoor3_cam','fotoNa0','fotoNa0_cam','fotoNa1','fotoNa1_cam','fotoNa2','fotoNa2_cam','fotoNa3','fotoNa3_cam'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function handleEditFoto(input,slotId,type,idx){
   const f=input.files[0]; if(!f) return;
@@ -1068,12 +1085,15 @@ function handleEditFoto(input,slotId,type,idx){
 function removeEditFoto(ev,slotId,type,idx){
   ev.stopPropagation(); editFotos[type][idx]=null;
   const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
-  slot.innerHTML=`<span class="foto-slot-icon">📷</span><span class="foto-slot-label">${type==='voor'?'Voor':'Na'} ${idx+1} toevoegen</span>`;
-  slot.onclick=()=>document.getElementById(`eFoto${type==='voor'?'Voor':'Na'}${idx}`).click();
+  const inp=`eFoto${type==='voor'?'Voor':'Na'}${idx}`;
+  slot.innerHTML=`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${type==='voor'?'Voor':'Na'} ${idx+1} toevoegen</span>`;
 }
 function resetEditFotos(){
   editFotos={voor:[null,null,null,null],na:[null,null,null,null]};
-  ['eFotoVoor0','eFotoVoor1','eFotoVoor2','eFotoVoor3','eFotoNa0','eFotoNa1','eFotoNa2','eFotoNa3'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const slotHTML=(inp,lbl)=>`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${lbl}</span>`;
+  [0,1,2,3].forEach(i=>{const s=document.getElementById(`eSlotVoor${i}`);if(s){s.classList.remove('has-foto');s.innerHTML=slotHTML(`eFotoVoor${i}`,`Voor ${i+1}`);}});
+  [0,1,2,3].forEach(i=>{const s=document.getElementById(`eSlotNa${i}`);if(s){s.classList.remove('has-foto');s.innerHTML=slotHTML(`eFotoNa${i}`,`Na ${i+1}`);}});
+  ['eFotoVoor0','eFotoVoor0_cam','eFotoVoor1','eFotoVoor1_cam','eFotoVoor2','eFotoVoor2_cam','eFotoVoor3','eFotoVoor3_cam','eFotoNa0','eFotoNa0_cam','eFotoNa1','eFotoNa1_cam','eFotoNa2','eFotoNa2_cam','eFotoNa3','eFotoNa3_cam'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 
 // ── FORM HELPERS ─────────────────────────────────────────────
@@ -1834,7 +1854,7 @@ async function showDetail(id){
         </div>
       </div>`;
     }
-    return `<div class="foto-slot" onclick="document.getElementById('dFV${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`;
+    return `<div class="foto-slot"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('dFV${i}_${id}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('dFV${i}_${id}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"><input type="file" id="dFV${i}_${id}_cam" accept="image/*" capture="environment" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`;
   }).join('');
 
   const fNHTML=fotoNaUrls.map((url,i)=>{
@@ -1848,7 +1868,7 @@ async function showDetail(id){
         </div>
       </div>`;
     }
-    return `<div class="foto-slot" onclick="document.getElementById('dFN${i}_${id}').click()"><span class="foto-slot-icon">📷</span><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`;
+    return `<div class="foto-slot"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('dFN${i}_${id}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('dFN${i}_${id}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"><input type="file" id="dFN${i}_${id}_cam" accept="image/*" capture="environment" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`;
   }).join('');
 
   document.getElementById('detailContent').innerHTML=`
@@ -1949,8 +1969,9 @@ async function showDetail(id){
     `:''}
     <div class="divider"></div>
     ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="width:100%;margin-bottom:7px">📋 Akte van Cessie PDF</button>`:''}
+    ${(o.fotos&&((o.fotos.voor||[]).some(f=>f)||(o.fotos.na||[]).some(f=>f)))?`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:7px;cursor:pointer"><input type="checkbox" id="pdfFotos_${id}" style="width:16px;height:16px;cursor:pointer">📷 Foto's meenemen in werkbon PDF</label>`:''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
-      <button class="btn-compact btn-compact-green" onclick="savePDF(${id})">📄 Werkbon PDF</button>
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},document.getElementById('pdfFotos_${id}'),this)">📄 Werkbon PDF</button>
       <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       ${o.status==='klaar'?`<button class="btn-compact btn-compact-accent" onclick="archiveerOrder(${id})">📦 Archiveren</button>`:''}
@@ -2281,17 +2302,20 @@ async function saveCessiePDF(id){
   else{const a=document.createElement('a');a.href=url;a.download=`Cessie-${o.nr}.html`;a.click();}
 }
 
-async function savePDF(id, checkboxEl){
+async function savePDF(id, checkboxEl, btnEl){
   const metFotos = checkboxEl && checkboxEl.checked;
   const o=orders.find(x=>x.id===id); if(!o)return;
+  if(btnEl){ btnEl.disabled=true; btnEl.style.opacity=.6; }
 
   let fotoVoorHTML='', fotoNaHTML='';
+  try {
   if(metFotos && o.fotos){
     setSyncStatus("foto's laden...",'busy');
     const vUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.voor[i])));
     const nUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.na[i])));
     fotoVoorHTML=vUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
     fotoNaHTML=nUrls.filter(u=>u).map(url=>`<img src="${url}" style="width:48%;margin:1%;border-radius:4px;border:1px solid #ddd">`).join('');
+    if(!fotoVoorHTML && !fotoNaHTML){ showToast("Geen foto's beschikbaar om toe te voegen",true); }
     setSyncStatus('gesynchroniseerd','ok');
   }
   const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
@@ -2363,8 +2387,26 @@ async function savePDF(id, checkboxEl){
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const win=window.open(url,'_blank');
-  if(win){win.onload=()=>setTimeout(()=>win.print(),500);}
-  else{const a=document.createElement('a');a.href=url;a.download=`Werkbon-${o.nr}.html`;a.click();showToast('📄 Werkbon gedownload');}
+  if(win){
+    win.onload=()=>{
+      let afgedrukt=false;
+      const printNu=()=>{ if(afgedrukt) return; afgedrukt=true; win.print(); };
+      const imgs=Array.from(win.document.images||[]);
+      if(!imgs.length){ setTimeout(printNu,300); return; }
+      let klaar=0;
+      const check=()=>{ klaar++; if(klaar>=imgs.length) setTimeout(printNu,200); };
+      imgs.forEach(img=>{
+        if(img.complete && img.naturalWidth>0) check();
+        else { img.addEventListener('load',check); img.addEventListener('error',check); }
+      });
+      setTimeout(printNu,6000); // veiligheidsklep: hoe dan ook printen als een foto blijft hangen
+    };
+  } else {
+    const a=document.createElement('a');a.href=url;a.download=`Werkbon-${o.nr}.html`;a.click();showToast('📄 Werkbon gedownload');
+  }
+  } finally {
+    if(btnEl){ btnEl.disabled=false; btnEl.style.opacity=1; }
+  }
 }
 
 // ── LIGHTBOX ─────────────────────────────────────────────────
