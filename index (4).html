@@ -1,0 +1,2796 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REPAFIN Werkorder</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --bg: #f0f2f4;
+  --surface: #ffffff;
+  --surface2: #f5f7f8;
+  --border: #dde2e8;
+  --border2: #c4cdd6;
+  --text: #0F1B2A;
+  --text2: #4a5a6a;
+  --text3: #8a9aaa;
+  --accent: #3A6B4B;
+  --accent-bg: #eaf2ed;
+  --accent-dark: #0F1B2A;
+  --green: #3A6B4B;
+  --green-bg: #eaf2ed;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --blue: #1a4a8a;
+  --blue-bg: #eaf0fc;
+  --r: 10px;
+  --rlg: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 15px; min-height: 100vh; }
+
+/* HEADER */
+.hdr { background: #0F1B2A; border-bottom: none; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo-wrap { display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.logo-text { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: .05em; }
+.sync-ok { font-size: 11px; color: #7bc49a; font-family: monospace; }
+.sync-err { font-size: 11px; color: #ff8a80; font-family: monospace; }
+.sync-busy { font-size: 11px; color: rgba(255,255,255,0.5); font-family: monospace; }
+.btn-logout { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; display: none; }
+.btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+/* TABS */
+.tabs { display: flex; background: #0F1B2A; border-bottom: 2px solid #1e3040; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 11px 16px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; transition: color .2s; margin-bottom: -2px; }
+.tab.active { color: #ffffff; border-bottom-color: #3A6B4B; }
+
+/* PANELS */
+.panel { display: none; padding: 16px; padding-bottom: 60px; }
+.panel.active { display: block; }
+
+/* FORM */
+.slbl { font-family: monospace; font-size: 10px; letter-spacing: .1em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
+.slbl:first-child { margin-top: 0; }
+.field { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
+.field:focus-within { border-color: var(--accent); }
+.field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; font-weight: 500; }
+.field input, .field textarea, .field select { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 15px; -webkit-appearance: none; }
+.field textarea { resize: none; min-height: 78px; line-height: 1.5; }
+::placeholder { color: var(--text3); }
+
+/* TYPE / PRIO GRID */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.prio-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.tbtn { background: var(--surface); border: 2px solid var(--border2); border-radius: var(--r); padding: 12px 8px; text-align: center; cursor: pointer; font-size: 13px; color: var(--text2); font-family: inherit; line-height: 1.4; transition: all .15s; }
+.tbtn.sel { border-width: 3px; box-shadow: 0 0 0 2px var(--accent); font-weight: 700; transform: scale(1.02); }
+.tbtn .ti { font-size: 16px; display: block; margin-bottom: 3px; }
+.typelabel-inbraak.sel { box-shadow: 0 0 0 2px #1a3a6a; }
+.typelabel-keuken.sel { box-shadow: 0 0 0 2px #2a5a3a; }
+.typelabel-oplever.sel { box-shadow: 0 0 0 2px #1a4a7a; }
+.typelabel-overig.sel { box-shadow: 0 0 0 2px #2a3a4a; }
+
+/* BUTTONS */
+.btn { width: 100%; padding: 12px; border-radius: var(--r); border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: opacity .15s; }
+.btn:active { opacity: .8; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-green { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; font-size: 14px; margin-bottom: 7px; }
+.btn-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; font-size: 14px; margin-bottom: 7px; }
+.btn-edit { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); font-size: 14px; margin-bottom: 7px; }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid #e8c0bc; font-size: 13px; padding: 9px; }
+
+/* SIGNATURE */
+.sig-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 7px; }
+.sig-top { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.sig-top span { font-size: 12px; color: var(--text3); }
+.sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: inherit; }
+canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair; background: #fafaf8; }
+@media (min-width: 700px) {
+  canvas.sigpad { height: 90px; }
+}
+.sig-hint { padding: 6px 12px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
+.sig-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
+@media (min-width: 700px) {
+  .sig-preview { max-height: 90px; }
+}
+
+/* FOTO */
+.foto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
+.foto-slot { background: var(--surface); border: 1px dashed var(--border2); border-radius: var(--r); aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+.foto-slot.has-foto { border-style: solid; }
+.foto-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.foto-slot-icon { font-size: 20px; }
+.foto-slot-label { font-size: 10px; color: var(--text3); margin-top: 4px; z-index: 1; text-align: center; padding: 0 4px; }
+.foto-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+.foto-input { display: none; }
+.foto-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 7px; }
+.foto-detail-item { border-radius: var(--r); overflow: visible; border: 1px solid var(--border); background: var(--surface2); display: flex; flex-direction: column; }
+.foto-detail-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; cursor: pointer; flex-shrink: 0; border-radius: var(--r) var(--r) 0 0; }
+.foto-detail-label { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text2); background: var(--surface); border-top: 1px solid var(--border); min-height: 30px; flex-shrink: 0; border-radius: 0 0 var(--r) var(--r); }
+
+/* BADGES */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: monospace; }
+.b-nieuw { background: var(--blue-bg); color: var(--blue); border: 1px solid #c0d0f0; }
+.b-gepland { background: var(--accent-bg); color: var(--accent); border: 1px solid #e8d090; }
+.b-bezig { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+.b-klaar { background: var(--green-bg); color: var(--green); border: 1px solid #b0ddc0; }
+.b-spoed { background: var(--red-bg); color: var(--red); border: 1px solid #e8c0bc; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 14px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 4px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.stat:hover { border-color: var(--border2); }
+.stat.active-filter { border-color: var(--accent); background: var(--accent-bg); }
+.stat-n { font-family: monospace; font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+.stat-l { font-size: 9px; color: var(--text3); line-height: 1.3; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-bar select { flex: 1; min-width: 90px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 7px 10px; font-size: 12px; color: var(--text); font-family: inherit; -webkit-appearance: none; }
+
+/* ORDER CARDS */
+.ocard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); padding: 13px; margin-bottom: 9px; cursor: pointer; transition: border-color .2s; }
+.ocard:hover { border-color: var(--border2); }
+.ocard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.onr { font-family: monospace; font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.oname { font-size: 15px; font-weight: 600; }
+.osub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.ometa { font-size: 12px; color: var(--text2); display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+.otype { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 11px; color: var(--text2); margin-top: 5px; }
+.sig-ok { font-size: 11px; color: var(--green); margin-top: 3px; }
+.foto-ok { font-size: 11px; color: var(--blue); margin-top: 2px; }
+
+/* DETAIL */
+.det-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.back-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; color: var(--text2); font-size: 13px; cursor: pointer; font-family: inherit; }
+.drow { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
+.drow-l { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.drow-v { font-size: 14px; color: var(--text); line-height: 1.5; }
+.status-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.sopt { flex: 1; padding: 10px 4px; border-radius: var(--r); border: 2px solid var(--border); text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); background: var(--surface); transition: all .15s; }
+.sopt.a-nieuw { background: #dce8f8; color: #0a2a6e; border: 2px solid #0a2a6e; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,110,0.2); }
+.sopt.a-bezig { background: #fde8cc; color: #7a3300; border: 2px solid #d4800a; font-weight: 700; box-shadow: 0 2px 6px rgba(212,128,10,0.2); }
+.sopt.a-klaar { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); font-weight: 700; box-shadow: 0 2px 6px rgba(58,107,75,0.2); }
+.sopt.a-spoed { background: #fde8e8; color: #c0392b; border: 2px solid #c0392b; font-weight: 700; box-shadow: 0 2px 6px rgba(192,57,43,0.2); }
+.sopt.a-prioriteit { background: #fff0e0; color: #c06000; border: 2px solid #e07800; font-weight: 700; box-shadow: 0 2px 6px rgba(224,120,0,0.2); }
+.sopt.a-normaal { background: #fef8e0; color: #8a6000; border: 2px solid #d4a800; font-weight: 700; box-shadow: 0 2px 6px rgba(212,168,0,0.2); }
+.sopt:not(.a-spoed):not(.a-prioriteit):not(.a-normaal):not(.a-nieuw):not(.a-bezig):not(.a-klaar) { border: 1px solid var(--border); }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.time-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); outline: none; font-size: 15px; color: var(--text); padding: 4px 0; font-family: inherit; }
+
+/* MODAL */
+.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; }
+.modal-ov.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--rlg) var(--rlg) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 16px; padding-bottom: 40px; }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.modal-ttl { font-size: 16px; font-weight: 600; }
+.mclose { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text2); }
+
+/* LOGIN */
+.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; padding: 30px 20px; text-align: center; background: var(--bg); }
+.login-icon { width: 100px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.login-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #0F1B2A; letter-spacing: 0.02em; }
+.login-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 28px; max-width: 300px; }
+.btn-dbx { background: #0061FF; color: #fff; border: none; border-radius: var(--r); padding: 14px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 10px; }
+.login-note { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.6; }
+
+/* LIGHTBOX */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 500; align-items: center; justify-content: center; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
+.lightbox-close { position: absolute; top: 16px; right: 16px; color: white; font-size: 28px; cursor: pointer; background: none; border: none; }
+
+/* QUEUE BANNER */
+.queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
+#pullRefresh { height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text2); font-size: 13px; transition: height .25s ease; }
+#pullRefresh.dragging { transition: none; }
+#pullRefreshIcon { display: inline-block; transition: transform .2s ease; }
+#pullRefreshIcon.flip { transform: rotate(180deg); }
+#pullRefreshIcon.spin { animation: pullspin 0.8s linear infinite; }
+@keyframes pullspin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.queue-banner.hidden { display: none; }
+.btn-queue { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+/* EMPTY / LOADING */
+.empty { text-align: center; padding: 40px 16px; color: var(--text3); }
+.empty-icon { font-size: 28px; margin-bottom: 10px; }
+.empty-txt { font-size: 14px; line-height: 1.6; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* TYPEWERK KLEUREN */
+.type-inbraak, .type-keuken, .type-oplever, .type-overig, .type-lakschade, .type-sanitair { border-left: 1px solid var(--border); }
+.typelabel-inbraak { background: #dce8f8; color: #0a2a6e; border-color: #7a9fd4; font-weight:600; }
+.typelabel-keuken { background: #d4edda; color: #1a5c2e; border-color: #5a9e6e; font-weight:600; }
+.typelabel-oplever { background: #d8eaf8; color: #0d3a7a; border-color: #6a9abf; font-weight:600; }
+.typelabel-overig { background: #e0e4e8; color: #1a2a3a; border-color: #7a8a9a; font-weight:600; }
+.typelabel-sanitair { background: #e8f4fd; color: #0a4a7a; border-color: #5a9abf; font-weight:600; }
+
+/* BINNEN/BUITEN */
+.loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+
+/* ZOEKBALK */
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px 10px 36px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; }
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
+
+/* COMPACTE KNOPPEN */
+.btn-compact { padding: 9px 8px; border-radius: var(--r); border: 1px solid var(--border); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; transition: opacity .15s; }
+.btn-compact:active { opacity: .8; }
+.btn-compact-green { background: var(--green-bg); color: var(--green); border-color: #b0ddc0; }
+.btn-compact-blue { background: var(--blue-bg); color: var(--blue); border-color: #c0d0f0; }
+.btn-compact-edit { background: var(--surface2); color: var(--text2); border-color: var(--border2); }
+.btn-compact-danger { background: var(--red-bg); color: var(--red); border-color: #e8c0bc; }
+.btn-compact-accent { background: var(--accent-bg); color: var(--accent); border-color: #e8d090; }
+
+@media print {
+  body > * { display: none !important; }
+  #printOutput { display: block !important; }
+  .werkbon { padding: 24px; font-family: Arial, sans-serif; }
+  .werkbon-hdr { display: flex; justify-content: space-between; border-bottom: 2px solid #b5820c; padding-bottom: 14px; margin-bottom: 20px; }
+  .werkbon-logo { font-size: 18px; font-weight: 700; color: #b5820c; }
+  .werkbon table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .werkbon td { padding: 7px 10px; border: 1px solid #ddd; font-size: 13px; vertical-align: top; }
+  .werkbon td:first-child { font-weight: 600; width: 34%; background: #f9f9f9; color: #666; }
+  .werkbon-sig img { max-height: 80px; border: 1px solid #ddd; border-radius: 4px; margin-top: 14px; }
+  .print-list table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .print-list th { background: #f0ede8; padding: 7px 10px; text-align: left; border: 1px solid #ddd; }
+  .print-list td { padding: 6px 10px; border: 1px solid #ddd; }
+}
+.print-only { display: none; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo-wrap">
+    <div class="logo-icon"><svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="32" height="34"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#fff"/></svg></div>
+    <div class="logo-text">WERKORDER</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="syncStatus" class="sync-busy">niet verbonden</span>
+    <button class="btn-logout" id="logoutBtn" onclick="logout()">Uitloggen</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="overzicht" onclick="goTab('overzicht')">Opdrachten</div>
+  <div class="tab" data-tab="nieuw" onclick="goTab('nieuw')">+ Nieuw</div>
+  <div class="tab" data-tab="detail" id="detailTab" style="display:none" onclick="goTab('detail')">Detail</div>
+  <div class="tab" data-tab="archief" onclick="goTab('archief')">Archief</div>
+  <div class="tab" data-tab="print" onclick="goTab('print')">Printen</div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center">
+  <div class="login-icon"><svg viewBox="0 0 532.2 149.6" xmlns="http://www.w3.org/2000/svg" width="200" height="56"><path d="M125.7,54.9c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V54.9Z" fill="#3a6b4b"/><path d="M0,7.8v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V7.8H0Z" fill="#0F1B2A"/><rect x="168.3" width="3" height="149.6" fill="#3a6b4b"/><path d="M213.9,9.3c0-.8.6-1.3,1.3-1.3h21.6c6.1,0,11.2,5,11.2,11.2v24.3c0,4.8-3,8.7-7,10.4l7.6,29.1c.4,1.3-.7,1.3-.7,1.3h-11s-1,0-1.3-1.3l-7.4-28.3h-1.5v28.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3ZM235.2,23c0-1.5-1.2-2.8-2.8-2.8h-5.6v22.4h5.6c1.5,0,2.8-1.2,2.8-2.8v-16.9Z" fill="#0F1B2A"/><path d="M279.2,71.9h18c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-29.6c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h29c.8,0,1.3.6,1.3,1.3v9.7c0,.8-.6,1.3-1.3,1.3h-17.4v17.5h13.6c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-13.6v21.7Z" fill="#0F1B2A"/><path d="M315.6,9.3c0-.8.6-1.3,1.3-1.3h21.6c6.1,0,11.2,5,11.2,11.2v24.3c0,6.2-5.1,11.2-11.2,11.2h-10.1v28.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3ZM336.9,23c0-1.5-1.2-2.8-2.8-2.8h-5.6v22.4h5.6c1.5,0,2.8-1.2,2.8-2.8v-16.9Z" fill="#0F1B2A"/><path d="M385,8s1.2,0,1.4,1.3l12.7,73.6c.2,1.3-.8,1.3-.8,1.3h-11s-1,0-1.1-1.3l-1.3-9.2h-8.6l-1.3,9.2c-.2,1.3-1.1,1.3-1.1,1.3h-11s-1,0-.8-1.3l12.7-73.6c.2-1.3,1.4-1.3,1.4-1.3h8.8ZM378,61.3h5.4l-2.8-28.2-2.7,28.2Z" fill="#0F1B2A"/><path d="M428.7,82.9c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h29c.8,0,1.3.6,1.3,1.3v9.7c0,.8-.6,1.3-1.3,1.3h-17.4v17.5h13.6c.8,0,1.3.6,1.3,1.3v9.6c0,.8-.6,1.3-1.3,1.3h-13.6v32.7Z" fill="#3a6b4b"/><path d="M476.5,82.9c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3h10.2c.8,0,1.3.6,1.3,1.3v73.6Z" fill="#3a6b4b"/><path d="M496.3,8h10.1s1,0,1.4,1.3l9.3,32.4V9.3c0-.8.6-1.3,1.3-1.3h10.2c.8,0,1.3.6,1.3,1.3v73.6c0,.8-.6,1.3-1.3,1.3h-9.6s-1,0-1.4-1.3l-9.8-31.3v31.3c0,.8-.6,1.3-1.3,1.3h-10.2c-.8,0-1.3-.6-1.3-1.3V9.3c0-.8.6-1.3,1.3-1.3Z" fill="#3a6b4b"/></svg></div>
+  <div class="login-title">Werkorder</div>
+  <div class="login-sub">Verbind je Dropbox-account om te starten.</div>
+  <button class="btn-dbx" onclick="startAuth()">
+    <svg width="18" height="18" viewBox="0 0 40 40"><path d="M20 7L10 13.5L20 20L10 26.5L0 20L10 13.5L0 7L10 .5L20 7Z" fill="white"/><path d="M20 7L30 13.5L20 20L30 26.5L40 20L30 13.5L40 7L30 .5L20 7Z" fill="white" opacity=".7"/><path d="M10 28L20 21.5L30 28L20 34.5L10 28Z" fill="white" opacity=".5"/></svg>
+    Inloggen met Dropbox
+  </button>
+  <div class="login-note">Je gegevens blijven in je eigen Dropbox.</div>
+</div>
+
+<!-- NIEUW -->
+<div class="panel" id="panel-nieuw">
+  <div id="newForm" style="display:none">
+
+    <button class="btn btn-primary" onclick="saveOrder()" style="margin-bottom:14px">Opdracht opslaan & synchroniseren</button>
+    <div class="slbl" style="margin-top:0">Opdrachtgever</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button class="tbtn" id="ogParticulier" onclick="selOGType('particulier')" style="padding:12px 8px"><span class="ti">👤</span>Particulier</button>
+      <button class="tbtn" id="ogBedrijf" onclick="selOGType('bedrijf')" style="padding:12px 8px"><span class="ti">🏢</span>Bedrijf</button>
+    </div>
+
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" class="tbtn sel" id="f_cessie_nl" onclick="selCessieTaal('nl')" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" class="tbtn" id="f_cessie_de" onclick="selCessieTaal('de')" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
+
+    <div id="f_og_extra" style="display:none">
+      <input type="hidden" id="f_og_type" value="particulier">
+      <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field"><label>Contactpersoon</label><div style="position:relative"><input type="text" id="f_og_contact" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_contact')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
+      <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
+      <div class="field"><label>Referentie / opdrachtnummer</label><div style="position:relative"><input type="text" id="f_og_ref" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_ref')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field" style="background:var(--surface2)">
+        <label>📎 Opdrachtbevestiging (PDF)</label>
+        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
+        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
+    </div>
+
+    <div class="field"><label>Naam bewoner</label><div style="position:relative"><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+    <div class="field"><label>Adres werklocatie</label><div style="position:relative"><input type="text" id="f_adres" placeholder="Hoofdstraat 12, Maastricht" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_adres')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+    <div class="field"><label>Telefoon</label><input type="tel" id="f_tel" placeholder="06 12345678"></div>
+    <div class="field"><label>E-mailadres</label><input type="email" id="f_email" placeholder="bewoner@email.nl"></div>
+
+    <div class="slbl">Type werkzaamheden</div>
+    <div class="type-grid">
+      <button class="tbtn typelabel-inbraak" onclick="selType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
+      <button class="tbtn typelabel-keuken" onclick="selType(this,'Keuken/Tegel')"><span class="ti">🍽️</span>Keuken/Tegel</button>
+      <button class="tbtn typelabel-oplever" onclick="selType(this,'Opleverpunt')"><span class="ti">🏗️</span>Opleverpunt</button>
+      <button class="tbtn typelabel-lakschade" onclick="selType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
+      <button class="tbtn typelabel-sanitair" onclick="selType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
+      <button class="tbtn typelabel-overig" onclick="selType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
+    </div>
+    <div id="f_overig_wrap" style="display:none">
+      <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="f_overig" placeholder="bijv. garagepoort, sanitair..."></div>
+    </div>
+
+    <div class="slbl">Locatie & prioriteit</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button class="tbtn" id="locBinnen" onclick="selLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
+      <button class="tbtn" id="locBuiten" onclick="selLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <button class="tbtn" id="prioSpoed" onclick="selPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn" id="prioPrioriteit" onclick="selPrio(this,'prioriteit')"><span class="ti">🟠</span>Prioriteit</button>
+      <button class="tbtn sel" id="prioNormaal" onclick="selPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+    </div>
+    </div>
+
+    <div class="slbl">Opdracht</div>
+    <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="f_datum"></div>
+    <div class="field">
+      <label>Starttijd afspraak (Google Agenda)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="time" id="f_agenda_tijd" value="08:00" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:14px;color:var(--text);font-family:inherit;outline:none">
+        <button type="button" onclick="addToAgendaNieuw()" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:10px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap">📅 Agenda</button>
+      </div>
+    </div>
+    <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="f_datum_deadline"></div>
+    <div class="field">
+      <label>Omschrijving</label>
+      <div style="position:relative">
+        <textarea id="f_omschr" placeholder="Beschrijf de werkzaamheden..." style="padding-right:44px"></textarea>
+        <button type="button" onclick="startSpeech('f_omschr')" style="position:absolute;right:8px;bottom:8px;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:5px 8px;font-size:16px;cursor:pointer;line-height:1">🎤</button>
+      </div>
+    </div>
+    <div class="field" style="background:var(--surface2)"><label style="color:var(--text3)">🔒 Intern — niet zichtbaar op werkbon</label>
+      <div style="position:relative">
+        <textarea id="f_intern" placeholder="Bewaar hier interne berichten, notities of afspraakinformatie..." style="min-height:80px;padding-right:44px"></textarea>
+        <button type="button" onclick="startSpeech('f_intern')" style="position:absolute;right:8px;bottom:8px;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:5px 8px;font-size:16px;cursor:pointer;line-height:1">🎤</button>
+      </div>
+    </div>
+
+    <div class="slbl">Foto's voor werkzaamheden</div>
+    <div class="foto-grid">
+      <div class="foto-slot" id="slotVoor0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="slotVoor1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="slotVoor2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="slotVoor3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoVoor3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoVoor3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 4</span></div>
+    </div>
+    <input type="file" class="foto-input" id="fotoVoor0" accept="image/*" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor0_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="fotoVoor1" accept="image/*" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor1_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="fotoVoor2" accept="image/*" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor2_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="fotoVoor3" accept="image/*" onchange="handleFoto(this,'slotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="fotoVoor3_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotVoor3','voor',3)">
+
+    <div class="slbl">Foto's na werkzaamheden</div>
+    <div class="foto-grid">
+      <div class="foto-slot" id="slotNa0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="slotNa1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="slotNa2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="slotNa3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('fotoNa3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('fotoNa3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 4</span></div>
+    </div>
+    <input type="file" class="foto-input" id="fotoNa0" accept="image/*" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa0_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa0','na',0)">
+    <input type="file" class="foto-input" id="fotoNa1" accept="image/*" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa1_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa1','na',1)">
+    <input type="file" class="foto-input" id="fotoNa2" accept="image/*" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa2_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa2','na',2)">
+    <input type="file" class="foto-input" id="fotoNa3" accept="image/*" onchange="handleFoto(this,'slotNa3','na',3)">
+    <input type="file" class="foto-input" id="fotoNa3_cam" accept="image/*" capture="environment" onchange="handleFoto(this,'slotNa3','na',3)">
+
+    <div class="slbl">Verzekeringsgeval</div>
+    <div class="field" style="display:flex;align-items:center;gap:12px">
+      <input type="checkbox" id="f_verzekering" style="width:20px;height:20px;cursor:pointer" onchange="toggleVerzekering()">
+      <label for="f_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie toevoegen</label>
+    </div>
+    <div id="f_verzekering_wrap" style="display:none">
+      <div class="field"><label id="f_lbl_verzekeraar">Maatschappij (verzekeraar)</label><input type="text" id="f_verzekeraar" placeholder="bijv. Allianz, Interpolis..." autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_volmacht">Volmacht</label><input type="text" id="f_volmacht" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_polisnr">Polisnummer</label><input type="text" id="f_polisnr" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_schadesnr">Schadedossiernummer</label><input type="text" id="f_schadesnr" autocomplete="off"></div>
+      <div class="field"><label id="f_lbl_schadebedrag">Schadebedrag excl. BTW (€)</label><input type="number" id="f_schadebedrag" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label>BTW (€)</label><input type="number" id="f_btw" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label id="f_lbl_eigenrisico">Eigen risico (€)</label><input type="number" id="f_eigenrisico" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="field"><label>BTW terug (BTW-plichtige ondernemers) (€)</label><input type="number" id="f_btwterug" placeholder="0.00" step="0.01" min="0"></div>
+      <div id="f_cessie_preview" style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px"></div>
+    </div>
+
+    <div class="slbl">Handtekening klant voor akkoord</div>
+    <div id="sigHint" style="font-size:12px;color:var(--text3);margin-bottom:6px">Klant tekent voor akkoord uitvoering werkzaamheden.</div>
+    <div id="sigHintCessie" style="display:none;font-size:12px;color:var(--accent);margin-bottom:6px;font-weight:500">+ Handtekening geldt tevens als akkoord akte van cessie.</div>
+    <div id="sigTekstWrap" style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
+      <div id="sigTekstNL"></div>
+      <div id="sigTekstDE" style="margin-top:4px"></div>
+    </div>
+    <div class="sig-wrap">
+      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
+      <canvas id="sigCanvas" class="sigpad"></canvas>
+    </div>
+    <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
+  </div>
+</div>
+
+<!-- OVERZICHT -->
+<div class="panel active" id="panel-overzicht">
+  <div id="pullRefresh"><span id="pullRefreshIcon">&#8595;</span><span id="pullRefreshLabel">Trek om te vernieuwen</span></div>
+  <div class="queue-banner hidden" id="queueBanner">
+    <span>📤 Opdrachten wachten op synchronisatie</span>
+    <button class="btn-queue" onclick="syncQueue()">Nu synchroniseren</button>
+  </div>
+  <div id="bulkBalk" style="display:none;background:var(--red-bg);border:1px solid #e8c0bc;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between">
+    <span id="bulkTeller" style="font-size:13px;color:var(--red);font-weight:500">0 geselecteerd</span>
+    <div style="display:flex;gap:8px">
+      <button onclick="bulkDeselecteer()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit">Annuleren</button>
+      <button onclick="bulkVerwijder()" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🗑️ Verwijderen</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat" id="stat-totaal" onclick="statFilter('alle')">
+      <div class="stat-n" id="s-totaal" style="color:var(--text)">0</div>
+      <div class="stat-l">Totaal</div>
+    </div>
+    <div class="stat" id="stat-nieuw" onclick="statFilter('nogteplannen')">
+      <div class="stat-n" id="s-nieuw" style="color:var(--blue)">0</div>
+      <div class="stat-l">Nog te plannen</div>
+    </div>
+    <div class="stat" id="stat-gepland" onclick="statFilter('gepland')">
+      <div class="stat-n" id="s-gepland" style="color:var(--accent)">0</div>
+      <div class="stat-l">Gepland</div>
+    </div>
+    <div class="stat" id="stat-bezig" onclick="statFilter('bezig')">
+      <div class="stat-n" id="s-bezig" style="color:var(--blue)">0</div>
+      <div class="stat-l">Onderhanden</div>
+    </div>
+    <div class="stat" id="stat-klaar" onclick="statFilter('klaar')">
+      <div class="stat-n" id="s-klaar" style="color:var(--green)">0</div>
+      <div class="stat-l">Klaar v. fact.</div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchField" placeholder="Zoek op naam of adres..." oninput="renderList()">
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center">
+    <span style="font-size:11px;color:var(--text3)">Type:</span>
+    <span id="leg-alle" style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);cursor:pointer" onclick="filterOpType('alle')">Alle</span>
+    <span id="leg-inbraak" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#dce8f8;color:#0a2a6e;border:1px solid #7a9fd4;cursor:pointer;font-weight:600" onclick="filterOpType('inbraak')">🔒 Inbraakschade</span>
+    <span id="leg-lakschade" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fde8cc;color:#7a3300;border:1px solid #d4800a;cursor:pointer;font-weight:600" onclick="filterOpType('lakschade')">🎨 Lakschade</span>
+    <span id="leg-keuken" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d4edda;color:#1a5c2e;border:1px solid #5a9e6e;cursor:pointer;font-weight:600" onclick="filterOpType('keuken')">🍽️ Keuken/Tegel</span>
+    <span id="leg-oplever" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#d8eaf8;color:#0d3a7a;border:1px solid #6a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('oplever')">🏗️ Opleverpunt</span>
+    <span id="leg-sanitair" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e8f4fd;color:#0a4a7a;border:1px solid #5a9abf;cursor:pointer;font-weight:600" onclick="filterOpType('sanitair')">🚿 Sanitair</span>
+    <span id="leg-overig" style="font-size:11px;padding:3px 8px;border-radius:6px;background:#e0e4e8;color:#1a2a3a;border:1px solid #7a8a9a;cursor:pointer;font-weight:600" onclick="filterOpType('overig')">🔧 Overig</span>
+  </div>
+  <div class="filter-bar">
+    <select id="filterStatus" onchange="renderList()">
+      <option value="alle">Alle statussen</option>
+      <option value="nogteplannen">Nog te plannen</option>
+      <option value="gepland">Gepland</option>
+      <option value="bezig">Onderhanden</option>
+      <option value="klaar">Klaar voor facturatie</option>
+    </select>
+    <select id="filterPrio" onchange="renderList()">
+      <option value="alle">Alle prioriteiten</option>
+      <option value="spoed">🔴 Spoed</option>
+      <option value="normaal">🟡 Normaal</option>
+    </select>
+    <select id="filterLocatie" onchange="renderList()">
+      <option value="alle">Binnen & buiten</option>
+      <option value="binnen">🏠 Binnen</option>
+      <option value="buiten">🌤️ Buiten</option>
+    </select>
+    <select id="sortOrder" onchange="renderList()">
+      <option value="prio">Prioriteit</option>
+      <option value="ontvangen">Aanmaakdatum (nr.)</option>
+      <option value="deadline">Deadline</option>
+      <option value="datum">Datum afspraak</option>
+      <option value="naam">Alfabetisch (naam)</option>
+    </select>
+    <button id="sortRichtingBtn" onclick="toggleSortRichting()" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:7px 12px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--text);flex-shrink:0" title="Volgorde omdraaien">↓</button>
+  </div>
+  <div id="orderList"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Laden...</div></div></div>
+</div>
+
+<!-- DETAIL -->
+<div class="panel" id="panel-detail">
+  <div id="detailContent"></div>
+</div>
+
+<!-- ARCHIEF -->
+<div class="panel" id="panel-archief">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="archiefSearchField" placeholder="Zoek in archief op naam of adres..." oninput="renderArchief()">
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button class="btn-compact btn-compact-edit" style="flex:1" onclick="laadArchiefIndex(true)">↻ Archief opnieuw indexeren</button>
+  </div>
+  <div id="archiefList"><div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Open dit tabblad om het archief te laden.</div></div></div>
+</div>
+
+<!-- ARCHIEF DETAIL -->
+<div class="panel" id="panel-archiefdetail">
+  <div id="archiefDetailContent"></div>
+</div>
+
+<!-- PRINTEN -->
+<div class="panel" id="panel-print">
+  <div class="slbl" style="margin-top:0">Werkbon afdrukken</div>
+  <div class="field"><label>Kies opdracht</label>
+    <select id="printSelect"><option value="">— Kies opdracht —</option></select>
+  </div>
+  <button class="btn btn-blue" onclick="printWerkbon()">🖨️ Werkbon afdrukken</button>
+  <div class="slbl">Lijst afdrukken</div>
+  <div class="field"><label>Filter op status</label>
+    <select id="listFilter">
+      <option value="alle">Alle opdrachten</option>
+      <option value="nogteplannen">Nog te plannen</option>
+      <option value="gepland">Gepland</option>
+      <option value="bezig">Onderhanden</option>
+      <option value="klaar">Klaar voor facturatie</option>
+    </select>
+  </div>
+  <button class="btn btn-blue" onclick="printList()">🖨️ Lijst afdrukken</button>
+</div>
+
+<!-- BEWERK MODAL -->
+<div class="modal-ov" id="editModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-ttl">Opdracht bewerken</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="saveEdit()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
+        <button class="mclose" onclick="closeEdit()">Sluiten</button>
+      </div>
+    </div>
+    <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
+    <div class="type-grid">
+      <button class="tbtn typelabel-inbraak" onclick="selEditType(this,'Inbraakschade')"><span class="ti">🔒</span>Inbraakschade</button>
+      <button class="tbtn typelabel-keuken" onclick="selEditType(this,'Keuken/Tegel')"><span class="ti">🍽️</span>Keuken/Tegel</button>
+      <button class="tbtn typelabel-oplever" onclick="selEditType(this,'Opleverpunt')"><span class="ti">🏗️</span>Opleverpunt</button>
+      <button class="tbtn typelabel-lakschade" onclick="selEditType(this,'(Lak)schade deur/poort')"><span class="ti">🎨</span>(Lak)schade deur/poort</button>
+      <button class="tbtn typelabel-sanitair" onclick="selEditType(this,'Sanitair')"><span class="ti">🚿</span>Sanitair</button>
+      <button class="tbtn typelabel-overig" onclick="selEditType(this,'Overige werkzaamheden')"><span class="ti">🔧</span>Overige werkzaamheden</button>
+    </div>
+    <div id="e_overig_wrap" style="display:none">
+      <div class="field"><label>Omschrijf type schade / werk</label><input type="text" id="e_overig"></div>
+    </div>
+    <div class="slbl">Prioriteit</div>
+    <div class="prio-grid">
+      <button class="tbtn" id="eprioSpoed" onclick="selEditPrio(this,'spoed')"><span class="ti">🔴</span>Spoed</button>
+      <button class="tbtn" id="eprioPrioriteit" onclick="selEditPrio(this,'prioriteit')"><span class="ti">🟠</span>Prioriteit</button>
+      <button class="tbtn" id="eprioNormaal" onclick="selEditPrio(this,'normaal')"><span class="ti">🟡</span>Normaal</button>
+    </div>
+    <div class="slbl">Locatie werk</div>
+    <div class="loc-grid">
+      <button class="tbtn" id="elocBinnen" onclick="selEditLoc(this,'binnen')"><span class="ti">🏠</span>Binnen</button>
+      <button class="tbtn" id="elocBuiten" onclick="selEditLoc(this,'buiten')"><span class="ti">🌤️</span>Buiten</button>
+    </div>
+    <div class="slbl">Opdrachtgever</div>
+    <div class="field"><label>Type</label>
+      <select id="e_og_type" onchange="toggleEditOG()">
+        <option value="particulier">Particulier</option>
+        <option value="aannemer">Via aannemer / bedrijf</option>
+      </select>
+    </div>
+    <div id="e_og_extra" style="display:none">
+      <div class="field"><label>Naam aannemer</label><input type="text" id="e_og_naam"></div>
+      <div class="field"><label>Contactpersoon</label><input type="text" id="e_og_contact"></div>
+      <div class="field"><label>Telefoon aannemer</label><input type="tel" id="e_og_tel"></div>
+      <div class="field"><label>Email aannemer</label><input type="email" id="e_og_email"></div>
+      <div class="field"><label>Referentie</label><input type="text" id="e_og_ref"></div>
+    </div>
+    <div class="slbl">Locatie & klant</div>
+    <div class="field"><label>Naam bewoner</label><input type="text" id="e_naam"></div>
+    <div class="field"><label>Adres</label><input type="text" id="e_adres"></div>
+    <div class="field"><label>Telefoon</label><input type="tel" id="e_tel"></div>
+    <div class="field"><label>E-mailadres</label><input type="email" id="e_email"></div>
+    <div class="slbl">Opdracht</div>
+    <div class="field"><label>Datum afspraak / uitvoering</label><input type="date" id="e_datum"></div>
+    <div class="field"><label>Uiterlijk klaar op</label><input type="date" id="e_datum_deadline"></div>
+    <div class="field"><label>Omschrijving</label><textarea id="e_omschr"></textarea></div>
+    <div class="field" style="background:var(--surface2)"><label>🔒 Intern — niet zichtbaar op werkbon</label><textarea id="e_intern" style="min-height:80px"></textarea></div>
+
+    <div class="slbl">Foto's voor werkzaamheden</div>
+    <div id="e_fotos_voor_existing"></div>
+    <div class="foto-grid">
+      <div class="foto-slot" id="eSlotVoor0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 1</span></div>
+      <div class="foto-slot" id="eSlotVoor1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 2</span></div>
+      <div class="foto-slot" id="eSlotVoor2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 3</span></div>
+      <div class="foto-slot" id="eSlotVoor3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoVoor3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoVoor3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor 4</span></div>
+    </div>
+    <input type="file" class="foto-input" id="eFotoVoor0" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="eFotoVoor0_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor0','voor',0)">
+    <input type="file" class="foto-input" id="eFotoVoor1" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="eFotoVoor1_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor1','voor',1)">
+    <input type="file" class="foto-input" id="eFotoVoor2" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="eFotoVoor2_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor2','voor',2)">
+    <input type="file" class="foto-input" id="eFotoVoor3" accept="image/*" onchange="handleEditFoto(this,'eSlotVoor3','voor',3)">
+    <input type="file" class="foto-input" id="eFotoVoor3_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotVoor3','voor',3)">
+
+    <div class="slbl">Foto's na werkzaamheden</div>
+    <div id="e_fotos_na_existing"></div>
+    <div class="foto-grid">
+      <div class="foto-slot" id="eSlotNa0"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa0_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa0').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 1</span></div>
+      <div class="foto-slot" id="eSlotNa1"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa1_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa1').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 2</span></div>
+      <div class="foto-slot" id="eSlotNa2"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa2_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa2').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 3</span></div>
+      <div class="foto-slot" id="eSlotNa3"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('eFotoNa3_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('eFotoNa3').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na 4</span></div>
+    </div>
+    <input type="file" class="foto-input" id="eFotoNa0" accept="image/*" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
+    <input type="file" class="foto-input" id="eFotoNa0_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa0','na',0)">
+    <input type="file" class="foto-input" id="eFotoNa1" accept="image/*" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
+    <input type="file" class="foto-input" id="eFotoNa1_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa1','na',1)">
+    <input type="file" class="foto-input" id="eFotoNa2" accept="image/*" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
+    <input type="file" class="foto-input" id="eFotoNa2_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa2','na',2)">
+    <input type="file" class="foto-input" id="eFotoNa3" accept="image/*" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
+    <input type="file" class="foto-input" id="eFotoNa3_cam" accept="image/*" capture="environment" onchange="handleEditFoto(this,'eSlotNa3','na',3)">
+
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" id="e_cessie_nl" onclick="selCessieTaal('nl')" class="tbtn sel" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" id="e_cessie_de" onclick="selCessieTaal('de')" class="tbtn" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
+
+    <div class="slbl">Verzekeringsgeval</div>
+    <div class="field" style="display:flex;align-items:center;gap:12px">
+      <input type="checkbox" id="e_verzekering" style="width:20px;height:20px;cursor:pointer" onchange="toggleEditVerzekering()">
+      <label for="e_verzekering" style="cursor:pointer;font-size:14px;color:var(--text)">Verzekeringsgeval — akte van cessie / Abtretungserklärung</label>
+    </div>
+    <div id="e_verzekering_wrap" style="display:none">
+      <button type="button" onclick="vulCessieVanOG()" style="width:100%;padding:9px;background:var(--green-bg);color:var(--green);border:1px solid #a0c8b0;border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:10px">📋 Gegevens opdrachtgever overnemen</button>
+
+      <div class="field"><label id="e_lbl_verzekeraar">Maatschappij (verzekeraar)</label>
+        <div style="position:relative"><input type="text" id="e_verzekeraar" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_verzekeraar')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_volmacht">Volmacht</label>
+        <div style="position:relative"><input type="text" id="e_volmacht" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_volmacht')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_polisnr">Polisnummer</label>
+        <div style="position:relative"><input type="text" id="e_polisnr" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_polisnr')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_schadesnr">Schadedossiernummer</label>
+        <div style="position:relative"><input type="text" id="e_schadesnr" style="padding-right:44px">
+        <button type="button" onclick="startSpeech('e_schadesnr')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      </div>
+      <div class="field"><label id="e_lbl_schadebedrag">Schadebedrag excl. BTW (€)</label><input type="number" id="e_schadebedrag" step="0.01" min="0"></div>
+      <div class="field"><label>BTW (€)</label><input type="number" id="e_btw" step="0.01" min="0"></div>
+      <div class="field"><label id="e_lbl_eigenrisico">Eigen risico (€)</label><input type="number" id="e_eigenrisico" step="0.01" min="0"></div>
+      <div class="field"><label>BTW terug (€)</label><input type="number" id="e_btwterug" step="0.01" min="0"></div>
+
+      <div id="e_cessie_preview" style="background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:7px"></div>
+    </div>
+
+    <div class="slbl">Handtekening</div>
+    <div id="e_sig_existing" style="display:none;margin-bottom:8px">
+      <img id="e_sig_img" class="sig-preview" alt="Bestaande handtekening">
+      <button class="btn btn-secondary" style="margin-top:7px;font-size:13px;padding:9px" onclick="replaceEditSig()">Handtekening vervangen</button>
+    </div>
+    <div id="e_sig_new">
+      <div class="sig-wrap">
+        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
+        <canvas id="editSigCanvas" class="sigpad"></canvas>
+        <div class="sig-hint">Laat leeg om bestaande te behouden</div>
+      </div>
+    </div>
+    <input type="hidden" id="e_id">
+    <button class="btn btn-primary" onclick="saveEdit()">Wijzigingen opslaan</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<div class="print-only" id="printOutput"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const DBX_APP_KEY = '1kdk0mz2o7kqea8';
+const DBX_REDIRECT = 'https://rolfjurgen.github.io/werkorder';
+const DBX_FILE = '/werkorders.json';
+const DBX_ARCHIEF_INDEX = '/Archief/_index.json';
+const DBX_TELLER = '/Config/teller.json';
+const TELLER_LOCAL_KEY = 'rj_teller_v1';
+const BACKUP_KEY = 'rj_backup_v3';
+const QUEUE_KEY = 'rj_queue_v3';
+const DELETED_KEY = 'rj_deleted_v3';
+
+// ── STATE ────────────────────────────────────────────────────
+let token = localStorage.getItem('dbx_token') || null;
+let orders = [];
+let selTypeVal = '';
+let selPrioVal = 'normaal';
+let editTypeVal = '';
+let editPrioVal = 'normaal';
+let newFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
+let editFotos = { voor: [null,null,null,null], na: [null,null,null,null] };
+let currentStatFilter = 'alle'; // 'alle','nogteplannen','bezig','klaar'
+const sigStates = {};
+let archiveIndex = null;       // null = nog niet geladen, array = geladen
+let archiefBezigOpbouw = false;
+let laatsteNr = null;          // permanente opdrachtnummer-teller, null = nog niet geladen
+
+// ── AUTH ─────────────────────────────────────────────────────
+function startAuth() {
+  const st = Math.random().toString(36).slice(2);
+  localStorage.setItem('dbx_state', st);
+  location.href = `https://www.dropbox.com/oauth2/authorize?client_id=${DBX_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DBX_REDIRECT)}&state=${st}`;
+}
+function handleCallback() {
+  if (!location.hash) return false;
+  const p = new URLSearchParams(location.hash.slice(1));
+  const at = p.get('access_token'), st = p.get('state');
+  if (at && st === localStorage.getItem('dbx_state')) {
+    token = at; localStorage.setItem('dbx_token', at); location.hash = ''; return true;
+  }
+  return false;
+}
+function logout() {
+  localStorage.removeItem('dbx_token'); token = null; orders = [];
+  archiveIndex = null; laatsteNr = null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('newForm').style.display='none';
+  document.getElementById('logoutBtn').style.display='none';
+  setSyncStatus('niet verbonden','busy');
+}
+
+// ── DROPBOX API ──────────────────────────────────────────────
+async function dbxRead() {
+  setSyncStatus('laden...','busy');
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 30000);
+    const r = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})},
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); renderList(); return; }
+    if (!r.ok) throw new Error(r.status);
+    const text = await r.text();
+    orders = JSON.parse(text);
+    // Migreer oude type benamingen
+    orders = orders.map(o=>{
+      if(!o.type) return o;
+      if(o.type==='Overig'||o.type==='Overig werkzaamheden') o.type='Overige werkzaamheden';
+      if(o.type==='Inbraakschade kozijn/deur') o.type='Inbraakschade';
+      if(o.type==='Keukenblad herstellen') o.type='Keuken/Tegel';
+      if(o.type==='Opleverpunt herstellen') o.type='Opleverpunt';
+      return o;
+    });
+    setSyncStatus('gesynchroniseerd','ok');
+    renderList();
+  } catch(e) {
+    setSyncStatus('offline — lokaal','err');
+    orders = JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]');
+    renderList();
+  }
+}
+async function dbxWrite() {
+  setSyncStatus('opslaan...','busy');
+  const body = JSON.stringify(orders,null,2);
+  localStorage.setItem(BACKUP_KEY,body);
+  if (!token) { addToQueue(); return; }
+  try {
+    const vandaag=new Date().toISOString().slice(0,10);
+    const lastBackup=localStorage.getItem('rj_last_backup');
+    if(lastBackup!==vandaag){
+      try {
+        const rb=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}});
+        if(rb.ok){const data=await rb.text();await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Backup/werkorders_${vandaag}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:data});}
+      } catch(e){}
+      localStorage.setItem('rj_last_backup',vandaag);
+    }
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload',{
+      method:'POST', headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE,mode:'overwrite',autorename:false}),
+        'Content-Type':'application/octet-stream'
+      }, body
+    });
+    if (!r.ok) throw new Error(r.status);
+    setSyncStatus('gesynchroniseerd','ok');
+  } catch(e) { setSyncStatus('offline — lokaal','err'); addToQueue(); }
+}
+async function dbxUploadFoto(path,dataUrl) {
+  if (!token||!dataUrl) return null;
+  try {
+    const b64=dataUrl.split(',')[1], bin=atob(b64), arr=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path,mode:'overwrite',autorename:false}),'Content-Type':'application/octet-stream'},body:arr
+    });
+    return r.ok ? path : null;
+  } catch(e){return null;}
+}
+async function dbxGetFotoUrl(pad){
+  if(!pad) return null;
+  if(!pad.startsWith('dropbox:')) return pad; // oude base64 data
+  if(!token) return null;
+  const dbxPad=pad.replace('dropbox:','');
+  try {
+    const r=await fetch('https://api.dropboxapi.com/2/files/get_temporary_link',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path:dbxPad})
+    });
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d.link||null;
+  } catch(e){return null;}
+}
+async function dbxShareLink(path) {
+  if (!token) return null;
+  try {
+    const r=await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({path,settings:{requested_visibility:{'.tag':'public'}}})
+    });
+    if (r.status===409){
+      const r2=await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({path})
+      });
+      const d=await r2.json(); return d.links?.[0]?.url||null;
+    }
+    const d=await r.json(); return d.url||null;
+  } catch(e){return null;}
+}
+async function dbxListFolder(path) {
+  if (!token) return [];
+  let entries = [];
+  try {
+    let r = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({ path, recursive:false })
+    });
+    if (r.status===409) return []; // map bestaat nog niet — leeg archief
+    if (!r.ok) throw new Error(r.status);
+    let d = await r.json();
+    entries = entries.concat(d.entries||[]);
+    while (d.has_more) {
+      r = await fetch('https://api.dropboxapi.com/2/files/list_folder/continue', {
+        method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body: JSON.stringify({ cursor:d.cursor })
+      });
+      if (!r.ok) break;
+      d = await r.json();
+      entries = entries.concat(d.entries||[]);
+    }
+  } catch(e) { return entries; }
+  return entries;
+}
+async function dbxDelete(path) {
+  if (!token) return false;
+  try {
+    const r = await fetch('https://api.dropboxapi.com/2/files/delete_v2', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({ path })
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function dbxReadJSON(path) {
+  if (!token) return null;
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path})}
+    });
+    if (!r.ok) return null;
+    const text = await r.text();
+    return JSON.parse(text);
+  } catch(e) { return null; }
+}
+async function dbxWriteJSON(path, data) {
+  if (!token) return false;
+  try {
+    const r = await fetch('https://content.dropboxapi.com/2/files/upload', {
+      method:'POST', headers:{
+        'Authorization':'Bearer '+token,
+        'Dropbox-API-Arg':JSON.stringify({path,mode:'overwrite',autorename:false}),
+        'Content-Type':'application/octet-stream'
+      }, body: JSON.stringify(data,null,2)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+function setSyncStatus(msg,type) {
+  const el=document.getElementById('syncStatus');
+  el.textContent=msg;
+  el.className = type==='ok'?'sync-ok':type==='err'?'sync-err':'sync-busy';
+}
+
+// ── QUEUE ────────────────────────────────────────────────────
+function addToQueue() { localStorage.setItem(QUEUE_KEY,JSON.stringify(orders)); renderQueueBanner(); }
+function renderQueueBanner() {
+  const b=document.getElementById('queueBanner');
+  b.classList.toggle('hidden',!localStorage.getItem(QUEUE_KEY)||!token);
+}
+async function syncQueue() {
+  const q=localStorage.getItem(QUEUE_KEY); if(!q||!token) return;
+  orders=JSON.parse(q); await dbxWrite();
+  localStorage.removeItem(QUEUE_KEY); renderQueueBanner(); showToast('✓ Gesynchroniseerd'); renderList();
+}
+
+// ── NUMMERING (permanente teller, voorkomt dubbele RJ-nummers na archiveren) ──
+function nrGetal(nr){ const m=/RJ-(\d+)/.exec(nr||''); return m?parseInt(m[1],10):0; }
+async function haalHoogsteNrUitArchief(){
+  const entries = await dbxListFolder('/Archief');
+  let hoogste = 0;
+  entries.forEach(e=>{
+    const m=/^RJ-(\d+)\.json$/.exec(e.name||'');
+    if(m) hoogste=Math.max(hoogste,parseInt(m[1],10));
+  });
+  return hoogste;
+}
+async function zorgTeller(){
+  if (laatsteNr!==null) return laatsteNr;
+  const lokaal = parseInt(localStorage.getItem(TELLER_LOCAL_KEY)||'0',10) || 0;
+  let dbxWaarde = 0;
+  if (token) {
+    const d = await dbxReadJSON(DBX_TELLER);
+    if (d && typeof d.laatsteNr==='number') dbxWaarde = d.laatsteNr;
+  }
+  if (dbxWaarde>0 || lokaal>0) {
+    laatsteNr = Math.max(dbxWaarde, lokaal);
+  } else {
+    // Eerste keer: teller bestaat nog nergens — bepaal hoogste al gebruikte nummer
+    // uit actieve opdrachten én het archief, zodat we nooit een nummer hergebruiken.
+    const hoogsteActief = orders.reduce((m,o)=>Math.max(m,nrGetal(o.nr)),0);
+    const hoogsteArchief = token ? await haalHoogsteNrUitArchief() : 0;
+    laatsteNr = Math.max(hoogsteActief, hoogsteArchief);
+  }
+  localStorage.setItem(TELLER_LOCAL_KEY, String(laatsteNr));
+  if (token) await dbxWriteJSON(DBX_TELLER, {laatsteNr});
+  return laatsteNr;
+}
+async function volgendNr(){
+  await zorgTeller();
+  laatsteNr = laatsteNr + 1;
+  localStorage.setItem(TELLER_LOCAL_KEY, String(laatsteNr));
+  if (token) await dbxWriteJSON(DBX_TELLER, {laatsteNr});
+  return 'RJ-'+String(laatsteNr).padStart(4,'0');
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+async function init() {
+  handleCallback();
+  // Datum afspraak NIET automatisch invullen - gebruiker vult zelf in
+  if (token) {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('newForm').style.display='block';
+    document.getElementById('logoutBtn').style.display='inline-block';
+    await dbxRead();
+    goTab('overzicht');
+    renderQueueBanner();
+    setInterval(async()=>{ if(token){await dbxRead();renderList();} }, 45*60*1000);
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+  }
+  initSigPad('sigCanvas');
+}
+
+// ── TAB NAVIGATION ───────────────────────────────────────────
+function goTab(tab) {
+  // Verberg alle panels
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+
+  if (tab !== 'detail') {
+    // Leeg detail panel bij weggaan
+    document.getElementById('detailContent').innerHTML='';
+    document.getElementById('detailTab').style.display='none';
+  }
+  const archDetEl=document.getElementById('archiefDetailContent');
+  if (archDetEl) archDetEl.innerHTML='';
+
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
+
+  if (tab==='overzicht') renderList();
+  if (tab==='print') renderPrintSelect();
+  if (tab==='archief') renderArchief();
+}
+
+function goDetail() {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-detail').classList.add('active');
+  document.getElementById('detailTab').style.display='block';
+  document.getElementById('detailTab').classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('panel-detail').scrollTop=0;
+}
+
+function goArchiefDetail() {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-archiefdetail').classList.add('active');
+  const archTab=document.querySelector('[data-tab="archief"]');
+  if(archTab) archTab.classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('panel-archiefdetail').scrollTop=0;
+}
+
+// ── SIGNATURE ────────────────────────────────────────────────
+function initSigPad(id) {
+  const c=document.getElementById(id); if(!c)return;
+  const dpr=window.devicePixelRatio||1, rect=c.getBoundingClientRect();
+  const sigH=rect.height||140;
+  c.width=(rect.width||320)*dpr; c.height=sigH*dpr;
+  const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.strokeStyle='#1c1916'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  sigStates[id]={ctx,drawing:false,hasSig:false};
+  const pos=(e)=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
+  c.addEventListener('mousedown',e=>{sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  c.addEventListener('mousemove',e=>{if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
+  c.addEventListener('mouseup',()=>sigStates[id].drawing=false);
+  c.addEventListener('mouseleave',()=>sigStates[id].drawing=false);
+  c.addEventListener('touchstart',e=>{e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
+  c.addEventListener('touchend',()=>sigStates[id].drawing=false);
+}
+function clearSig(id){const s=sigStates[id];if(!s)return;const c=document.getElementById(id);s.ctx.clearRect(0,0,c.width,c.height);s.hasSig=false;}
+function getSig(id){const s=sigStates[id];return s&&s.hasSig?document.getElementById(id).toDataURL('image/png'):null;}
+
+// ── FOTO ─────────────────────────────────────────────────────
+function compressImg(dataUrl,cb){
+  const img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas'),mw=1200;let w=img.width,h=img.height;if(w>mw){h=Math.round(h*mw/w);w=mw;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.75));};
+  img.src=dataUrl;
+}
+function handleFoto(input,slotId,type,idx){
+  const f=(input&&input.files)?input.files[0]:input; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>compressImg(e.target.result,compressed=>{
+    newFotos[type][idx]=compressed;
+    const slot=document.getElementById(slotId);
+    slot.classList.add('has-foto');
+    slot.innerHTML=`<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
+  });
+  r.readAsDataURL(f);
+}
+function removeFoto(ev,slotId,type,idx){
+  ev.stopPropagation(); newFotos[type][idx]=null;
+  const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
+  const lbl=type==='voor'?`Voor ${idx+1}`:`Na ${idx+1}`;
+  const inp=type==='voor'?`fotoVoor${idx}`:`fotoNa${idx}`;
+  slot.innerHTML=`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${lbl}</span>`;
+}
+function resetFotos(){
+  newFotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  const slotHTML=(inp,l)=>`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${l}</span>`;
+  ['Voor 1','Voor 2','Voor 3','Voor 4'].forEach((l,i)=>{const s=document.getElementById(`slotVoor${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=slotHTML(`fotoVoor${i}`,l);});
+  ['Na 1','Na 2','Na 3','Na 4'].forEach((l,i)=>{const s=document.getElementById(`slotNa${i}`);if(!s)return;s.classList.remove('has-foto');s.innerHTML=slotHTML(`fotoNa${i}`,l);});
+  ['fotoVoor0','fotoVoor0_cam','fotoVoor1','fotoVoor1_cam','fotoVoor2','fotoVoor2_cam','fotoVoor3','fotoVoor3_cam','fotoNa0','fotoNa0_cam','fotoNa1','fotoNa1_cam','fotoNa2','fotoNa2_cam','fotoNa3','fotoNa3_cam'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function handleEditFoto(input,slotId,type,idx){
+  const f=(input&&input.files)?input.files[0]:input; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>compressImg(e.target.result,compressed=>{
+    editFotos[type][idx]=compressed;
+    const slot=document.getElementById(slotId); slot.classList.add('has-foto');
+    slot.innerHTML=`<img src="${compressed}" alt=""><button class="foto-remove" onclick="removeEditFoto(event,'${slotId}','${type}',${idx})">✕</button>`;
+  });
+  r.readAsDataURL(f);
+}
+function removeEditFoto(ev,slotId,type,idx){
+  ev.stopPropagation(); editFotos[type][idx]=null;
+  const slot=document.getElementById(slotId); slot.classList.remove('has-foto');
+  const inp=`eFoto${type==='voor'?'Voor':'Na'}${idx}`;
+  slot.innerHTML=`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${type==='voor'?'Voor':'Na'} ${idx+1} toevoegen</span>`;
+}
+function resetEditFotos(){
+  editFotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  const slotHTML=(inp,lbl)=>`<div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('${inp}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('${inp}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">${lbl}</span>`;
+  [0,1,2,3].forEach(i=>{const s=document.getElementById(`eSlotVoor${i}`);if(s){s.classList.remove('has-foto');s.innerHTML=slotHTML(`eFotoVoor${i}`,`Voor ${i+1}`);}});
+  [0,1,2,3].forEach(i=>{const s=document.getElementById(`eSlotNa${i}`);if(s){s.classList.remove('has-foto');s.innerHTML=slotHTML(`eFotoNa${i}`,`Na ${i+1}`);}});
+  ['eFotoVoor0','eFotoVoor0_cam','eFotoVoor1','eFotoVoor1_cam','eFotoVoor2','eFotoVoor2_cam','eFotoVoor3','eFotoVoor3_cam','eFotoNa0','eFotoNa0_cam','eFotoNa1','eFotoNa1_cam','eFotoNa2','eFotoNa2_cam','eFotoNa3','eFotoNa3_cam'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+// ── FORM HELPERS ─────────────────────────────────────────────
+let selLocVal = '';
+let editLocVal = '';
+
+function toggleVerzekering(){
+  const cb=document.getElementById('f_verzekering');
+  const wrap=document.getElementById('f_verzekering_wrap');
+  const hint=document.getElementById('sigHintCessie');
+  wrap.style.display=cb.checked?'block':'none';
+  hint.style.display=cb.checked?'block':'none';
+  if(cb.checked) selCessieTaal(cessieTaal);
+}
+// ── CESSIE TAAL & AUTO-INVULLEN ───────────────────────────────
+let cessieTaal = 'nl';
+
+const cessieTekst = {
+  nl: {
+    titel: 'CESSIE / OVERDRACHT VORDERINGSRECHT',
+    tekst: 'Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.',
+    verzekeraar: 'Maatschappij (verzekeraar)', volmacht: 'Volmacht', polisnr: 'Polisnummer',
+    schadesnr: 'Schadedossiernummer', schadebedrag: 'Schadebedrag excl. BTW (€)', eigenrisico: 'Eigen risico (€)',
+  },
+  de: {
+    titel: 'ABTRETUNGSERKLÄRUNG',
+    tekst: 'Der/Die Unterzeichnende tritt seine/ihre Forderung gegenüber dem Versicherer an <strong>REPAFIN by Rolf Jurgen</strong> ab und erteilt dem Versicherer unwiderruflich Auftrag und Vollmacht, den ihm/ihr zustehenden Betrag direkt auf das auf der Rechnung angegebene Konto auszuzahlen. Falls der Versicherer aus irgendeinem Grund nicht an <strong>REPAFIN by Rolf Jurgen</strong> zahlt, geht die Forderung vollständig zu Lasten des Kunden.',
+    verzekeraar: 'Versicherungsgesellschaft', volmacht: 'Vollmacht', polisnr: 'Versicherungsscheinnummer',
+    schadesnr: 'Schadennummer', schadebedrag: 'Schadenbetrag excl. MwSt. (€)', eigenrisico: 'Selbstbeteiligung (€)',
+  }
+};
+
+function selCessieTaal(taal){
+  cessieTaal = taal;
+  const zet=(id,fn)=>{const el=document.getElementById(id); if(el) fn(el);};
+  zet('f_cessie_nl',el=>el.classList.toggle('sel', taal==='nl'));
+  zet('f_cessie_de',el=>el.classList.toggle('sel', taal==='de'));
+  zet('e_cessie_nl',el=>el.classList.toggle('sel', taal==='nl'));
+  zet('e_cessie_de',el=>el.classList.toggle('sel', taal==='de'));
+  const t = cessieTekst[taal];
+  zet('f_lbl_verzekeraar',el=>el.textContent=t.verzekeraar);
+  zet('e_lbl_verzekeraar',el=>el.textContent=t.verzekeraar);
+  zet('f_lbl_volmacht',el=>el.textContent=t.volmacht);
+  zet('e_lbl_volmacht',el=>el.textContent=t.volmacht);
+  zet('f_lbl_polisnr',el=>el.textContent=t.polisnr);
+  zet('e_lbl_polisnr',el=>el.textContent=t.polisnr);
+  zet('f_lbl_schadesnr',el=>el.textContent=t.schadesnr);
+  zet('e_lbl_schadesnr',el=>el.textContent=t.schadesnr);
+  zet('f_lbl_schadebedrag',el=>el.textContent=t.schadebedrag);
+  zet('e_lbl_schadebedrag',el=>el.textContent=t.schadebedrag);
+  zet('f_lbl_eigenrisico',el=>el.textContent=t.eigenrisico);
+  zet('e_lbl_eigenrisico',el=>el.textContent=t.eigenrisico);
+  updateCessiePreview();
+}
+
+function updateCessiePreview(){
+  const t = cessieTekst[cessieTaal];
+  const html = `<strong style="color:var(--text)">${t.titel}</strong><br>${t.tekst}`;
+  const fEl = document.getElementById('f_cessie_preview'); if(fEl) fEl.innerHTML = html;
+  const eEl = document.getElementById('e_cessie_preview'); if(eEl) eEl.innerHTML = html;
+}
+
+function vulCessieVanOG(){
+  const idx = orders.findIndex(x=>x.id===parseInt(document.getElementById('e_id').value));
+  if(idx<0) return;
+  const o = orders[idx];
+  if(o.og_naam) document.getElementById('e_verzekeraar').value = o.og_naam;
+  if(o.og_contact) document.getElementById('e_volmacht').value = o.og_contact;
+  if(o.og_ref) document.getElementById('e_schadesnr').value = o.og_ref;
+  showToast('✓ Gegevens opdrachtgever overgenomen');
+}
+
+function toggleEditVerzekering(){
+  const cb=document.getElementById('e_verzekering');
+  document.getElementById('e_verzekering_wrap').style.display=cb.checked?'block':'none';
+  if(cb.checked){ selCessieTaal(cessieTaal); }
+}
+
+function selLoc(btn,loc){
+  document.getElementById('locBinnen').classList.remove('sel');
+  document.getElementById('locBuiten').classList.remove('sel');
+  btn.classList.add('sel'); selLocVal=loc;
+}
+function selEditLoc(btn,loc){
+  document.getElementById('elocBinnen').classList.remove('sel');
+  document.getElementById('elocBuiten').classList.remove('sel');
+  btn.classList.add('sel'); editLocVal=loc;
+}
+function typeKleur(type){
+  if(!type) return 'overig';
+  if(type.includes('Inbraak')||type.includes('kozijn')||type.includes('deur')&&type.includes('Inbraak')) return 'inbraak';
+  if(type.includes('Keuken')||type.includes('Tegel')) return 'keuken';
+  if(type.includes('Oplever')) return 'oplever';
+  if(type.includes('Sanitair')||type.includes('sanitair')) return 'sanitair';
+  if(type.includes('Lak')||type.includes('lak')||type.includes('Poort')||type.includes('poort')) return 'lakschade';
+  return 'overig';
+}
+
+function selType(btn,type){
+  document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); selTypeVal=type;
+  document.getElementById('f_overig_wrap').style.display=type==='Overig'?'block':'none';
+  if(type!=='Overig') document.getElementById('f_overig').value='';
+}
+function selPrio(btn,prio){
+  document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('prioPrioriteit').classList.remove('sel');
+  document.getElementById('prioNormaal').classList.remove('sel');
+  btn.classList.add('sel'); selPrioVal=prio;
+}
+function toggleOG(){
+  document.getElementById('f_og_extra').style.display=document.getElementById('f_og_type').value==='aannemer'?'block':'none';
+}
+
+// ── OPDRACHTGEVER TYPE SELECTIE ───────────────────────────────
+function updateSigTekst(){
+  const ogType = document.getElementById('f_og_type') ? document.getElementById('f_og_type').value : 'particulier';
+  const metBetaling = ogType !== 'aannemer';
+  const nlTekst = metBetaling
+    ? '<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.'
+    : '<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden. (Betalingsverplichting ligt bij de opdrachtgever.)';
+  const deTekst = metBetaling
+    ? '<strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.'
+    : '<strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten. (Die Zahlungsverpflichtung liegt beim Auftraggeber.)';
+  const nl = document.getElementById('sigTekstNL');
+  const de = document.getElementById('sigTekstDE');
+  if(nl) nl.innerHTML = nlTekst;
+  if(de) de.innerHTML = deTekst;
+}
+
+function selOGType(type){
+  document.getElementById('ogParticulier').classList.toggle('sel', type==='particulier');
+  document.getElementById('ogBedrijf').classList.toggle('sel', type==='bedrijf');
+  document.getElementById('f_og_extra').style.display = type==='bedrijf'?'block':'none';
+  document.getElementById('f_og_type').value = type==='bedrijf'?'aannemer':'particulier';
+  updateSigTekst();
+}
+
+// ── SPRAAK INVOER ─────────────────────────────────────────────
+function startSpeech(fieldId){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    showToast('Spraakherkenning niet beschikbaar in deze browser',true); return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();
+  rec.lang='nl-NL'; rec.continuous=false; rec.interimResults=false;
+  rec.onresult=e=>{
+    const tekst=e.results[0][0].transcript;
+    const el=document.getElementById(fieldId);
+    el.value=(el.value?el.value+' ':'')+tekst;
+    el.dispatchEvent(new Event('input'));
+  };
+  rec.onerror=()=>showToast('Spraakherkenning mislukt',true);
+  rec.start();
+  showToast('🎤 Spreek nu...');
+}
+
+// ── BULK VERWIJDEREN ──────────────────────────────────────────
+let bulkSelectie=new Set();
+
+function toggleBulk(id, el){
+  if(bulkSelectie.has(id)) bulkSelectie.delete(id);
+  else bulkSelectie.add(id);
+  document.getElementById('bulkTeller').textContent=`${bulkSelectie.size} geselecteerd`;
+  const balk=document.getElementById('bulkBalk');
+  balk.style.display=bulkSelectie.size>0?'flex':'none';
+  // Checkbox uiterlijk bijwerken
+  const cb=document.getElementById('cb_'+id);
+  if(cb) cb.checked=bulkSelectie.has(id);
+}
+
+function bulkDeselecteer(){
+  bulkSelectie.clear();
+  document.getElementById('bulkBalk').style.display='none';
+  renderList();
+}
+
+async function bulkVerwijder(){
+  if(!confirm(`${bulkSelectie.size} opdracht(en) definitief verwijderen?`)) return;
+  orders=orders.filter(o=>!bulkSelectie.has(o.id));
+  bulkSelectie.clear();
+  document.getElementById('bulkBalk').style.display='none';
+  await dbxWrite();
+  renderList();
+  showToast('✓ Geselecteerde opdrachten verwijderd');
+}
+function selEditType(btn,type){
+  document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); editTypeVal=type;
+  document.getElementById('e_overig_wrap').style.display=type==='Overig'?'block':'none';
+}
+function selEditPrio(btn,prio){
+  document.getElementById('eprioSpoed').classList.remove('sel');
+  document.getElementById('eprioPrioriteit').classList.remove('sel');
+  document.getElementById('eprioNormaal').classList.remove('sel');
+  btn.classList.add('sel'); editPrioVal=prio;
+}
+function toggleEditOG(){
+  document.getElementById('e_og_extra').style.display=document.getElementById('e_og_type').value==='aannemer'?'block':'none';
+}
+function replaceEditSig(){
+  document.getElementById('e_sig_existing').style.display='none';
+  document.getElementById('e_sig_new').style.display='block';
+  setTimeout(()=>initSigPad('editSigCanvas'),120);
+}
+
+// ── SAVE ORDER ───────────────────────────────────────────────
+async function saveOrder(){
+  if(!token){showToast('Verbind eerst met Dropbox',true);return;}
+  const naam=document.getElementById('f_naam').value.trim();
+  const ogNaam=document.getElementById('f_og_naam').value.trim();
+  const ogType=document.getElementById('f_og_type').value;
+  if(!naam&&!(ogType==='aannemer'&&ogNaam)){showToast('Vul een naam in',true);return;}
+  if(!selTypeVal){showToast('Kies een type werkzaamheden',true);return;}
+
+  const overig=document.getElementById('f_overig').value.trim();
+  const typeLabel=selTypeVal==='Overige werkzaamheden'&&overig?`Overige werkzaamheden: ${overig}`:selTypeVal;
+  const nr=await volgendNr();
+  const mapPad=`/Fotos/${nr}_${Date.now()}`;
+
+  setSyncStatus("foto's uploaden...",'busy');
+  const fotoUrls={voor:[null,null,null,null],na:[null,null,null,null]};
+  for(let i=0;i<4;i++){
+    if(newFotos.voor[i]){
+      const pad=await dbxUploadFoto(`${mapPad}/voor_${i+1}.jpg`,newFotos.voor[i]);
+      fotoUrls.voor[i]=pad?`dropbox:${mapPad}/voor_${i+1}.jpg`:null;
+    }
+    if(newFotos.na[i]){
+      const pad=await dbxUploadFoto(`${mapPad}/na_${i+1}.jpg`,newFotos.na[i]);
+      fotoUrls.na[i]=pad?`dropbox:${mapPad}/na_${i+1}.jpg`:null;
+    }
+  }
+
+  // PDF bijlage uploaden
+  let bijlagePad=null;
+  const bijlageFile=document.getElementById('f_og_bijlage').files[0];
+  if(bijlageFile&&token){
+    setSyncStatus('bijlage uploaden...','busy');
+    const reader=new FileReader();
+    bijlagePad=await new Promise(res=>{
+      reader.onload=async e=>{
+        const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+        const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+          method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`${mapPad}/opdrachtbevestiging.pdf`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
+        });
+        res(r.ok?`${mapPad}/opdrachtbevestiging.pdf`:null);
+      };
+      reader.readAsDataURL(bijlageFile);
+    });
+  }
+
+  orders.unshift({
+    id:Date.now(),nr,status:'nieuw',prioriteit:selPrioVal,locatie:selLocVal,
+    naam,type:typeLabel,
+    og_type:ogType,og_naam:ogNaam,
+    og_contact:document.getElementById('f_og_contact').value.trim(),
+    og_tel:document.getElementById('f_og_tel').value.trim(),
+    og_email:document.getElementById('f_og_email').value.trim(),
+    og_ref:document.getElementById('f_og_ref').value.trim(),
+    adres:document.getElementById('f_adres').value.trim(),
+    tel:document.getElementById('f_tel').value.trim(),
+    email:document.getElementById('f_email').value.trim(),
+    datum:document.getElementById('f_datum').value,
+    datum_deadline:document.getElementById('f_datum_deadline').value,
+    agenda_tijd:document.getElementById('f_agenda_tijd').value||'08:00',
+    omschr:document.getElementById('f_omschr').value.trim(),
+    sig:getSig('sigCanvas'),
+    fotos:fotoUrls,fotoMap:mapPad,
+    bijlage:bijlagePad,
+    intern:document.getElementById('f_intern').value.trim(),
+    cessie_taal:cessieTaal,
+    verzekering:document.getElementById('f_verzekering').checked,
+    verzekeraar:document.getElementById('f_verzekeraar').value.trim(),
+    volmacht:document.getElementById('f_volmacht').value.trim(),
+    polisnr:document.getElementById('f_polisnr').value.trim(),
+    schadesnr:document.getElementById('f_schadesnr').value.trim(),
+    schadebedrag:document.getElementById('f_schadebedrag').value,
+    btw:document.getElementById('f_btw').value,
+    eigenrisico:document.getElementById('f_eigenrisico').value,
+    btwterug:document.getElementById('f_btwterug').value,
+    aangemaakt:new Date().toISOString()
+  });
+
+  await dbxWrite();
+
+  // Reset formulier
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline','f_datum'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_agenda_tijd').value='08:00';
+  document.getElementById('f_og_type').value='particulier'; toggleOG();
+  document.getElementById('ogParticulier').classList.add('sel');
+  document.getElementById('ogBedrijf').classList.remove('sel');
+  updateSigTekst();
+  document.getElementById('f_overig_wrap').style.display='none';
+  document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
+  selTypeVal=''; selPrioVal='normaal';
+  document.getElementById('prioNormaal').classList.add('sel');
+  document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('prioPrioriteit').classList.remove('sel');
+  document.getElementById('f_intern').value='';
+  document.getElementById('f_verzekering').checked=false;
+  document.getElementById('f_verzekering_wrap').style.display='none';
+  ['f_verzekeraar','f_volmacht','f_polisnr','f_schadesnr','f_schadebedrag','f_btw','f_eigenrisico','f_btwterug'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sigHintCessie').style.display='none';
+  cessieTaal='nl'; selCessieTaal('nl');
+  selLocVal='';
+  document.getElementById('locBinnen').classList.remove('sel');
+  document.getElementById('locBuiten').classList.remove('sel');
+  clearSig('sigCanvas'); resetFotos();
+  showToast('✓ Opdracht '+nr+' opgeslagen');
+  currentStatFilter='alle';
+  document.getElementById('filterStatus').value='alle';
+  goTab('overzicht');
+}
+
+// ── RENDER LIST ──────────────────────────────────────────────
+function statusLabel(s,o){
+  if(s==='klaar') return 'Klaar voor facturatie';
+  if(s==='bezig') return 'Onderhanden';
+  if(s==='nieuw') return (o&&o.datum&&o.datum!=='')?'Gepland':'Nog te plannen';
+  return s;
+}
+function prioRank(p){return p==='spoed'?0:p==='prioriteit'?1:2;}
+
+let sortRichting = 'desc'; // desc = nieuwste/hoogste eerst, asc = oudste/laagste eerst
+
+function toggleSortRichting(){
+  sortRichting = sortRichting === 'desc' ? 'asc' : 'desc';
+  document.getElementById('sortRichtingBtn').textContent = sortRichting === 'desc' ? '↓' : '↑';
+  document.getElementById('sortRichtingBtn').title = sortRichting === 'desc' ? 'Nieuwste eerst' : 'Oudste eerst';
+  renderList();
+}
+
+let currentTypeFilter = 'alle';
+
+function filterOpType(type){
+  currentTypeFilter = type;
+  ['alle','inbraak','keuken','oplever','lakschade','sanitair','overig'].forEach(k=>{
+    const el=document.getElementById('leg-'+k);
+    if(el) el.style.outline = k===type ? '2px solid currentColor' : 'none';
+  });
+  renderList();
+}
+
+function statFilter(type){
+  currentStatFilter=type;
+  ['totaal','nieuw','gepland','bezig','klaar'].forEach(k=>{
+    const el=document.getElementById('stat-'+k);
+    if(el) el.classList.remove('active-filter');
+  });
+  if(type==='alle') document.getElementById('stat-totaal').classList.add('active-filter');
+  else if(type==='nogteplannen') document.getElementById('stat-nieuw').classList.add('active-filter');
+  else if(type==='gepland') document.getElementById('stat-gepland').classList.add('active-filter');
+  else if(type==='bezig') document.getElementById('stat-bezig').classList.add('active-filter');
+  else if(type==='klaar') document.getElementById('stat-klaar').classList.add('active-filter');
+  document.getElementById('filterStatus').value='alle';
+  // Overige filters ook resetten, anders kan de lijst stiekem minder tonen dan de
+  // teller aangeeft (bv. door een vergeten kleur-, locatie- of zoekfilter).
+  document.getElementById('filterPrio').value='alle';
+  const filterLocatieEl=document.getElementById('filterLocatie');
+  if(filterLocatieEl) filterLocatieEl.value='alle';
+  const searchEl=document.getElementById('searchField');
+  if(searchEl) searchEl.value='';
+  currentTypeFilter='alle';
+  ['alle','inbraak','keuken','oplever','lakschade','sanitair','overig'].forEach(k=>{
+    const el=document.getElementById('leg-'+k);
+    if(el) el.style.outline='none';
+  });
+  renderList();
+}
+
+function isNogTePlannen(o){ return o.status==='nieuw' && (!o.datum||o.datum===''); }
+function isGepland(o){ return o.status==='nieuw' && o.datum && o.datum!==''; }
+
+// Sorteersleutel voor "Alfabetisch": bij een bedrijf (via aannemer) het eerste woord
+// van de bedrijfsnaam, bij een particulier het laatste woord van de naam (de achternaam,
+// ook bij tussenvoegsels zoals "van der Berg" of "de Vries").
+function sorteerNaamSleutel(o){
+  const isBedrijf = o.og_type==='aannemer' && o.og_naam;
+  const naam = isBedrijf ? o.og_naam : (o.naam||'');
+  const delen = naam.trim().split(/\s+/).filter(Boolean);
+  if(!delen.length) return '';
+  return (isBedrijf ? delen[0] : delen[delen.length-1]).toLowerCase();
+}
+
+function renderList(){
+  // Tellers — gebaseerd op datum afspraak en status
+  const nogTeP = orders.filter(o=>isNogTePlannen(o)).length;
+  const gepland = orders.filter(o=>isGepland(o)).length;
+  const bezig = orders.filter(o=>o.status==='bezig').length;
+  const klaar = orders.filter(o=>o.status==='klaar').length;
+
+  document.getElementById('s-totaal').textContent=orders.length;
+  document.getElementById('s-nieuw').textContent=nogTeP;
+  document.getElementById('s-gepland').textContent=gepland;
+  document.getElementById('s-bezig').textContent=bezig;
+  document.getElementById('s-klaar').textContent=klaar;
+
+  const fStatus=document.getElementById('filterStatus').value;
+  const fPrio=document.getElementById('filterPrio').value;
+  const sort=document.getElementById('sortOrder').value;
+
+  let filtered=[...orders];
+
+  // Stat filter heeft voorrang boven dropdown
+  if(currentStatFilter==='nogteplannen'){
+    filtered=filtered.filter(o=>isNogTePlannen(o));
+  } else if(currentStatFilter==='gepland'){
+    filtered=filtered.filter(o=>isGepland(o));
+  } else if(currentStatFilter==='bezig'){
+    filtered=filtered.filter(o=>o.status==='bezig');
+  } else if(currentStatFilter==='klaar'){
+    filtered=filtered.filter(o=>o.status==='klaar');
+  } else {
+    // Dropdown filter
+    if(fStatus==='nogteplannen') filtered=filtered.filter(o=>isNogTePlannen(o));
+    else if(fStatus==='gepland') filtered=filtered.filter(o=>isGepland(o));
+    else if(fStatus==='bezig') filtered=filtered.filter(o=>o.status==='bezig');
+    else if(fStatus==='klaar') filtered=filtered.filter(o=>o.status==='klaar');
+  }
+  if(fPrio!=='alle') filtered=filtered.filter(o=>(o.prioriteit||'normaal')===fPrio);
+
+  // Type filter via legenda
+  if(currentTypeFilter!=='alle') filtered=filtered.filter(o=>typeKleur(o.type)===currentTypeFilter);
+
+  const fLocatie=document.getElementById('filterLocatie')?.value||'alle';
+  if(fLocatie!=='alle') filtered=filtered.filter(o=>(o.locatie||'binnen')===fLocatie);
+
+  const zoek=(document.getElementById('searchField')?.value||'').toLowerCase().trim();
+  if(zoek) filtered=filtered.filter(o=>{
+    const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+    return (hoofd||'').toLowerCase().includes(zoek)||(o.naam||'').toLowerCase().includes(zoek)||(o.adres||'').toLowerCase().includes(zoek)||(o.nr||'').toLowerCase().includes(zoek);
+  });
+
+  // Sorteren
+  filtered.sort((a,b)=>{
+    let res=0;
+    if(sort==='prio'){res=prioRank(a.prioriteit||'normaal')-prioRank(b.prioriteit||'normaal');if(res===0)res=new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);}
+    else if(sort==='ontvangen'){
+      // Sorteer op opdrachtnummer — meest betrouwbare volgorde van binnenkomst
+      const nrA = parseInt((a.nr||'RJ-0000').replace('RJ-',''));
+      const nrB = parseInt((b.nr||'RJ-0000').replace('RJ-',''));
+      res = nrA - nrB;
+    }
+    else if(sort==='deadline'){if(!a.datum_deadline&&!b.datum_deadline)res=0;else if(!a.datum_deadline)res=1;else if(!b.datum_deadline)res=-1;else res=new Date(a.datum_deadline)-new Date(b.datum_deadline);}
+    else if(sort==='datum'){if(!a.datum&&!b.datum)res=0;else if(!a.datum)res=1;else if(!b.datum)res=-1;else res=new Date(a.datum)-new Date(b.datum);}
+    else if(sort==='naam'){res=sorteerNaamSleutel(a).localeCompare(sorteerNaamSleutel(b),'nl',{sensitivity:'base'});}
+    else res=new Date(b.aangemaakt||0)-new Date(a.aangemaakt||0);
+    return sortRichting==='asc'?-res:res;
+  });
+
+  const el=document.getElementById('orderList');
+  const archiefHTML = zoek ? renderArchiefZoekResultaten(zoek) : '';
+  if(!orders.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nog geen opdrachten.<br>Maak een nieuwe aan via het + tabblad.</div></div>'+archiefHTML;return;}
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen actieve opdrachten gevonden<br>met deze filters.</div></div>'+archiefHTML;return;}
+
+  const hoofdNaam=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const badgeCls=o=>o.status==='klaar'?'b-klaar':o.status==='bezig'?'b-bezig':(o.datum&&o.datum!==''?'b-gepland':'b-nieuw');
+  const hasFotos=o=>o.fotos&&(o.fotos.voor.some(f=>f)||o.fotos.na.some(f=>f));
+  const pBadge = o => {
+    const p = o.prioriteit||'normaal';
+    if(p==='spoed') return '<span class="badge b-spoed">🔴 Spoed</span>';
+    if(p==='prioriteit') return '<span class="badge" style="background:#fff0e0;color:#c06000;border:1px solid #e07800">🟠 Prioriteit</span>';
+    return '';
+  };
+
+  el.innerHTML=filtered.map(o=>{
+    const tk=typeKleur(o.type);
+    const loc=o.locatie||'binnen';
+    const locLabel=loc==='buiten'?'<span style="font-size:11px;color:var(--text2);font-weight:500">🌤️ Buiten</span>':'<span style="font-size:11px;color:var(--text2);font-weight:500">🏠 Binnen</span>';
+    const telLink=o.tel?`<a href="tel:${o.tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.tel}</a>`:(o.og_tel?`<a href="tel:${o.og_tel}" onclick="event.stopPropagation()" style="font-size:12px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px">📞 ${o.og_tel}</a>`:'');
+    const indicators=`<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">
+      ${hasFotos(o)?'<span title="Foto\'s aanwezig" style="font-size:16px">📷</span>':''}
+      ${o.sig?'<span title="Handtekening aanwezig" style="font-size:16px">✍️</span>':''}
+    </div>`;
+    return `
+    <div class="ocard type-${tk}" style="position:relative">
+      <input type="checkbox" id="cb_${o.id}" ${bulkSelectie.has(o.id)?'checked':''} onclick="event.stopPropagation();toggleBulk(${o.id},this)" style="position:absolute;top:10px;right:10px;width:20px;height:20px;cursor:pointer;z-index:2">
+      <div onclick="showDetail(${o.id})">
+      <div class="ocard-top">
+        <div>
+          <div class="onr">${o.nr}</div>
+          <div class="oname">${hoofdNaam(o)}</div>
+          ${o.og_type==='aannemer'&&o.naam?`<div class="osub">Bewoner: ${o.naam}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-right:28px">
+          <span class="badge ${badgeCls(o)}">${statusLabel(o.status,o)}</span>
+          ${pBadge(o)}
+        </div>
+      </div>
+      <div class="ometa">
+        ${o.datum?`<span>📅 ${fmtDate(o.datum)}</span>`:''}
+        ${o.datum_deadline?`<span style="color:var(--red)">⚠️ ${fmtDate(o.datum_deadline)}</span>`:''}
+        ${o.adres?`<span>📍 ${o.adres}</span>`:''}
+      </div>
+      ${telLink}
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div class="otype">${o.type}</div>
+          ${locLabel}
+        </div>
+        ${indicators}
+      </div>
+      </div>
+    </div>`;
+  }).join('')+archiefHTML;
+}
+
+function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
+
+// ── DETAIL ───────────────────────────────────────────────────
+let detailWijzigingen={};
+let detailId=null;
+
+function markeerWijziging(id,veld,waarde){
+  detailWijzigingen[veld]=waarde;
+  const banner=document.getElementById('opslaanBanner');
+  if(banner) banner.style.display='flex';
+  const knopTop=document.getElementById('opslaanKnopTop');
+  if(knopTop) knopTop.style.display='block';
+  const knopBottom=document.getElementById('opslaanKnopBottom');
+  if(knopBottom) knopBottom.style.display='block';
+}
+
+async function slaDetailOp(id){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  Object.assign(orders[idx],detailWijzigingen);
+  detailWijzigingen={};
+  showToast('✓ Wijzigingen opgeslagen');
+  goTab('overzicht');
+  await dbxWrite();
+}
+
+async function handleDetailFoto(input,type,idx,id){
+  const f=(input&&input.files)?input.files[0]:input; if(!f)return;
+  showToast('📷 Foto uploaden...');
+  const r=new FileReader();
+  r.onload=async e=>compressImg(e.target.result,async compressed=>{
+    setSyncStatus('foto uploaden...','busy');
+    const o=orders.find(x=>x.id===id); if(!o)return;
+    if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+    while(o.fotos[type].length<4) o.fotos[type].push(null);
+    if(!o.fotoMap) o.fotoMap=`/Fotos/${o.nr}`;
+    const pad=await dbxUploadFoto(`${o.fotoMap}/${type}_${idx+1}.jpg`,compressed);
+    if(pad){
+      o.fotos[type][idx]=`dropbox:${o.fotoMap}/${type}_${idx+1}.jpg`;
+      // Sla ook eventuele onopgeslagen tekstveldwijzigingen op
+      if(Object.keys(detailWijzigingen).length>0){
+        const idx2=orders.findIndex(x=>x.id===id);
+        if(idx2>=0) Object.assign(orders[idx2],detailWijzigingen);
+        detailWijzigingen={};
+      }
+      await dbxWrite();
+      showToast(`✅ Foto ${type==='voor'?'voor':'na'} ${idx+1} opgeslagen`);
+      showDetail(id);
+    } else { showToast('❌ Foto upload mislukt',true); }
+  });
+  r.readAsDataURL(f);
+}
+
+async function slaHandtekeningOp(id){
+  const sig=getSig('detailSigCanvas');
+  if(!sig){showToast('Teken eerst een handtekening',true);return;}
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].sig=sig;
+  showToast('✓ Handtekening opgeslagen');
+  goTab('overzicht');
+  await dbxWrite();
+}
+
+function vervangHandtekening(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  o.sig=null; showDetail(id);
+}
+
+async function archiveerOrder(id){
+  if(!confirm('Opdracht archiveren? Hij verdwijnt uit het overzicht.')) return;
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  const archief={...o,gearchiveerd:new Date().toISOString()};
+  if(token){
+    try {
+      await fetch('https://content.dropboxapi.com/2/files/upload',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Archief/${o.nr}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},
+        body:JSON.stringify(archief,null,2)
+      });
+      // Zoekindex bijwerken zodat de opdracht meteen vindbaar/terugvindbaar is
+      if(archiveIndex===null) await laadArchiefIndex();
+      if(archiveIndex){
+        archiveIndex=archiveIndex.filter(r=>r.nr!==o.nr);
+        archiveIndex.unshift(archiefIndexRecord(archief));
+        await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex);
+      }
+    } catch(e){}
+  }
+  const del=JSON.parse(localStorage.getItem('rj_deleted_v3')||'[]');
+  del.push(id); localStorage.setItem('rj_deleted_v3',JSON.stringify(del));
+  orders=orders.filter(x=>x.id!==id);
+  await dbxWrite();
+  goTab('overzicht');
+  showToast(`✓ ${o.nr} gearchiveerd`);
+}
+
+// ── ARCHIEF (index, zoeken, terugzetten) ────────────────────
+function archiefIndexRecord(o){
+  return {
+    id:o.id, nr:o.nr, naam:o.naam||'', og_naam:o.og_naam||'', og_type:o.og_type||'particulier',
+    adres:o.adres||'', type:o.type||'', status:o.status||'', prioriteit:o.prioriteit||'normaal',
+    locatie:o.locatie||'binnen', datum:o.datum||'', gearchiveerd:o.gearchiveerd||new Date().toISOString()
+  };
+}
+async function laadArchiefIndex(forceer){
+  if(!token){ showToast('Verbind eerst met Dropbox',true); return archiveIndex||[]; }
+  if(archiveIndex && !forceer) return archiveIndex;
+  if(archiefBezigOpbouw) return archiveIndex||[];
+  archiefBezigOpbouw=true;
+  try{
+    if(!forceer){
+      const d = await dbxReadJSON(DBX_ARCHIEF_INDEX);
+      if(Array.isArray(d)){ archiveIndex=d; return archiveIndex; }
+    }
+    // Index ontbreekt (of handmatig herindexeren gevraagd) — volledige opbouw uit /Archief
+    showToast('📦 Archief indexeren, even geduld...');
+    setSyncStatus('archief indexeren...','busy');
+    const entries = (await dbxListFolder('/Archief')).filter(e=>e['.tag']==='file' && /^RJ-\d+\.json$/.test(e.name||''));
+    const nieuweIndex=[];
+    const CONCURRENCY=6;
+    for(let i=0;i<entries.length;i+=CONCURRENCY){
+      const batch=entries.slice(i,i+CONCURRENCY);
+      const resultaten=await Promise.all(batch.map(e=>dbxReadJSON('/Archief/'+e.name)));
+      resultaten.forEach(data=>{ if(data) nieuweIndex.push(archiefIndexRecord(data)); });
+    }
+    nieuweIndex.sort((a,b)=>new Date(b.gearchiveerd||0)-new Date(a.gearchiveerd||0));
+    archiveIndex=nieuweIndex;
+    await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex);
+    setSyncStatus('gesynchroniseerd','ok');
+    showToast(`✓ Archief geïndexeerd (${archiveIndex.length} opdrachten)`);
+  } finally {
+    archiefBezigOpbouw=false;
+  }
+  return archiveIndex||[];
+}
+function renderArchief(){
+  const el=document.getElementById('archiefList'); if(!el) return;
+  if(!token){ el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Verbind eerst met Dropbox.</div></div>'; return; }
+  if(archiveIndex===null){
+    el.innerHTML='<div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Archief laden...</div></div>';
+    laadArchiefIndex().then(()=>renderArchief());
+    return;
+  }
+  const zoek=(document.getElementById('archiefSearchField')?.value||'').toLowerCase().trim();
+  let lijst=[...archiveIndex];
+  if(zoek) lijst=lijst.filter(o=>archiefMatch(o,zoek));
+  if(!archiveIndex.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-txt">Nog geen gearchiveerde opdrachten.</div></div>'; return; }
+  if(!lijst.length){ el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-txt">Geen gearchiveerde opdrachten gevonden.</div></div>'; return; }
+  el.innerHTML=lijst.map(archiefKaartHTML).join('');
+}
+function archiefMatch(o,zoek){
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  return (hoofd||'').toLowerCase().includes(zoek)||(o.naam||'').toLowerCase().includes(zoek)||(o.adres||'').toLowerCase().includes(zoek)||(o.nr||'').toLowerCase().includes(zoek);
+}
+function archiefKaartHTML(o){
+  const tk=typeKleur(o.type);
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  return `<div class="ocard type-${tk}" style="opacity:.85" onclick="showArchiefDetail('${o.nr}')">
+    <div class="ocard-top">
+      <div><div class="onr">${o.nr}</div><div class="oname">${hoofd||'—'}</div></div>
+      <span class="badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2)">📦 Archief</span>
+    </div>
+    <div class="ometa">
+      ${o.datum?`<span>📅 ${fmtDate(o.datum)}</span>`:''}
+      ${o.adres?`<span>📍 ${o.adres}</span>`:''}
+      ${o.gearchiveerd?`<span>Gearchiveerd: ${fmtDate(o.gearchiveerd.slice(0,10))}</span>`:''}
+    </div>
+    ${o.type?`<div class="otype" style="margin-top:5px">${o.type}</div>`:''}
+  </div>`;
+}
+function renderArchiefZoekResultaten(zoek){
+  if(!token) return `<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0">📦 Archief niet doorzoekbaar zonder Dropbox-verbinding</div>`;
+  if(archiveIndex===null){
+    if(!archiefBezigOpbouw) laadArchiefIndex().then(()=>renderList());
+    return `<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0">📦 Archief doorzoeken...</div>`;
+  }
+  const gevonden=archiveIndex.filter(o=>archiefMatch(o,zoek));
+  if(!gevonden.length) return '';
+  return `<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">📦 Gevonden in archief (${gevonden.length})</div>`
+    + gevonden.map(archiefKaartHTML).join('');
+}
+async function showArchiefDetail(nr){
+  if(!token){ showToast('Verbind eerst met Dropbox',true); return; }
+  setSyncStatus('archiefrecord laden...','busy');
+  const o=await dbxReadJSON('/Archief/'+nr+'.json');
+  setSyncStatus('gesynchroniseerd','ok');
+  if(!o){ showToast('Archiefrecord niet gevonden',true); return; }
+  const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+
+  const fotoVoorUrls=[null,null,null,null], fotoNaUrls=[null,null,null,null];
+  if(o.fotos){
+    for(let i=0;i<4;i++){
+      if(o.fotos.voor&&o.fotos.voor[i]) fotoVoorUrls[i]=await dbxGetFotoUrl(o.fotos.voor[i]);
+      if(o.fotos.na&&o.fotos.na[i]) fotoNaUrls[i]=await dbxGetFotoUrl(o.fotos.na[i]);
+    }
+  }
+  const fotoHTML=(urls,label)=>urls.filter(u=>u).map(url=>`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="${label}" style="cursor:pointer"></div>`).join('');
+
+  document.getElementById('archiefDetailContent').innerHTML=`
+    <div class="det-hdr">
+      <button class="back-btn" onclick="goTab('archief')">← Terug</button>
+      <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
+      <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2)">
+      📦 Alleen-lezen archiefweergave — gearchiveerd op ${o.gearchiveerd?fmtDate(o.gearchiveerd.slice(0,10)):'onbekende datum'}
+    </div>
+    <div class="slbl" style="margin-top:0">Opdrachtgever</div>
+    ${o.og_type==='aannemer'&&o.og_naam?`<div class="drow"><div class="drow-l">Aannemer</div><div class="drow-v">${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</div></div>`:''}
+    <div class="slbl">Locatie & klant</div>
+    <div class="drow"><div class="drow-l">Naam bewoner</div><div class="drow-v">${o.naam||'—'}</div></div>
+    <div class="drow"><div class="drow-l">Adres</div><div class="drow-v">${o.adres||'—'}</div></div>
+    ${o.tel?`<div class="drow"><div class="drow-l">Telefoon</div><div class="drow-v">${o.tel}</div></div>`:''}
+    <div class="slbl">Opdracht</div>
+    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type||''}</div></div>
+    ${o.datum?`<div class="drow"><div class="drow-l">Datum uitvoering</div><div class="drow-v">${fmtDate(o.datum)}</div></div>`:''}
+    ${o.omschr?`<div class="drow"><div class="drow-l">Omschrijving</div><div class="drow-v">${o.omschr}</div></div>`:''}
+    ${o.intern?`<div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern</div><div class="drow-v">${o.intern}</div></div>`:''}
+    ${fotoVoorUrls.some(u=>u)?`<div class="slbl">Foto's voor</div><div class="foto-detail-grid">${fotoHTML(fotoVoorUrls,'Voor')}</div>`:''}
+    ${fotoNaUrls.some(u=>u)?`<div class="slbl">Foto's na</div><div class="foto-detail-grid">${fotoHTML(fotoNaUrls,'Na')}</div>`:''}
+    ${o.sig?`<div class="slbl">Handtekening klant</div><img src="${o.sig}" class="sig-preview" alt="Handtekening">`:''}
+    ${o.verzekering?`<div class="slbl">Verzekeringsgeval</div>
+      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+      ${o.polisnr?`<div class="drow"><div class="drow-l">Polisnummer</div><div class="drow-v">${o.polisnr}</div></div>`:''}
+      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier nr.</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
+    `:''}
+    <div class="divider"></div>
+    <button class="btn btn-primary" onclick="herstelOrder('${o.nr}')">↩️ Terugzetten naar actief</button>
+    <button class="btn btn-secondary" onclick="goTab('archief')">← Terug naar archief</button>
+  `;
+  goArchiefDetail();
+}
+async function herstelOrder(nr){
+  if(!confirm(`Opdracht ${nr} terugzetten naar actief?`)) return;
+  const o=await dbxReadJSON('/Archief/'+nr+'.json');
+  if(!o){ showToast('Archiefrecord niet gevonden',true); return; }
+  delete o.gearchiveerd;
+  if(orders.some(x=>x.id===o.id)) o.id=Date.now(); // zeer uitzonderlijke id-botsing voorkomen
+  orders.unshift(o);
+  await dbxWrite();
+  await dbxDelete('/Archief/'+nr+'.json');
+  if(archiveIndex){ archiveIndex=archiveIndex.filter(r=>r.nr!==nr); await dbxWriteJSON(DBX_ARCHIEF_INDEX, archiveIndex); }
+  showToast(`✓ ${nr} teruggezet naar actief`);
+  goTab('overzicht');
+}
+
+async function openBijlage(pad){
+  const url=await dbxGetFotoUrl(pad.startsWith('dropbox:')?pad:`dropbox:${pad}`);
+  if(url) window.open(url,'_blank');
+  else showToast('Bijlage niet beschikbaar',true);
+}
+
+async function showDetail(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  detailId=id; detailWijzigingen={};
+  const hoofdNaam=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+
+  const fotoVoorUrls=[null,null,null,null];
+  const fotoNaUrls=[null,null,null,null];
+  if(o.fotos){
+    for(let i=0;i<4;i++){
+      if(o.fotos.voor[i]) fotoVoorUrls[i]=await dbxGetFotoUrl(o.fotos.voor[i]);
+      if(o.fotos.na[i]) fotoNaUrls[i]=await dbxGetFotoUrl(o.fotos.na[i]);
+    }
+  }
+
+  // Sla URLs op in window object zodat we geen base64 in onclick hoeven
+  window._fotoUrls = window._fotoUrls || {};
+  window._fotoUrls[id] = { voor: fotoVoorUrls, na: fotoNaUrls };
+
+  const fVHTML=fotoVoorUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.voor&&o.fotos.voor[i];
+    if(pad){
+      return `<div class="foto-detail-item">
+        <img id="fotoV_${id}_${i}" onclick="openLightboxIdx(${id},'voor',${i})" alt="Voor ${i+1}" style="cursor:pointer">
+        <div class="foto-detail-label">
+          <span>Voor ${i+1}</span>
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'voor',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="foto-slot"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('dFV${i}_${id}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('dFV${i}_${id}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Voor ${i+1} toevoegen</span><input type="file" id="dFV${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"><input type="file" id="dFV${i}_${id}_cam" accept="image/*" capture="environment" style="display:none" onchange="handleDetailFoto(this,'voor',${i},${id})"></div>`;
+  }).join('');
+
+  const fNHTML=fotoNaUrls.map((url,i)=>{
+    const pad=o.fotos&&o.fotos.na&&o.fotos.na[i];
+    if(pad){
+      return `<div class="foto-detail-item">
+        <img id="fotoN_${id}_${i}" onclick="openLightboxIdx(${id},'na',${i})" alt="Na ${i+1}" style="cursor:pointer">
+        <div class="foto-detail-label">
+          <span>Na ${i+1}</span>
+          <button onclick="event.stopPropagation();verwijderFoto(${id},'na',${i})" style="background:var(--red-bg);color:var(--red);border:1px solid #e8c0bc;border-radius:4px;padding:3px 8px;font-size:14px;cursor:pointer;line-height:1">🗑️</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="foto-slot"><div style="display:flex;gap:14px;margin-bottom:4px"><span onclick="document.getElementById('dFN${i}_${id}_cam').click()" style="cursor:pointer;font-size:20px" title="Camera">📷</span><span onclick="document.getElementById('dFN${i}_${id}').click()" style="cursor:pointer;font-size:20px" title="Galerij">🖼️</span></div><span class="foto-slot-label">Na ${i+1} toevoegen</span><input type="file" id="dFN${i}_${id}" accept="image/*" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"><input type="file" id="dFN${i}_${id}_cam" accept="image/*" capture="environment" style="display:none" onchange="handleDetailFoto(this,'na',${i},${id})"></div>`;
+  }).join('');
+
+  document.getElementById('detailContent').innerHTML=`
+    <div class="det-hdr">
+      <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
+      <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
+      <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
+      <div style="display:flex;gap:6px">
+        <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
+      </div>
+    </div>
+    <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
+    </div>
+    <div class="slbl" style="margin-top:0">Status</div>
+    <div class="status-row">${['nieuw','bezig','klaar'].map(s=>`<div class="sopt ${o.status===s?'a-'+s:''}" onclick="changeStatus(${id},'${s}')">${statusLabel(s,o)}</div>`).join('')}</div>
+    <div class="status-row">${['spoed','prioriteit','normaal'].map(p=>`<div class="sopt ${(o.prioriteit||'normaal')===p?'a-'+p:''}" onclick="changePrio(${id},'${p}')">${p==='spoed'?'🔴 Spoed':p==='prioriteit'?'🟠 Prioriteit':'🟡 Normaal'}</div>`).join('')}</div>
+    <div class="slbl">Taal werkbon</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button type="button" class="tbtn ${(o.cessie_taal||'nl')==='nl'?'sel':''}" onclick="changeTaal(${id},'nl')" style="padding:12px 8px">🇳🇱 Nederlands</button>
+      <button type="button" class="tbtn ${o.cessie_taal==='de'?'sel':''}" onclick="changeTaal(${id},'de')" style="padding:12px 8px">🇩🇪 Deutsch</button>
+    </div>
+    <div class="slbl">Opdrachtgever</div>
+    <div class="drow"><div class="drow-l">Type</div>
+      <select style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_type',this.value)">
+        <option value="particulier" ${(o.og_type||'particulier')==='particulier'?'selected':''}>Particulier</option>
+        <option value="aannemer" ${o.og_type==='aannemer'?'selected':''}>Via aannemer / bedrijf</option>
+      </select>
+    </div>
+    <div style="display:${o.og_type==='aannemer'?'block':'none'}" id="ogAannemerBlok_${id}">
+      <div class="drow"><div class="drow-l">Aannemer</div><input type="text" value="${o.og_naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_naam',this.value)"></div>
+      <div class="drow"><div class="drow-l">Contactpersoon</div><input type="text" value="${o.og_contact||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_contact',this.value)"></div>
+      <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.og_tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_tel',this.value)"></div>
+      <div class="drow"><div class="drow-l">Email</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_email',this.value)"></div>
+      <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_ref',this.value)"></div>
+    </div>
+    ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Bijlage</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
+    <div class="slbl">Locatie & klant</div>
+    <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'naam',this.value)"></div>
+    <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'adres',this.value)"></div>
+    <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'tel',this.value)"></div>
+    <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'email',this.value)"></div>
+    <div class="slbl">Opdracht</div>
+    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
+    ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
+    <div class="drow"><div class="drow-l">Omschrijving</div><textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea></div>
+    <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
+    <div class="drow"><div class="drow-l">Datum afspraak</div><input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum',this.value)"></div>
+    <div class="drow"><div class="drow-l">Uiterlijk klaar op</div><input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum_deadline',this.value)"></div>
+    <div class="slbl">Agenda</div>
+    <div class="drow" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div class="drow-l">Starttijd afspraak</div><input class="time-input" type="time" value="${o.agenda_tijd||'08:00'}" onchange="saveAgendaTijd(${id},this.value)"></div>
+      <button onclick="addToAgenda(${id})" style="background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">📅 Agenda</button>
+    </div>
+    <div class="slbl">Tijdregistratie</div>
+    <div class="drow">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🚗 Reistijd heen</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><div class="drow-l">Vertrek</div><input class="time-input" type="time" value="${o.tijd_vertrek||''}" onchange="saveTijd(${id},'tijd_vertrek',this.value)"></div>
+        <div><div class="drow-l">Aankomst</div><input class="time-input" type="time" value="${o.tijd_aankomst||''}" onchange="saveTijd(${id},'tijd_aankomst',this.value)"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🔨 Werktijd</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><div class="drow-l">Werk van</div><input class="time-input" type="time" value="${o.tijd_werk_van||''}" onchange="saveTijd(${id},'tijd_werk_van',this.value)"></div>
+        <div><div class="drow-l">Werk tot</div><input class="time-input" type="time" value="${o.tijd_werk_tot||''}" onchange="saveTijd(${id},'tijd_werk_tot',this.value)"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500">🚗 Terugreis</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="drow-l">Vertrek zaak</div><input class="time-input" type="time" value="${o.tijd_terug_vertrek||''}" onchange="saveTijd(${id},'tijd_terug_vertrek',this.value)"></div>
+        <div><div class="drow-l">Aankomst zaak</div><input class="time-input" type="time" value="${o.tijd_terug_aankomst||''}" onchange="saveTijd(${id},'tijd_terug_aankomst',this.value)"></div>
+      </div>
+      ${berekenTijden(o)}
+    </div>
+    <div class="slbl">Foto's voor <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
+    <div class="foto-detail-grid">${fVHTML}</div>
+    <div class="slbl">Foto's na <span style="font-size:10px;color:var(--text3)">(tik op leeg slot om toe te voegen)</span></div>
+    <div class="foto-detail-grid">${fNHTML}</div>
+    <div class="slbl">Handtekening klant</div>
+    ${o.sig?`<div style="margin-bottom:7px"><img src="${o.sig}" class="sig-preview" alt="Handtekening"></div>
+    <button onclick="vervangHandtekening(${id})" style="width:100%;padding:9px;background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;margin-bottom:7px">✍️ Handtekening vervangen</button>`
+    :`<div class="sig-wrap" id="detailSigWrap">
+      <div style="background:#f5f7f8;border:1px solid #dde2e8;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:11px;line-height:1.7;color:#4a5a6a">
+        ${o.og_type==='aannemer'
+          ? `<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden. <em>(Betalingsverplichting ligt bij de opdrachtgever.)</em><br>
+             <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten. <em>(Die Zahlungsverpflichtung liegt beim Auftraggeber.)</em>`
+          : `<strong style="color:#0F1B2A">NL:</strong> De klant verklaart akkoord te gaan met de uitgevoerde werkzaamheden en erkent de betalingsverplichting.<br>
+             <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.`
+        }
+      </div>
+      <div class="sig-top"><span>Teken hieronder / Unterschrift</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
+      <canvas id="detailSigCanvas" class="sigpad"></canvas>
+    </div>
+    <button onclick="slaHandtekeningOp(${id})" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:7px">✅ Handtekening opslaan</button>`}
+    ${o.verzekering?`<div class="slbl">Verzekeringsgeval — Akte van Cessie</div>
+      ${o.verzekeraar?`<div class="drow"><div class="drow-l">Maatschappij</div><div class="drow-v">${o.verzekeraar}</div></div>`:''}
+      ${o.volmacht?`<div class="drow"><div class="drow-l">Volmacht</div><div class="drow-v">${o.volmacht}</div></div>`:''}
+      ${o.polisnr?`<div class="drow"><div class="drow-l">Polisnummer</div><div class="drow-v">${o.polisnr}</div></div>`:''}
+      ${o.schadesnr?`<div class="drow"><div class="drow-l">Schadedossier nr.</div><div class="drow-v">${o.schadesnr}</div></div>`:''}
+      ${o.schadebedrag?`<div class="drow"><div class="drow-l">Schadebedrag excl. BTW</div><div class="drow-v">€ ${parseFloat(o.schadebedrag).toFixed(2)}</div></div>`:''}
+      ${o.btw?`<div class="drow"><div class="drow-l">BTW</div><div class="drow-v">€ ${parseFloat(o.btw).toFixed(2)}</div></div>`:''}
+      ${(o.schadebedrag&&o.btw)?`<div class="drow"><div class="drow-l"><strong>Totaal incl. BTW</strong></div><div class="drow-v"><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></div></div>`:''}
+      ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
+    `:''}
+    <button id="opslaanKnopBottom" onclick="slaDetailOp(${id})" style="display:none;width:100%;margin-bottom:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">💾 Wijzigingen opslaan</button>
+    <div class="divider"></div>
+    ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="width:100%;margin-bottom:7px">📋 Akte van Cessie PDF</button>`:''}
+    ${(o.fotos&&((o.fotos.voor||[]).some(f=>f)||(o.fotos.na||[]).some(f=>f)))?`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:7px;cursor:pointer"><input type="checkbox" id="pdfFotos_${id}" style="width:16px;height:16px;cursor:pointer">📷 Foto's meenemen in werkbon PDF</label>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+      <button class="btn-compact btn-compact-green" onclick="savePDF(${id},document.getElementById('pdfFotos_${id}'),this)">📄 Werkbon PDF</button>
+      <button class="btn-compact btn-compact-edit" onclick="openEdit(${id})">✏️ Bewerken</button>
+      <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
+      ${o.status==='klaar'?`<button class="btn-compact btn-compact-accent" onclick="archiveerOrder(${id})">📦 Archiveren</button>`:''}
+      <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
+      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')"${o.status!=='klaar'?' style="grid-column:span 2"':''}>← Terug</button>
+    </div>`;
+
+  goDetail();
+  if(!o.sig) setTimeout(()=>initSigPad('detailSigCanvas'),100);
+  // Foto src BUITEN innerHTML zetten zodat grote base64 de DOM niet breekt
+  setTimeout(()=>{
+    fotoVoorUrls.forEach((url,i)=>{ if(url){ const el=document.getElementById(`fotoV_${id}_${i}`); if(el) el.src=url; }});
+    fotoNaUrls.forEach((url,i)=>{ if(url){ const el=document.getElementById(`fotoN_${id}_${i}`); if(el) el.src=url; }});
+  },50);
+}
+
+async function verwijderFoto(id, type, idx){
+  if(!confirm('Foto verwijderen?')) return;
+  const numId = typeof id === 'string' ? parseInt(id) : id;
+  const o=orders.find(x=>x.id===numId);
+  if(!o){ showToast('Opdracht niet gevonden',true); return; }
+  if(!o.fotos){ showToast('Geen foto data',true); return; }
+  // Sla onopgeslagen wijzigingen eerst op
+  if(Object.keys(detailWijzigingen).length>0){
+    const idx2=orders.findIndex(x=>x.id===numId);
+    if(idx2>=0) Object.assign(orders[idx2],detailWijzigingen);
+    detailWijzigingen={};
+  }
+  o.fotos[type][idx]=null;
+  await dbxWrite();
+  showToast('✓ Foto verwijderd');
+  showDetail(numId);
+}
+
+async function changeStatus(id,status){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
+  orders[idx].status=status; await dbxWrite(); showDetail(id); renderList();
+}
+async function changePrio(id,prio){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
+  orders[idx].prioriteit=prio; await dbxWrite(); showDetail(id);
+}
+async function changeTaal(id,taal){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
+  orders[idx].cessie_taal=taal; await dbxWrite(); showDetail(id);
+}
+async function deleteOrder(id){
+  if(!confirm('Opdracht verwijderen?'))return;
+  const del=JSON.parse(localStorage.getItem(DELETED_KEY)||'[]'); del.push(id); localStorage.setItem(DELETED_KEY,JSON.stringify(del));
+  orders=orders.filter(x=>x.id!==id); await dbxWrite();
+  goTab('overzicht'); showToast('Opdracht verwijderd');
+}
+
+// ── EDIT ─────────────────────────────────────────────────────
+async function openEdit(id){
+  resetEditFotos();
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  document.getElementById('e_id').value=id;
+  document.getElementById('e_naam').value=o.naam||'';
+  document.getElementById('e_adres').value=o.adres||'';
+  document.getElementById('e_tel').value=o.tel||'';
+  document.getElementById('e_email').value=o.email||'';
+  document.getElementById('e_datum').value=o.datum||'';
+  document.getElementById('e_datum_deadline').value=o.datum_deadline||'';
+  document.getElementById('e_omschr').value=o.omschr||'';
+  document.getElementById('e_og_type').value=o.og_type||'particulier'; toggleEditOG();
+  document.getElementById('e_og_naam').value=o.og_naam||'';
+  document.getElementById('e_og_contact').value=o.og_contact||'';
+  document.getElementById('e_og_tel').value=o.og_tel||'';
+  document.getElementById('e_og_email').value=o.og_email||'';
+  document.getElementById('e_og_ref').value=o.og_ref||'';
+
+  editTypeVal=o.type||'';
+  const isOverig=editTypeVal.startsWith('Overig');
+  document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>{
+    const bType=b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    b.classList.toggle('sel',isOverig?bType==='Overig':bType===editTypeVal);
+  });
+  document.getElementById('e_overig_wrap').style.display=isOverig?'block':'none';
+  if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overig: ','').replace('Overig','');
+
+  editLocVal=o.locatie||'binnen';
+  document.getElementById('elocBinnen').classList.toggle('sel',editLocVal==='binnen');
+  document.getElementById('elocBuiten').classList.toggle('sel',editLocVal==='buiten');
+  editPrioVal=o.prioriteit||'normaal';
+  document.getElementById('eprioSpoed').classList.toggle('sel',editPrioVal==='spoed');
+  document.getElementById('eprioPrioriteit').classList.toggle('sel',editPrioVal==='prioriteit');
+  document.getElementById('eprioNormaal').classList.toggle('sel',editPrioVal==='normaal');
+
+  document.getElementById('e_intern').value=o.intern||'';
+  document.getElementById('e_verzekering').checked=o.verzekering||false;
+  document.getElementById('e_verzekering_wrap').style.display=o.verzekering?'block':'none';
+  cessieTaal = o.cessie_taal||'nl';
+  selCessieTaal(cessieTaal);
+  document.getElementById('e_verzekeraar').value=o.verzekeraar||'';
+  document.getElementById('e_volmacht').value=o.volmacht||'';
+  document.getElementById('e_polisnr').value=o.polisnr||'';
+  document.getElementById('e_schadesnr').value=o.schadesnr||'';
+  document.getElementById('e_schadebedrag').value=o.schadebedrag||'';
+  document.getElementById('e_btw').value=o.btw||'';
+  document.getElementById('e_eigenrisico').value=o.eigenrisico||'';
+  document.getElementById('e_btwterug').value=o.btwterug||'';
+
+  // Bestaande fotos tonen — uitgebreid naar 4
+  for(const type of ['voor','na']){
+    const el=document.getElementById(`e_fotos_${type}_existing`);
+    if(o.fotos&&o.fotos[type]&&o.fotos[type].some(f=>f)){
+      const urls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos[type][i])));
+      el.innerHTML=`<div class="foto-detail-grid">${urls.map((url,i)=>url?`<div class="foto-detail-item"><img src="${url}" onclick="openLightbox('${url}')" alt="${type} ${i+1}"><div class="foto-detail-label">${type==='voor'?'Voor':'Na'} ${i+1} (bestaand)</div></div>`:'').join('')}</div><div style="font-size:11px;color:var(--text3);margin-bottom:6px">Nieuwe foto's toevoegen ter vervanging</div>`;
+    } else { el.innerHTML=''; }
+  }
+
+  if(o.sig){
+    document.getElementById('e_sig_existing').style.display='block';
+    document.getElementById('e_sig_img').src=o.sig;
+    document.getElementById('e_sig_new').style.display='none';
+  } else {
+    document.getElementById('e_sig_existing').style.display='none';
+    document.getElementById('e_sig_new').style.display='block';
+  }
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(()=>initSigPad('editSigCanvas'),120);
+}
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
+async function saveEdit(){
+  const id=parseInt(document.getElementById('e_id').value);
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  const naam=document.getElementById('e_naam').value.trim();
+  const ogNaam=document.getElementById('e_og_naam').value.trim();
+  const ogType=document.getElementById('e_og_type').value;
+  if(!naam&&!(ogType==='aannemer'&&ogNaam)){showToast('Vul een naam in',true);return;}
+
+  const eOverig=document.getElementById('e_overig').value.trim();
+  orders[idx].naam=naam;
+  orders[idx].adres=document.getElementById('e_adres').value.trim();
+  orders[idx].tel=document.getElementById('e_tel').value.trim();
+  orders[idx].email=document.getElementById('e_email').value.trim();
+  orders[idx].datum=document.getElementById('e_datum').value;
+  orders[idx].datum_deadline=document.getElementById('e_datum_deadline').value;
+  orders[idx].omschr=document.getElementById('e_omschr').value.trim();
+  orders[idx].og_type=ogType;
+  orders[idx].og_naam=ogNaam;
+  orders[idx].og_contact=document.getElementById('e_og_contact').value.trim();
+  orders[idx].og_tel=document.getElementById('e_og_tel').value.trim();
+  orders[idx].og_email=document.getElementById('e_og_email').value.trim();
+  orders[idx].og_ref=document.getElementById('e_og_ref').value.trim();
+  orders[idx].prioriteit=editPrioVal;
+  orders[idx].locatie=editLocVal;
+  if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
+
+  // Nieuwe fotos
+  orders[idx].intern=document.getElementById('e_intern').value.trim();
+  orders[idx].verzekering=document.getElementById('e_verzekering').checked;
+  orders[idx].cessie_taal=cessieTaal;
+  orders[idx].verzekeraar=document.getElementById('e_verzekeraar').value.trim();
+  orders[idx].volmacht=document.getElementById('e_volmacht').value.trim();
+  orders[idx].polisnr=document.getElementById('e_polisnr').value.trim();
+  orders[idx].schadesnr=document.getElementById('e_schadesnr').value.trim();
+  orders[idx].schadebedrag=document.getElementById('e_schadebedrag').value;
+  orders[idx].btw=document.getElementById('e_btw').value;
+  orders[idx].eigenrisico=document.getElementById('e_eigenrisico').value;
+  orders[idx].btwterug=document.getElementById('e_btwterug').value;
+
+  if(!orders[idx].fotos) orders[idx].fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+  while(orders[idx].fotos.voor.length<4) orders[idx].fotos.voor.push(null);
+  while(orders[idx].fotos.na.length<4) orders[idx].fotos.na.push(null);
+  if(!orders[idx].fotoMap) orders[idx].fotoMap=`/Fotos/${orders[idx].nr}`;
+  for(let i=0;i<4;i++){
+    if(editFotos.voor[i]){
+      const pad=await dbxUploadFoto(`${orders[idx].fotoMap}/voor_${i+1}.jpg`,editFotos.voor[i]);
+      if(pad) orders[idx].fotos.voor[i]=`dropbox:${orders[idx].fotoMap}/voor_${i+1}.jpg`;
+    }
+    if(editFotos.na[i]){
+      const pad=await dbxUploadFoto(`${orders[idx].fotoMap}/na_${i+1}.jpg`,editFotos.na[i]);
+      if(pad) orders[idx].fotos.na[i]=`dropbox:${orders[idx].fotoMap}/na_${i+1}.jpg`;
+    }
+  }
+  const newSig=getSig('editSigCanvas');
+  if(newSig) orders[idx].sig=newSig;
+
+  await dbxWrite(); closeEdit(); showToast('✓ Wijzigingen opgeslagen'); showDetail(id);
+}
+
+// ── TIJDREGISTRATIE ──────────────────────────────────────────
+function tijdNaarMin(t){if(!t)return 0;const[u,m]=t.split(':').map(Number);return u*60+m;}
+function minNaarTijd(m){if(!m||m<=0)return '';return `${Math.floor(m/60)}u ${m%60}min`;}
+function berekenTijden(o){
+  const reisHeen=o.tijd_vertrek&&o.tijd_aankomst?tijdNaarMin(o.tijd_aankomst)-tijdNaarMin(o.tijd_vertrek):0;
+  const werk=o.tijd_werk_van&&o.tijd_werk_tot?tijdNaarMin(o.tijd_werk_tot)-tijdNaarMin(o.tijd_werk_van):0;
+  const reisTerug=o.tijd_terug_vertrek&&o.tijd_terug_aankomst?tijdNaarMin(o.tijd_terug_aankomst)-tijdNaarMin(o.tijd_terug_vertrek):0;
+  const totaal=reisHeen+werk+reisTerug;
+  if(!totaal) return '';
+  return `<div style="font-size:12px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+    ${reisHeen>0?`🚗 Heen: ${minNaarTijd(reisHeen)} &nbsp;`:''}
+    ${werk>0?`🔨 Werk: ${minNaarTijd(werk)} &nbsp;`:''}
+    ${reisTerug>0?`🚗 Terug: ${minNaarTijd(reisTerug)} &nbsp;`:''}
+    ${totaal>0?`| <strong>Totaal: ${minNaarTijd(totaal)}</strong>`:''}
+  </div>`;
+}
+async function saveTijd(id,veld,waarde){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx][veld]=waarde; await dbxWrite();
+}
+async function saveAgendaTijd(id,tijd){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  orders[idx].agenda_tijd=tijd; await dbxWrite();
+}
+
+// ── AGENDA ───────────────────────────────────────────────────
+function addToAgendaNieuw(){
+  const datum=document.getElementById('f_datum').value;
+  const tijd=document.getElementById('f_agenda_tijd').value||'08:00';
+  const naam=document.getElementById('f_naam').value||document.getElementById('f_og_naam').value||'Opdracht';
+  const adres=document.getElementById('f_adres').value||'';
+  const omschr=document.getElementById('f_omschr').value||'';
+  if(!datum){showToast('Vul eerst een datum in',true);return;}
+  const [h,m]=tijd.split(':');
+  const start=datum.replace(/-/g,'')+'T'+h+m+'00';
+  const eindH=String(parseInt(h)+2).padStart(2,'0');
+  const eind=datum.replace(/-/g,'')+'T'+eindH+m+'00';
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(naam)}&dates=${start}/${eind}&details=${encodeURIComponent(omschr)}&location=${encodeURIComponent(adres)}`;
+  window.open(url,'_blank');
+}
+
+async function addToAgenda(id){
+  const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  // Nog niet opgeslagen wijzigingen (bv. een net ingevulde datum) eerst bewaren,
+  // anders leest deze knop de oude/lege datum uit het laatst opgeslagen exemplaar.
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+    await dbxWrite();
+    showToast('✓ Wijzigingen opgeslagen');
+  }
+  const o=orders[idx];
+  const datum=o.datum;
+  if(!datum){showToast('Vul eerst een datum in',true);return;}
+  const d=datum.replace(/-/g,'');
+  const tijdStr=(o.agenda_tijd||'08:00');
+  const[uurStr,minStr]=tijdStr.split(':');
+  const uur=parseInt(uurStr);
+  const startStr=`${d}T${String(uur).padStart(2,'0')}${minStr}00`;
+  const eindStr=`${d}T${String(uur+1).padStart(2,'0')}${minStr}00`;
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const titel=encodeURIComponent(`${hoofd} — ${type}`);
+  const loc=encodeURIComponent(o.adres||'');
+  const det=encodeURIComponent(`Werkorder: ${o.nr}\nKlant: ${o.naam||''}\n${o.adres?'Adres: '+o.adres+'\n':''}${o.omschr?'Omschrijving: '+o.omschr:''}`);
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titel}&dates=${startStr}/${eindStr}&location=${loc}&details=${det}`, '_blank');
+}
+
+// ── MAIL ─────────────────────────────────────────────────────
+async function mailOrder(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  setSyncStatus('email voorbereiden...','busy');
+  const emailTo=o.og_type==='aannemer'?(o.og_email||''):(o.email||'');
+  const emailCC=o.og_type==='aannemer'?(o.email||''):'';
+  let fotoTekst='';
+  if(o.fotoMap&&token){const link=await dbxShareLink(o.fotoMap);if(link)fotoTekst=`\n\nFoto's voor en na:\n${link}`;}
+  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const onderwerp=`Herstelopdracht — ${type} — ${o.nr}`;
+  const aanhef=o.og_type==='aannemer'?`Beste ${o.og_contact||o.og_naam||'opdrachtgever'}`:`Beste ${o.naam||''}`;
+  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`Opdrachtgever:      ${o.og_naam}${o.og_contact?' — '+o.og_contact:''}\n`:'';
+  const refRegel=o.og_type==='aannemer'&&o.og_ref?`Uw referentie:      ${o.og_ref}\n`:'';
+  const body=`${aanhef},\n\nHierbij de bevestiging van de uitgevoerde werkzaamheden.\n\nOpdrachtnummer:     ${o.nr}\n${ogRegel}${refRegel}Type werkzaamheden: ${o.type}\nLocatie:            ${o.adres||'niet opgegeven'}\nKlant / bewoner:    ${o.naam||'niet opgegeven'}\nDatum uitvoering:   ${o.datum?fmtDate(o.datum):'niet opgegeven'}\n${o.omschr?'\nOmschrijving:\n'+o.omschr+'\n':''}\nDe werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.${fotoTekst}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
+  try{await navigator.clipboard.writeText(body);}catch(e){}
+  const onderwerpEnc=encodeURIComponent(onderwerp);
+  const bodyEnc=encodeURIComponent(body);
+  const mailto=`mailto:${emailTo}?subject=${onderwerpEnc}${emailCC?'&cc='+encodeURIComponent(emailCC):''}&body=${bodyEnc}`;
+  window.location.href=mailto;
+  showToast('✓ Email geopend met tekst ingevuld');
+  setSyncStatus('gesynchroniseerd','ok');
+}
+
+// ── PDF ──────────────────────────────────────────────────────
+async function saveCessiePDF(id){
+  const o=orders.find(x=>x.id===id); if(!o||!o.verzekering) return;
+  const taal=o.cessie_taal||'nl';
+  const t=cessieTekst[taal];
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.titel} ${o.nr}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#0F1B2A;margin:0;padding:32px}
+  .hdr{display:flex;justify-content:space-between;border-bottom:3px solid #3A6B4B;padding-bottom:14px;margin-bottom:24px}
+  .bedrijf{font-size:16px;font-weight:700;color:#0F1B2A}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}
+  .nr{font-size:12px;color:#666;text-align:right;line-height:1.8}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}
+  td:first-child{font-weight:600;width:40%;background:#f5f7f8;color:#4a5a6a}
+  .cessie-tekst{font-size:12px;color:#444;line-height:1.8;margin:16px 0;padding:12px;border:1px solid #ddd;background:#eaf2ed}
+  .sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px}
+  .sig-lbl{font-size:11px;color:#666;margin-bottom:50px}
+  .sig-lijn{border-top:1px solid #333;padding-top:4px;font-size:11px}
+  .footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666}
+  @media print{body{padding:0}}</style>
+  </head><body>
+  <div class="hdr">
+    <div>
+      <svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="36" height="39" style="display:block;margin-bottom:6px"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#0F1B2A"/></svg>
+      <div class="bedrijf">REPAFIN by Rolf Jurgen</div>
+      <div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@repafin.nl | www.repafin.nl</div>
+    </div>
+    <div class="nr"><strong>${t.titel}</strong><br>Ref: ${o.nr}<br>Datum: ${new Date().toLocaleDateString('nl-NL')}</div>
+  </div>
+  <table>
+    ${o.naam?`<tr><td>${taal==='de'?'Kunde / Bewohner':'Klant / bewoner'}</td><td>${o.naam}</td></tr>`:''}
+    ${o.adres?`<tr><td>${taal==='de'?'Adresse':'Adres'}</td><td>${o.adres}</td></tr>`:''}
+    ${o.verzekeraar?`<tr><td>${t.verzekeraar}</td><td>${o.verzekeraar}</td></tr>`:''}
+    ${o.volmacht?`<tr><td>${t.volmacht}</td><td>${o.volmacht}</td></tr>`:''}
+    ${o.polisnr?`<tr><td>${t.polisnr}</td><td>${o.polisnr}</td></tr>`:''}
+    ${o.schadesnr?`<tr><td>${t.schadesnr}</td><td>${o.schadesnr}</td></tr>`:''}
+    ${o.schadebedrag?`<tr><td>${t.schadebedrag}</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
+    ${o.btw?`<tr><td>BTW / MwSt.</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
+    ${(o.schadebedrag&&o.btw)?`<tr><td><strong>${taal==='de'?'Gesamt inkl. MwSt.':'Totaal incl. BTW'}</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
+    ${o.eigenrisico?`<tr><td>${t.eigenrisico}</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
+  </table>
+  <div class="cessie-tekst">${t.tekst}</div>
+  <div class="sig-grid">
+    <div>
+      <div class="sig-lbl">${t.handtekening} / ${o.naam||''}</div>
+      ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:''}
+      <div class="sig-lijn">${o.naam||''} — ${t.datum}: ___________</div>
+    </div>
+    <div>
+      <div class="sig-lbl">${t.uitvoerder}</div>
+      <div class="sig-lijn">R. Jurgen — REPAFIN by Rolf Jurgen</div>
+    </div>
+  </div>
+  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | KvK: 140.80.696 | BTW: NL 0018.20.226.B78</div>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win){win.onload=()=>setTimeout(()=>win.print(),500);}
+  else{const a=document.createElement('a');a.href=url;a.download=`Cessie-${o.nr}.html`;a.click();}
+}
+
+async function savePDF(id, checkboxEl, btnEl){
+  const metFotos = checkboxEl && checkboxEl.checked;
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  if(btnEl){ btnEl.disabled=true; btnEl.style.opacity=.6; }
+
+  let fotoVoorHTML='', fotoNaHTML='';
+  try {
+  if(metFotos && o.fotos){
+    setSyncStatus("foto's laden...",'busy');
+    const vUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.voor[i])));
+    const nUrls=await Promise.all([0,1,2,3].map(i=>dbxGetFotoUrl(o.fotos.na[i])));
+    fotoVoorHTML=vUrls.filter(u=>u).map(url=>`<div style="display:inline-block;width:48%;margin:1%;vertical-align:top;page-break-inside:avoid;break-inside:avoid"><img src="${url}" style="width:100%;display:block;border-radius:4px;border:1px solid #ddd"></div>`).join('');
+    fotoNaHTML=nUrls.filter(u=>u).map(url=>`<div style="display:inline-block;width:48%;margin:1%;vertical-align:top;page-break-inside:avoid;break-inside:avoid"><img src="${url}" style="width:100%;display:block;border-radius:4px;border:1px solid #ddd"></div>`).join('');
+    if(!fotoVoorHTML && !fotoNaHTML){ showToast("Geen foto's beschikbaar om toe te voegen",true); }
+    setSyncStatus('gesynchroniseerd','ok');
+  }
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const taalPDF=o.cessie_taal==='de'?'de':'nl';
+  const L=taalPDF==='de'?{
+    werkbon:'Arbeitsschein', datum:'Datum', status:'Status', opdrachtgever:'Auftraggeber',
+    referentie:'Referenz', typeWerk:'Art der Arbeiten', datumUitvoering:'Ausführungsdatum',
+    uiterlijkKlaar:'Fertigstellung spätestens', klantBewoner:'Kunde / Bewohner', adres:'Adresse',
+    telefoon:'Telefon', omschrijving:'Beschreibung',
+    akkoordZin:'Die Arbeiten wurden gemäß Auftrag ausgeführt und vom Kunden / Bewohner durch Unterschrift bestätigt.',
+    fotoVoor:'Fotos vor den Arbeiten', fotoNa:'Fotos nach den Arbeiten', handtekening:'Unterschrift Kunde',
+    kvk:'Handelsreg.-Nr.', btwLabel:'USt-IdNr.'
+  }:{
+    werkbon:'Werkbon', datum:'Datum', status:'Status', opdrachtgever:'Opdrachtgever',
+    referentie:'Referentie', typeWerk:'Type werkzaamheden', datumUitvoering:'Datum uitvoering',
+    uiterlijkKlaar:'Uiterlijk klaar', klantBewoner:'Klant / bewoner', adres:'Adres',
+    telefoon:'Telefoon', omschrijving:'Omschrijving',
+    akkoordZin:'De werkzaamheden zijn conform opdracht uitgevoerd en door de klant / bewoner voor akkoord ondertekend.',
+    fotoVoor:"Foto's voor werkzaamheden", fotoNa:"Foto's na werkzaamheden", handtekening:'Handtekening klant',
+    kvk:'KvK', btwLabel:'BTW'
+  };
+  let statusTekstPDF=statusLabel(o.status,o);
+  if(taalPDF==='de'){
+    if(o.status==='klaar') statusTekstPDF='Abschlussbereit (Rechnung)';
+    else if(o.status==='bezig') statusTekstPDF='In Bearbeitung';
+    else if(o.status==='nieuw') statusTekstPDF=(o.datum&&o.datum!=='')?'Geplant':'Noch zu planen';
+  }
+  const ogRegel=o.og_type==='aannemer'&&o.og_naam?`<tr><td>${L.opdrachtgever}</td><td>${o.og_naam}${o.og_contact?' — '+o.og_contact:''}</td></tr>`:'';
+  const refRegel=o.og_ref?`<tr><td>${L.referentie}</td><td>${o.og_ref}</td></tr>`:'';
+  const tijdRegel='';
+  const cessieTekstPDF = o.cessie_taal==='de' ? {
+    titel: 'ABTRETUNGSERKLÄRUNG',
+    tekst: 'Der/Die Unterzeichnende tritt seine/ihre Forderung gegenüber dem Versicherer an <strong>REPAFIN by Rolf Jurgen</strong> ab und erteilt dem Versicherer unwiderruflich Auftrag und Vollmacht, den ihm/ihr zustehenden Betrag direkt auf das auf der Rechnung angegebene Konto auszuzahlen. Falls der Versicherer aus irgendeinem Grund nicht an <strong>REPAFIN by Rolf Jurgen</strong> zahlt, geht die Forderung vollständig zu Lasten des Kunden.',
+    handtekening: 'Unterschrift Kunde', datum: 'Datum', uitvoerder: 'Unterschrift REPAFIN by Rolf Jurgen'
+  } : {
+    titel: 'CESSIE / OVERDRACHT VORDERINGSRECHT',
+    tekst: 'Ondergetekende draagt zijn/haar vordering op de verzekeraar over aan <strong>REPAFIN by Rolf Jurgen</strong> en geeft de verzekeraar onherroepelijk last en volmacht de hem/haar toekomende vordering rechtstreeks uit te keren op het op de factuur vermelde rekeningnummer. Indien de verzekeraar om welke reden dan ook niet uitbetaalt aan <strong>REPAFIN by Rolf Jurgen</strong>, komt de vordering geheel ten laste van de cliënt.',
+    handtekening: 'Handtekening klant', datum: 'Datum', uitvoerder: 'Handtekening REPAFIN by Rolf Jurgen'
+  };
+  const cessieHTML=o.verzekering?`
+  <div style="margin-top:24px;border-top:2px solid #3A6B4B;padding-top:16px">
+    <div style="font-size:14px;font-weight:700;color:#3A6B4B;margin-bottom:12px">${cessieTekstPDF.titel}</div>
+    <table>
+      ${o.verzekeraar?`<tr><td>${cessieTekstPDF.verzekeraar||'Maatschappij'}</td><td>${o.verzekeraar}</td><td>${cessieTekstPDF.volmacht||'Volmacht'}</td><td>${o.volmacht||'—'}</td></tr>`:''}
+      ${o.polisnr?`<tr><td>${cessieTekstPDF.polisnr||'Polisnummer'}</td><td>${o.polisnr}</td><td>${cessieTekstPDF.schadesnr||'Schade nr.'}</td><td>${o.schadesnr||'—'}</td></tr>`:''}
+    </table>
+    ${(o.schadebedrag||o.btw||o.eigenrisico)?`<table>
+      ${o.schadebedrag?`<tr><td>${cessieTekstPDF.schadebedrag||'Schadebedrag'}</td><td>€ ${parseFloat(o.schadebedrag).toFixed(2)}</td></tr>`:''}
+      ${o.btw?`<tr><td>BTW / MwSt.</td><td>€ ${parseFloat(o.btw).toFixed(2)}</td></tr>`:''}
+      ${(o.schadebedrag&&o.btw)?`<tr><td><strong>Totaal / Gesamt incl. BTW</strong></td><td><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></td></tr>`:''}
+      ${o.eigenrisico?`<tr><td>${cessieTekstPDF.eigenrisico||'Eigen risico'}</td><td>€ ${parseFloat(o.eigenrisico).toFixed(2)}</td></tr>`:''}
+      ${o.btwterug?`<tr><td>BTW terug / MwSt. Rückerstattung</td><td>€ ${parseFloat(o.btwterug).toFixed(2)}</td></tr>`:''}
+    </table>`:''}
+    <div style="font-size:11px;color:#444;line-height:1.8;margin:12px 0;padding:10px;border:1px solid #ddd;background:#eaf2ed">
+      ${cessieTekstPDF.tekst}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px">
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">${cessieTekstPDF.handtekening} / ${o.naam||''}</div>
+        ${o.sig?`<img src="${o.sig}" style="max-height:60px;border:1px solid #ddd;border-radius:4px;display:block;margin-bottom:4px">`:''}
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">${o.naam||''} — ${cessieTekstPDF.datum}: ___________</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:40px">${cessieTekstPDF.uitvoerder}</div>
+        <div style="border-top:1px solid #333;padding-top:4px;font-size:11px">R. Jurgen — REPAFIN by Rolf Jurgen</div>
+      </div>
+    </div>
+  </div>`:'';
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${L.werkbon} ${o.nr}</title>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;color:#0F1B2A;margin:0;padding:32px}.werkbon-hdr{display:flex;justify-content:space-between;border-bottom:3px solid #3A6B4B;padding-bottom:14px;margin-bottom:20px}.bedrijf{font-size:18px;font-weight:700;color:#0F1B2A}.sub{font-size:11px;color:#666;margin-top:4px;line-height:1.6}.nr{font-size:12px;color:#666;text-align:right;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}td:first-child{font-weight:600;width:36%;background:#f5f7f8;color:#4a5a6a}.footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#666;line-height:1.8}@media print{body{padding:0}}</style>
+  </head><body><div class="werkbon-hdr">
+  <div>
+    <svg viewBox="0 0 125.7 134" xmlns="http://www.w3.org/2000/svg" width="40" height="43" style="display:block;margin-bottom:6px"><path d="M125.7,47.1c-34.5,15-80.7,35.2-87.3,38.7-3.2,4.5-19.2,28.9-31.8,48.2h119.1V47.1Z" fill="#3a6b4b"/><path d="M0,0v107.1h11c10.2-15.6,18.6-28.1,19.8-29.4s2.7-2.7,94.9-42.6V0H0Z" fill="#0F1B2A"/></svg>
+    <div class="bedrijf">REPAFIN by Rolf Jurgen</div>
+    <div class="sub">Langheckweg 38-A, 6468 EL Kerkrade (NL)<br>T +31(0)45-5350200 | mail@repafin.nl | www.repafin.nl</div>
+  </div>
+  <div class="nr"><strong>${L.werkbon} ${o.nr}</strong><br>${L.datum}: ${new Date().toLocaleDateString(taalPDF==='de'?'de-DE':'nl-NL')}<br>${L.status}: ${statusTekstPDF}</div></div>
+  <table>${ogRegel}${refRegel}<tr><td>${L.typeWerk}</td><td>${o.type}</td></tr>
+  ${o.datum?`<tr><td>${L.datumUitvoering}</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+  ${o.datum_deadline?`<tr><td>${L.uiterlijkKlaar}</td><td>${fmtDate(o.datum_deadline)}</td></tr>`:''}
+  <tr><td>${L.klantBewoner}</td><td>${o.naam||'—'}</td></tr>
+  ${o.adres?`<tr><td>${L.adres}</td><td>${o.adres}</td></tr>`:''}
+  ${o.tel?`<tr><td>${L.telefoon}</td><td>${o.tel}</td></tr>`:''}
+  ${o.omschr?`<tr><td>${L.omschrijving}</td><td>${o.omschr}</td></tr>`:''}
+  ${tijdRegel}</table>
+  <div style="font-size:12px;color:#666">${L.akkoordZin}</div>
+  ${fotoVoorHTML?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoVoor}</div><div>${fotoVoorHTML}</div></div>`:''}
+  ${fotoNaHTML?`<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.fotoNa}</div><div>${fotoNaHTML}</div></div>`:''}
+  ${o.sig?`<div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">${L.handtekening}</div><img src="${o.sig}" style="max-height:80px;border:1px solid #ddd;border-radius:4px"></div>`:''}
+  <div class="footer">R. Jurgen | REPAFIN by Rolf Jurgen | IBAN: NL25 ABNA 0589 1617 17 | ${L.kvk}: 140.80.696 | ${L.btwLabel}: NL 0018.20.226.B78</div>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win){
+    win.onload=()=>{
+      let afgedrukt=false;
+      const printNu=()=>{ if(afgedrukt) return; afgedrukt=true; win.print(); };
+      const imgs=Array.from(win.document.images||[]);
+      if(!imgs.length){ setTimeout(printNu,300); return; }
+      let klaar=0;
+      const check=()=>{ klaar++; if(klaar>=imgs.length) setTimeout(printNu,200); };
+      imgs.forEach(img=>{
+        if(img.complete && img.naturalWidth>0) check();
+        else { img.addEventListener('load',check); img.addEventListener('error',check); }
+      });
+      setTimeout(printNu,6000); // veiligheidsklep: hoe dan ook printen als een foto blijft hangen
+    };
+  } else {
+    const a=document.createElement('a');a.href=url;a.download=`Werkbon-${o.nr}.html`;a.click();showToast('📄 Werkbon gedownload');
+  }
+  } finally {
+    if(btnEl){ btnEl.disabled=false; btnEl.style.opacity=1; }
+  }
+}
+
+// ── LIGHTBOX ─────────────────────────────────────────────────
+function openLightboxIdx(id, type, idx){
+  const urls = window._fotoUrls && window._fotoUrls[id];
+  const url = urls && urls[type] && urls[type][idx];
+  if(url){ document.getElementById('lightboxImg').src=url; document.getElementById('lightbox').classList.add('open'); }
+}
+function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+// ── PRINT ────────────────────────────────────────────────────
+function statusLabelPrint(s,o){return statusLabel(s,o);}
+function renderPrintSelect(){
+  const sel=document.getElementById('printSelect');
+  sel.innerHTML='<option value="">— Kies opdracht —</option>';
+  orders.forEach(o=>{const opt=document.createElement('option');opt.value=o.id;const h=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;opt.textContent=`${o.nr} — ${h}${o.datum?' ('+fmtDate(o.datum)+')':''}`;sel.appendChild(opt);});
+}
+function printWerkbon(){
+  const id=parseInt(document.getElementById('printSelect').value);if(!id){showToast('Kies eerst een opdracht',true);return;}
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const hoofd=o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  document.getElementById('printOutput').innerHTML=`<div class="werkbon">
+    <div class="werkbon-hdr"><div><div class="werkbon-logo">REPAFIN by Rolf Jurgen</div><div style="font-size:11px;color:#666;margin-top:3px">mail@repafin.nl | www.repafin.nl</div></div>
+    <div style="font-family:monospace;font-size:12px;color:#666">${o.nr}<br>${new Date().toLocaleDateString('nl-NL')}</div></div>
+    <table>
+      ${o.og_type==='aannemer'&&o.og_naam?`<tr><td>Opdrachtgever</td><td>${o.og_naam}</td></tr>`:''}
+      ${o.og_ref?`<tr><td>Referentie</td><td>${o.og_ref}</td></tr>`:''}
+      <tr><td>Type werkzaamheden</td><td>${o.type}</td></tr>
+      ${o.datum?`<tr><td>Datum uitvoering</td><td>${fmtDate(o.datum)}</td></tr>`:''}
+      <tr><td>Klant / bewoner</td><td>${o.naam||'—'}</td></tr>
+      ${o.adres?`<tr><td>Adres</td><td>${o.adres}</td></tr>`:''}
+      ${o.tel?`<tr><td>Telefoon</td><td>${o.tel}</td></tr>`:''}
+      <tr><td>Status</td><td>${statusLabelPrint(o.status,o)}</td></tr>
+      ${o.omschr?`<tr><td>Omschrijving</td><td>${o.omschr}</td></tr>`:''}
+    </table>
+    ${o.sig?`<div class="werkbon-sig"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Handtekening klant (akkoord reparatie)</div><img src="${o.sig}"></div>`:''}
+  </div>`;
+  window.print();
+}
+function printList(){
+  const filter=document.getElementById('listFilter').value;
+  let filtered;
+  if(filter==='alle') filtered=[...orders];
+  else if(filter==='nogteplannen') filtered=orders.filter(o=>isNogTePlannen(o));
+  else if(filter==='gepland') filtered=orders.filter(o=>isGepland(o));
+  else if(filter==='bezig') filtered=orders.filter(o=>o.status==='bezig');
+  else if(filter==='klaar') filtered=orders.filter(o=>o.status==='klaar');
+  else filtered=[...orders];
+  if(!filtered.length){showToast('Geen opdrachten gevonden',true);return;}
+  const hoofd=o=>o.og_type==='aannemer'&&o.og_naam?o.og_naam:o.naam;
+  const rows=filtered.map(o=>`<tr><td>${o.nr}</td><td>${hoofd(o)}</td><td>${o.adres||''}</td><td>${o.type}</td><td>${o.datum?fmtDate(o.datum):''}</td><td>${statusLabelPrint(o.status,o)}</td></tr>`).join('');
+  document.getElementById('printOutput').innerHTML=`<div class="print-list">
+    <div style="display:flex;justify-content:space-between;margin-bottom:14px;border-bottom:2px solid #b5820c;padding-bottom:10px">
+      <div><div style="font-size:18px;font-weight:700;color:#b5820c">REPAFIN by Rolf Jurgen</div><div style="font-size:12px;color:#666">Opdrachtenlijst — ${new Date().toLocaleDateString('nl-NL')}</div></div>
+      <div style="font-size:12px;color:#666">${filtered.length} opdrachten</div>
+    </div>
+    <table><thead><tr><th>Nr</th><th>Opdrachtgever</th><th>Adres</th><th>Type</th><th>Datum</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+  window.print();
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function showToast(msg,isErr,duurMs){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=isErr?'var(--red)':'var(--green)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),duurMs||2800);
+}
+
+// ── START ────────────────────────────────────────────────────
+window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); initPullToRefresh(); initPasteFoto(); initDropFoto(); });
+
+function eersteLegeFotoSlot(fotosObj){
+  for(let i=0;i<4;i++){ if(!fotosObj.voor[i]) return {type:'voor',idx:i}; }
+  for(let i=0;i<4;i++){ if(!fotosObj.na[i]) return {type:'na',idx:i}; }
+  return null;
+}
+
+// Gedeelde plaatsingslogica voor zowel plakken (Ctrl+V) als slepen: zoekt het actieve
+// scherm (nieuw-formulier, bewerk-modal of detailscherm) en plaatst de foto in het
+// eerstvolgende lege foto-vak.
+function plaatsGeplakteFoto(file){
+  if(!file) return;
+  if(document.getElementById('editModal').classList.contains('open')){
+    const slot=eersteLegeFotoSlot(editFotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    const slotId='eSlot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+    handleEditFoto(file,slotId,slot.type,slot.idx);
+    showToast('📋 Foto toegevoegd');
+    return;
+  }
+  const panelNieuw=document.getElementById('panel-nieuw');
+  if(panelNieuw && panelNieuw.classList.contains('active')){
+    const slot=eersteLegeFotoSlot(newFotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    const slotId='slot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+    handleFoto(file,slotId,slot.type,slot.idx);
+    showToast('📋 Foto toegevoegd');
+    return;
+  }
+  const panelDetail=document.getElementById('panel-detail');
+  if(panelDetail && panelDetail.classList.contains('active') && detailId){
+    const o=orders.find(x=>x.id===detailId);
+    if(!o) return;
+    if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+    const slot=eersteLegeFotoSlot(o.fotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    handleDetailFoto(file,slot.type,slot.idx,detailId);
+    return;
+  }
+  showToast("Open eerst een opdracht (nieuw, bewerken of detail) om een foto te kunnen plaatsen",true);
+}
+
+// Herkent een afbeelding uit een DataTransferItemList (plakken) of FileList (slepen),
+// met een terugvaloptie op de bestandsextensie voor bronnen die geen duidelijk
+// image/...-type meegeven (zoals een bijlage die Outlook kopieert).
+function vindAfbeeldingUitItems(items){
+  let file=null, reserve=null;
+  for(let i=0;i<items.length;i++){
+    const item=items[i];
+    if(item.kind!=='file') continue;
+    const type=(item.type||'').toLowerCase();
+    if(type.indexOf('image/')===0){ file=item.getAsFile(); break; }
+    if(!reserve) reserve=item;
+  }
+  if(!file && reserve){
+    const f=reserve.getAsFile();
+    if(f && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) file=f;
+  }
+  return file;
+}
+function vindAfbeeldingUitBestanden(files){
+  let file=null, reserve=null;
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const type=(f.type||'').toLowerCase();
+    if(type.indexOf('image/')===0){ file=f; break; }
+    if(!reserve && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) reserve=f;
+  }
+  return file||reserve;
+}
+
+// Bepaalt of we op een scherm zitten waar een geplakte/gesleepte foto ergens naartoe
+// zou kunnen (nieuw-formulier, bewerk-modal of detailscherm) — gebruikt om de
+// diagnose-melding bij plakken alleen te tonen waar dit ook relevant is.
+function isFotoContextActief(){
+  if(document.getElementById('editModal').classList.contains('open')) return true;
+  const panelNieuw=document.getElementById('panel-nieuw');
+  if(panelNieuw && panelNieuw.classList.contains('active')) return true;
+  const panelDetail=document.getElementById('panel-detail');
+  if(panelDetail && panelDetail.classList.contains('active') && detailId) return true;
+  return false;
+}
+
+// Diagnose-hulpfuncties: zetten om wat het klembord/sleep-object daadwerkelijk bevat
+// in een leesbare tekst, zodat we bij een mislukte herkenning precies kunnen zien wat
+// er binnenkwam (bv. een Outlook-bijlage die zich anders gedraagt dan verwacht),
+// in plaats van stilletjes niets te doen.
+function beschrijfClipboardInhoud(cd){
+  if(!cd) return 'geen klembord-data beschikbaar';
+  const delen=[];
+  const items=cd.items||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    delen.push('item'+i+':kind='+it.kind+',type='+(it.type||'(leeg)'));
+  }
+  const files=cd.files||[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    delen.push('bestand'+i+':naam='+(f.name||'?')+',type='+(f.type||'(leeg)'));
+  }
+  if(delen.length===0) return 'klembord bevat niets herkenbaars (geen items of bestanden)';
+  return delen.join(' | ');
+}
+function beschrijfDataTransfer(dt){
+  if(!dt) return 'geen sleep-data beschikbaar';
+  const delen=[];
+  const types=dt.types||[];
+  if(types.length) delen.push('types='+Array.from(types).join(','));
+  const items=dt.items||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    delen.push('item'+i+':kind='+it.kind+',type='+(it.type||'(leeg)'));
+  }
+  const files=dt.files||[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    delen.push('bestand'+i+':naam='+(f.name||'?')+',type='+(f.type||'(leeg)'));
+  }
+  if(delen.length===0) return 'sleep-data bevat niets herkenbaars (geen types, items of bestanden)';
+  return delen.join(' | ');
+}
+
+function initPasteFoto(){
+  document.addEventListener('paste', (e)=>{
+    const items=(e.clipboardData&&e.clipboardData.items)||[];
+    const file=vindAfbeeldingUitItems(items);
+    if(!file){
+      // geen (herkenbare) afbeelding gevonden -> normale paste (bv. tekst in een veld) gewoon laten doorgaan;
+      // alleen als we NIET in een tekstveld aan het plakken zijn én er wel een foto-scherm open staat,
+      // tonen we precies wat er ontvangen werd, zodat een mislukte poging niet stil voorbijgaat.
+      const el=document.activeElement;
+      const isVeld=el && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.isContentEditable);
+      if(!isVeld && isFotoContextActief()){
+        showToast('Plakken: geen foto herkend. Ontvangen: '+beschrijfClipboardInhoud(e.clipboardData),true,7000);
+      }
+      return;
+    }
+    e.preventDefault();
+    plaatsGeplakteFoto(file);
+  });
+}
+
+function initDropFoto(){
+  // dragover ALTIJD onderscheppen: zonder dit navigeert de browser bij een per ongeluk
+  // gesleept bestand meteen weg van de app (en dus onopgeslagen wijzigingen kwijt) —
+  // dit is dus ook een stabiliteitsfix, los van het slepen van foto's zelf.
+  document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+  document.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    const files=(e.dataTransfer&&e.dataTransfer.files)||[];
+    const file=vindAfbeeldingUitBestanden(files);
+    if(!file){
+      // een drop op deze app heeft geen ander legitiem doel dan een foto toevoegen,
+      // dus hier tonen we altijd precies wat ontvangen werd als het geen foto bleek te zijn.
+      showToast('Slepen: geen foto herkend. Ontvangen: '+beschrijfDataTransfer(e.dataTransfer),true,7000);
+      return;
+    }
+    plaatsGeplakteFoto(file);
+  });
+}
+
+function initPullToRefresh(){
+  const el=document.getElementById('pullRefresh');
+  const icon=document.getElementById('pullRefreshIcon');
+  const label=document.getElementById('pullRefreshLabel');
+  if(!el||!icon||!label) return;
+  const DREMPEL=70;
+  let startY=null, pulling=false, refreshing=false;
+
+  function overzichtActief(){
+    const p=document.getElementById('panel-overzicht');
+    return p && p.classList.contains('active');
+  }
+
+  document.addEventListener('touchstart',e=>{
+    if(!overzichtActief()||refreshing){ startY=null; return; }
+    if(window.scrollY>0){ startY=null; return; }
+    if(e.touches.length!==1){ startY=null; return; }
+    startY=e.touches[0].clientY;
+    pulling=true;
+    el.classList.add('dragging');
+  },{passive:true});
+
+  document.addEventListener('touchmove',e=>{
+    if(!pulling||startY===null||refreshing) return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy<=0||window.scrollY>0){ pulling=false; el.classList.remove('dragging'); el.style.height='0px'; return; }
+    e.preventDefault();
+    const h=Math.min(dy*0.5,90);
+    el.style.height=h+'px';
+    if(h>=DREMPEL){ label.textContent='Loslaten om te vernieuwen'; icon.classList.add('flip'); }
+    else { label.textContent='Trek om te vernieuwen'; icon.classList.remove('flip'); }
+  },{passive:false});
+
+  document.addEventListener('touchend',async()=>{
+    if(!pulling||startY===null){ startY=null; return; }
+    const h=parseInt(el.style.height||'0',10);
+    pulling=false; startY=null;
+    el.classList.remove('dragging');
+    if(h>=DREMPEL && !refreshing){
+      refreshing=true;
+      el.style.height='46px';
+      icon.classList.remove('flip'); icon.classList.add('spin');
+      icon.innerHTML='&#8635;'; label.textContent='Vernieuwen...';
+      try { await dbxRead(); showToast('✓ Vernieuwd'); }
+      finally {
+        icon.classList.remove('spin');
+        icon.innerHTML='&#8595;';
+        label.textContent='Trek om te vernieuwen';
+        el.style.height='0px';
+        refreshing=false;
+      }
+    } else {
+      el.style.height='0px';
+    }
+  });
+
+  document.addEventListener('touchcancel',()=>{
+    pulling=false; startY=null;
+    el.classList.remove('dragging');
+    if(!refreshing) el.style.height='0px';
+  });
+}
+</script>
+</body>
+</html>
