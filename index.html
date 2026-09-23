@@ -305,11 +305,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
       <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
       <div class="field"><label>Referentie / opdrachtnummer</label><div style="position:relative"><input type="text" id="f_og_ref" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_ref')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
-      <div class="field" style="background:var(--surface2)">
-        <label>📎 Opdrachtbevestiging (PDF)</label>
-        <input type="file" id="f_og_bijlage" accept=".pdf" style="font-size:13px;color:var(--text2);margin-top:4px">
-        <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
-      </div>
+    </div>
+    <div class="field" style="background:var(--surface2)">
+      <label>📎 Opdrachtbevestiging (PDF)</label>
+      <input type="file" id="f_og_bijlage" accept=".pdf" onchange="toonBijlageNaam()" style="font-size:13px;color:var(--text2);margin-top:4px">
+      <div id="f_og_bijlage_naam" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
     </div>
 
     <div class="field"><label>Naam bewoner</label><div style="position:relative"><input type="text" id="f_naam" placeholder="Jan de Vries" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
@@ -1240,6 +1240,11 @@ function updateSigTekst(){
   if(de) de.innerHTML = deTekst;
 }
 
+function toonBijlageNaam(){
+  const f=document.getElementById('f_og_bijlage').files[0];
+  document.getElementById('f_og_bijlage_naam').textContent=f?('✓ '+f.name):'';
+}
+
 function selOGType(type){
   document.getElementById('ogParticulier').classList.toggle('sel', type==='particulier');
   document.getElementById('ogBedrijf').classList.toggle('sel', type==='bedrijf');
@@ -1344,6 +1349,9 @@ async function saveOrder(){
   }
 
   // PDF bijlage uploaden
+  // Let op: reader.onload/fetch hieronder zitten in try/catch en resolven ALTIJD (res(null) bij fouten) —
+  // zonder dat zou een mislukte upload (netwerkstoring, Dropbox-hik) het opslaan van de hele
+  // order eindeloos laten hangen, in plaats van gewoon door te gaan zonder bijlage.
   let bijlagePad=null;
   const bijlageFile=document.getElementById('f_og_bijlage').files[0];
   if(bijlageFile&&token){
@@ -1351,13 +1359,16 @@ async function saveOrder(){
     const reader=new FileReader();
     bijlagePad=await new Promise(res=>{
       reader.onload=async e=>{
+        try{
         const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
         for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
         const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
           method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`${mapPad}/opdrachtbevestiging.pdf`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
         });
         res(r.ok?`${mapPad}/opdrachtbevestiging.pdf`:null);
+        }catch(err){ res(null); }
       };
+      reader.onerror=()=>res(null);
       reader.readAsDataURL(bijlageFile);
     });
   }
@@ -1397,7 +1408,8 @@ async function saveOrder(){
   await dbxWrite();
 
   // Reset formulier
-  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline','f_datum'].forEach(id=>document.getElementById(id).value='');
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline','f_datum','f_og_bijlage'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_og_bijlage_naam').textContent='';
   document.getElementById('f_agenda_tijd').value='08:00';
   document.getElementById('f_og_type').value='particulier'; toggleOG();
   document.getElementById('ogParticulier').classList.add('sel');
@@ -1960,6 +1972,10 @@ async function showDetail(id){
     <div class="drow"><div class="drow-l">Omschrijving</div><textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea></div>
     <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
     <div class="drow"><div class="drow-l">Datum afspraak</div><input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum',this.value)"></div>
+    <div class="drow" style="display:flex;gap:8px">
+      <button onclick="mailAfspraak(${id})" style="flex:1;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">✉️ Afspraak bevestigen (mail)</button>
+      <button onclick="smsAfspraak(${id})" style="flex:1;background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">💬 Afspraak bevestigen (sms)</button>
+    </div>
     <div class="drow"><div class="drow-l">Uiterlijk klaar op</div><input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum_deadline',this.value)"></div>
     <div class="slbl">Agenda</div>
     <div class="drow" style="display:flex;align-items:center;gap:10px">
@@ -2307,6 +2323,71 @@ async function mailOrder(id){
   setSyncStatus('gesynchroniseerd','ok');
 }
 
+// ── AFSPRAAKBEVESTIGING (mail + sms) ────────────────────────────
+// Stelt onderwerp + bericht samen voor de afspraakbevestiging aan de bewoner,
+// in het NL of DE naargelang de taal van de werkbon (o.cessie_taal), net als
+// bij de werkbon-PDF en de mail-na-uitvoering hierboven.
+// kort=true levert een compacte versie zonder briefkop, voor gebruik in een sms.
+function bouwAfspraakBericht(o,kort){
+  const type=o.type.replace('Overig: ','').replace('Overig','');
+  const tijd=o.agenda_tijd||'08:00';
+  if((o.cessie_taal||'nl')==='de'){
+    const onderwerp=`Terminbestätigung — ${type} — ${o.nr}`;
+    const kern=`Sehr geehrte(r) ${o.naam||'Kunde/Kundin'},\n\nhiermit bestätigen wir den Termin für folgende Arbeiten:\n\nArt der Arbeiten: ${type}\nAdresse:          ${o.adres||'-'}\nDatum:            ${fmtDate(o.datum)}\nUhrzeit:          ab ${tijd} Uhr`;
+    const tekst=kort
+      ? `${kern}\n\nMit freundlichen Grüßen,\nRolf Jurgen — REPAFIN`
+      : `${kern}\n\nSollte dieser Termin nicht mehr passen, geben Sie uns bitte rechtzeitig Bescheid.\n\nMit freundlichen Grüßen,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
+    return {onderwerp,tekst};
+  }
+  const onderwerp=`Bevestiging afspraak — ${type} — ${o.nr}`;
+  const kern=`Beste ${o.naam||'klant'},\n\nHierbij bevestigen wij de afspraak voor de volgende werkzaamheden:\n\nType werkzaamheden: ${type}\nAdres:              ${o.adres||'-'}\nDatum:              ${fmtDate(o.datum)}\nTijd:               vanaf ${tijd} uur`;
+  const tekst=kort
+    ? `${kern}\n\nMet vriendelijke groet,\nRolf Jurgen — REPAFIN`
+    : `${kern}\n\nMocht deze datum of tijd onverhoopt niet meer uitkomen, laat het ons dan tijdig weten.\n\nMet vriendelijke groet,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
+  return {onderwerp,tekst};
+}
+
+// Neemt eerst eventuele onopgeslagen wijzigingen in het detailscherm mee (bv. een net
+// getypte datum) zonder van scherm te wisselen — zelfde aanpak als changeStatus/changePrio —
+// zodat een bevestiging nooit een verouderde datum verstuurt. Geeft null terug (met melding)
+// als er geen datum bekend is.
+async function bereidAfspraakActieVoor(id){
+  if(Object.keys(detailWijzigingen).length>0){
+    const idx=orders.findIndex(x=>x.id===id);
+    if(idx>=0) Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+    await dbxWrite();
+    showDetail(id);
+  }
+  const o=orders.find(x=>x.id===id);
+  if(!o) return null;
+  if(!o.datum){ showToast('Vul eerst een datum afspraak in voordat je deze bevestigt',true); return null; }
+  return o;
+}
+
+async function mailAfspraak(id){
+  const o=await bereidAfspraakActieVoor(id);
+  if(!o) return;
+  if(!o.email){ showToast('Geen e-mailadres bekend bij deze klant/bewoner',true); return; }
+  const {onderwerp,tekst}=bouwAfspraakBericht(o,false);
+  const mailto=`mailto:${o.email}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(tekst)}`;
+  window.location.href=mailto;
+  showToast('✓ Email geopend met afspraakbevestiging');
+}
+
+async function smsAfspraak(id){
+  const o=await bereidAfspraakActieVoor(id);
+  if(!o) return;
+  if(!o.tel){ showToast('Geen telefoonnummer bekend bij deze klant/bewoner',true); return; }
+  const {tekst}=bouwAfspraakBericht(o,true);
+  const nr=o.tel.replace(/[^0-9+]/g,'');
+  // iOS gebruikt "&body=", de meeste andere platformen (Android e.d.) "?body=" na het nummer.
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const smsHref=isIOS?`sms:${nr}&body=${encodeURIComponent(tekst)}`:`sms:${nr}?body=${encodeURIComponent(tekst)}`;
+  window.location.href=smsHref;
+  showToast('✓ SMS-app geopend met tekst — werkt alleen op je telefoon');
+}
+
 // ── PDF ──────────────────────────────────────────────────────
 async function saveCessiePDF(id){
   const o=orders.find(x=>x.id===id); if(!o||!o.verzekering) return;
@@ -2560,10 +2641,10 @@ function printList(){
 }
 
 // ── TOAST ────────────────────────────────────────────────────
-function showToast(msg,isErr){
+function showToast(msg,isErr,duurMs){
   const t=document.getElementById('toast');t.textContent=msg;
   t.style.background=isErr?'var(--red)':'var(--green)';
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),duurMs||2800);
 }
 
 // ── START ────────────────────────────────────────────────────
@@ -2639,11 +2720,72 @@ function vindAfbeeldingUitBestanden(files){
   return file||reserve;
 }
 
+// Bepaalt of we op een scherm zitten waar een geplakte/gesleepte foto ergens naartoe
+// zou kunnen (nieuw-formulier, bewerk-modal of detailscherm) — gebruikt om de
+// diagnose-melding bij plakken alleen te tonen waar dit ook relevant is.
+function isFotoContextActief(){
+  if(document.getElementById('editModal').classList.contains('open')) return true;
+  const panelNieuw=document.getElementById('panel-nieuw');
+  if(panelNieuw && panelNieuw.classList.contains('active')) return true;
+  const panelDetail=document.getElementById('panel-detail');
+  if(panelDetail && panelDetail.classList.contains('active') && detailId) return true;
+  return false;
+}
+
+// Diagnose-hulpfuncties: zetten om wat het klembord/sleep-object daadwerkelijk bevat
+// in een leesbare tekst, zodat we bij een mislukte herkenning precies kunnen zien wat
+// er binnenkwam (bv. een Outlook-bijlage die zich anders gedraagt dan verwacht),
+// in plaats van stilletjes niets te doen.
+function beschrijfClipboardInhoud(cd){
+  if(!cd) return 'geen klembord-data beschikbaar';
+  const delen=[];
+  const items=cd.items||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    delen.push('item'+i+':kind='+it.kind+',type='+(it.type||'(leeg)'));
+  }
+  const files=cd.files||[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    delen.push('bestand'+i+':naam='+(f.name||'?')+',type='+(f.type||'(leeg)'));
+  }
+  if(delen.length===0) return 'klembord bevat niets herkenbaars (geen items of bestanden)';
+  return delen.join(' | ');
+}
+function beschrijfDataTransfer(dt){
+  if(!dt) return 'geen sleep-data beschikbaar';
+  const delen=[];
+  const types=dt.types||[];
+  if(types.length) delen.push('types='+Array.from(types).join(','));
+  const items=dt.items||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    delen.push('item'+i+':kind='+it.kind+',type='+(it.type||'(leeg)'));
+  }
+  const files=dt.files||[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    delen.push('bestand'+i+':naam='+(f.name||'?')+',type='+(f.type||'(leeg)'));
+  }
+  if(delen.length===0) return 'sleep-data bevat niets herkenbaars (geen types, items of bestanden)';
+  return delen.join(' | ');
+}
+
 function initPasteFoto(){
   document.addEventListener('paste', (e)=>{
     const items=(e.clipboardData&&e.clipboardData.items)||[];
     const file=vindAfbeeldingUitItems(items);
-    if(!file) return; // geen (herkenbare) afbeelding in het klembord -> normale paste (bv. tekst) gewoon laten doorgaan
+    if(!file){
+      // geen (herkenbare) afbeelding gevonden -> normale paste (bv. tekst in een veld) gewoon laten doorgaan;
+      // alleen als we NIET in een tekstveld aan het plakken zijn én er wel een foto-scherm open staat,
+      // tonen we precies wat er ontvangen werd, zodat een mislukte poging niet stil voorbijgaat.
+      const el=document.activeElement;
+      const isVeld=el && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.isContentEditable);
+      if(!isVeld && isFotoContextActief()){
+        showToast('Plakken: geen foto herkend. Ontvangen: '+beschrijfClipboardInhoud(e.clipboardData),true,7000);
+      }
+      return;
+    }
     e.preventDefault();
     plaatsGeplakteFoto(file);
   });
@@ -2658,7 +2800,12 @@ function initDropFoto(){
     e.preventDefault();
     const files=(e.dataTransfer&&e.dataTransfer.files)||[];
     const file=vindAfbeeldingUitBestanden(files);
-    if(!file) return;
+    if(!file){
+      // een drop op deze app heeft geen ander legitiem doel dan een foto toevoegen,
+      // dus hier tonen we altijd precies wat ontvangen werd als het geen foto bleek te zijn.
+      showToast('Slepen: geen foto herkend. Ontvangen: '+beschrijfDataTransfer(e.dataTransfer),true,7000);
+      return;
+    }
     plaatsGeplakteFoto(file);
   });
 }
