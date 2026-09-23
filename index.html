@@ -2578,15 +2578,19 @@ function eersteLegeFotoSlot(fotosObj){
 function initPasteFoto(){
   document.addEventListener('paste', (e)=>{
     const items=(e.clipboardData&&e.clipboardData.items)||[];
-    let file=null;
+    let file=null, reserve=null;
     for(let i=0;i<items.length;i++){
       const item=items[i];
-      if(item.kind==='file' && item.type && item.type.indexOf('image/')===0){
-        file=item.getAsFile();
-        break;
-      }
+      if(item.kind!=='file') continue;
+      const type=(item.type||'').toLowerCase();
+      if(type.indexOf('image/')===0){ file=item.getAsFile(); break; }
+      if(!reserve) reserve=item; // bv. een bijlage die Outlook als generiek bestand aanlevert
     }
-    if(!file) return; // geen afbeelding in het klembord -> normale paste (bv. tekst) gewoon laten doorgaan
+    if(!file && reserve){
+      const f=reserve.getAsFile();
+      if(f && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) file=f;
+    }
+    if(!file) return; // geen (herkenbare) afbeelding in het klembord -> normale paste (bv. tekst) gewoon laten doorgaan
     e.preventDefault();
 
     if(document.getElementById('editModal').classList.contains('open')){
