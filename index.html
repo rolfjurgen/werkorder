@@ -187,6 +187,12 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
 /* QUEUE BANNER */
 .queue-banner { background: var(--accent-bg); border: 1px solid #e8d090; border-radius: var(--r); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; }
+#pullRefresh { height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text2); font-size: 13px; transition: height .25s ease; }
+#pullRefresh.dragging { transition: none; }
+#pullRefreshIcon { display: inline-block; transition: transform .2s ease; }
+#pullRefreshIcon.flip { transform: rotate(180deg); }
+#pullRefreshIcon.spin { animation: pullspin 0.8s linear infinite; }
+@keyframes pullspin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 .queue-banner.hidden { display: none; }
 .btn-queue { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
@@ -279,6 +285,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 <div class="panel" id="panel-nieuw">
   <div id="newForm" style="display:none">
 
+    <button class="btn btn-primary" onclick="saveOrder()" style="margin-bottom:14px">Opdracht opslaan & synchroniseren</button>
     <div class="slbl" style="margin-top:0">Opdrachtgever</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
       <button class="tbtn" id="ogParticulier" onclick="selOGType('particulier')" style="padding:12px 8px"><span class="ti">👤</span>Particulier</button>
@@ -426,6 +433,7 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
 <!-- OVERZICHT -->
 <div class="panel active" id="panel-overzicht">
+  <div id="pullRefresh"><span id="pullRefreshIcon">&#8595;</span><span id="pullRefreshLabel">Trek om te vernieuwen</span></div>
   <div class="queue-banner hidden" id="queueBanner">
     <span>📤 Opdrachten wachten op synchronisatie</span>
     <button class="btn-queue" onclick="syncQueue()">Nu synchroniseren</button>
@@ -550,7 +558,10 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
   <div class="modal">
     <div class="modal-hdr">
       <div class="modal-ttl">Opdracht bewerken</div>
-      <button class="mclose" onclick="closeEdit()">Sluiten</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="saveEdit()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
+        <button class="mclose" onclick="closeEdit()">Sluiten</button>
+      </div>
     </div>
     <div class="slbl" style="margin-top:0">Type werkzaamheden</div>
     <div class="type-grid">
@@ -1053,7 +1064,7 @@ function compressImg(dataUrl,cb){
   img.src=dataUrl;
 }
 function handleFoto(input,slotId,type,idx){
-  const f=input.files[0]; if(!f) return;
+  const f=(input&&input.files)?input.files[0]:input; if(!f) return;
   const r=new FileReader();
   r.onload=e=>compressImg(e.target.result,compressed=>{
     newFotos[type][idx]=compressed;
@@ -1078,7 +1089,7 @@ function resetFotos(){
   ['fotoVoor0','fotoVoor0_cam','fotoVoor1','fotoVoor1_cam','fotoVoor2','fotoVoor2_cam','fotoVoor3','fotoVoor3_cam','fotoNa0','fotoNa0_cam','fotoNa1','fotoNa1_cam','fotoNa2','fotoNa2_cam','fotoNa3','fotoNa3_cam'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function handleEditFoto(input,slotId,type,idx){
-  const f=input.files[0]; if(!f) return;
+  const f=(input&&input.files)?input.files[0]:input; if(!f) return;
   const r=new FileReader();
   r.onload=e=>compressImg(e.target.result,compressed=>{
     editFotos[type][idx]=compressed;
@@ -1386,8 +1397,7 @@ async function saveOrder(){
   await dbxWrite();
 
   // Reset formulier
-  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f_datum').value=new Date().toISOString().split('T')[0];
+  ['f_naam','f_adres','f_tel','f_email','f_omschr','f_og_naam','f_og_contact','f_og_tel','f_og_email','f_og_ref','f_overig','f_datum_deadline','f_datum'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f_agenda_tijd').value='08:00';
   document.getElementById('f_og_type').value='particulier'; toggleOG();
   document.getElementById('ogParticulier').classList.add('sel');
@@ -1398,6 +1408,7 @@ async function saveOrder(){
   selTypeVal=''; selPrioVal='normaal';
   document.getElementById('prioNormaal').classList.add('sel');
   document.getElementById('prioSpoed').classList.remove('sel');
+  document.getElementById('prioPrioriteit').classList.remove('sel');
   document.getElementById('f_intern').value='';
   document.getElementById('f_verzekering').checked=false;
   document.getElementById('f_verzekering_wrap').style.display='none';
@@ -1455,6 +1466,18 @@ function statFilter(type){
   else if(type==='bezig') document.getElementById('stat-bezig').classList.add('active-filter');
   else if(type==='klaar') document.getElementById('stat-klaar').classList.add('active-filter');
   document.getElementById('filterStatus').value='alle';
+  // Overige filters ook resetten, anders kan de lijst stiekem minder tonen dan de
+  // teller aangeeft (bv. door een vergeten kleur-, locatie- of zoekfilter).
+  document.getElementById('filterPrio').value='alle';
+  const filterLocatieEl=document.getElementById('filterLocatie');
+  if(filterLocatieEl) filterLocatieEl.value='alle';
+  const searchEl=document.getElementById('searchField');
+  if(searchEl) searchEl.value='';
+  currentTypeFilter='alle';
+  ['alle','inbraak','keuken','oplever','lakschade','sanitair','overig'].forEach(k=>{
+    const el=document.getElementById('leg-'+k);
+    if(el) el.style.outline='none';
+  });
   renderList();
 }
 
@@ -1607,6 +1630,8 @@ function markeerWijziging(id,veld,waarde){
   if(banner) banner.style.display='flex';
   const knopTop=document.getElementById('opslaanKnopTop');
   if(knopTop) knopTop.style.display='block';
+  const knopBottom=document.getElementById('opslaanKnopBottom');
+  if(knopBottom) knopBottom.style.display='block';
 }
 
 async function slaDetailOp(id){
@@ -1619,7 +1644,7 @@ async function slaDetailOp(id){
 }
 
 async function handleDetailFoto(input,type,idx,id){
-  const f=input.files[0]; if(!f)return;
+  const f=(input&&input.files)?input.files[0]:input; if(!f)return;
   showToast('📷 Foto uploaden...');
   const r=new FileReader();
   r.onload=async e=>compressImg(e.target.result,async compressed=>{
@@ -1990,6 +2015,7 @@ async function showDetail(id){
       ${(o.schadebedrag&&o.btw)?`<div class="drow"><div class="drow-l"><strong>Totaal incl. BTW</strong></div><div class="drow-v"><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></div></div>`:''}
       ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
     `:''}
+    <button id="opslaanKnopBottom" onclick="slaDetailOp(${id})" style="display:none;width:100%;margin-bottom:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">💾 Wijzigingen opslaan</button>
     <div class="divider"></div>
     ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="width:100%;margin-bottom:7px">📋 Akte van Cessie PDF</button>`:''}
     ${(o.fotos&&((o.fotos.voor||[]).some(f=>f)||(o.fotos.na||[]).some(f=>f)))?`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:7px;cursor:pointer"><input type="checkbox" id="pdfFotos_${id}" style="width:16px;height:16px;cursor:pointer">📷 Foto's meenemen in werkbon PDF</label>`:''}
@@ -2031,10 +2057,18 @@ async function verwijderFoto(id, type, idx){
 
 async function changeStatus(id,status){
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
   orders[idx].status=status; await dbxWrite(); showDetail(id); renderList();
 }
 async function changePrio(id,prio){
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  if(Object.keys(detailWijzigingen).length>0){
+    Object.assign(orders[idx],detailWijzigingen);
+    detailWijzigingen={};
+  }
   orders[idx].prioriteit=prio; await dbxWrite(); showDetail(id);
 }
 async function changeTaal(id,taal){
@@ -2085,6 +2119,7 @@ async function openEdit(id){
   document.getElementById('elocBuiten').classList.toggle('sel',editLocVal==='buiten');
   editPrioVal=o.prioriteit||'normaal';
   document.getElementById('eprioSpoed').classList.toggle('sel',editPrioVal==='spoed');
+  document.getElementById('eprioPrioriteit').classList.toggle('sel',editPrioVal==='prioriteit');
   document.getElementById('eprioNormaal').classList.toggle('sel',editPrioVal==='normaal');
 
   document.getElementById('e_intern').value=o.intern||'';
@@ -2532,7 +2567,121 @@ function showToast(msg,isErr){
 }
 
 // ── START ────────────────────────────────────────────────────
-window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); });
+window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); initPullToRefresh(); initPasteFoto(); });
+
+function eersteLegeFotoSlot(fotosObj){
+  for(let i=0;i<4;i++){ if(!fotosObj.voor[i]) return {type:'voor',idx:i}; }
+  for(let i=0;i<4;i++){ if(!fotosObj.na[i]) return {type:'na',idx:i}; }
+  return null;
+}
+
+function initPasteFoto(){
+  document.addEventListener('paste', (e)=>{
+    const items=(e.clipboardData&&e.clipboardData.items)||[];
+    let file=null;
+    for(let i=0;i<items.length;i++){
+      const item=items[i];
+      if(item.kind==='file' && item.type && item.type.indexOf('image/')===0){
+        file=item.getAsFile();
+        break;
+      }
+    }
+    if(!file) return; // geen afbeelding in het klembord -> normale paste (bv. tekst) gewoon laten doorgaan
+    e.preventDefault();
+
+    if(document.getElementById('editModal').classList.contains('open')){
+      const slot=eersteLegeFotoSlot(editFotos);
+      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+      const slotId='eSlot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+      handleEditFoto(file,slotId,slot.type,slot.idx);
+      showToast('📋 Foto geplakt');
+      return;
+    }
+    const panelNieuw=document.getElementById('panel-nieuw');
+    if(panelNieuw && panelNieuw.classList.contains('active')){
+      const slot=eersteLegeFotoSlot(newFotos);
+      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+      const slotId='slot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+      handleFoto(file,slotId,slot.type,slot.idx);
+      showToast('📋 Foto geplakt');
+      return;
+    }
+    const panelDetail=document.getElementById('panel-detail');
+    if(panelDetail && panelDetail.classList.contains('active') && detailId){
+      const o=orders.find(x=>x.id===detailId);
+      if(!o) return;
+      if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+      const slot=eersteLegeFotoSlot(o.fotos);
+      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+      handleDetailFoto(file,slot.type,slot.idx,detailId);
+      return;
+    }
+    showToast("Open eerst een opdracht (nieuw, bewerken of detail) om een geplakte foto te kunnen plaatsen",true);
+  });
+}
+
+function initPullToRefresh(){
+  const el=document.getElementById('pullRefresh');
+  const icon=document.getElementById('pullRefreshIcon');
+  const label=document.getElementById('pullRefreshLabel');
+  if(!el||!icon||!label) return;
+  const DREMPEL=70;
+  let startY=null, pulling=false, refreshing=false;
+
+  function overzichtActief(){
+    const p=document.getElementById('panel-overzicht');
+    return p && p.classList.contains('active');
+  }
+
+  document.addEventListener('touchstart',e=>{
+    if(!overzichtActief()||refreshing){ startY=null; return; }
+    if(window.scrollY>0){ startY=null; return; }
+    if(e.touches.length!==1){ startY=null; return; }
+    startY=e.touches[0].clientY;
+    pulling=true;
+    el.classList.add('dragging');
+  },{passive:true});
+
+  document.addEventListener('touchmove',e=>{
+    if(!pulling||startY===null||refreshing) return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy<=0||window.scrollY>0){ pulling=false; el.classList.remove('dragging'); el.style.height='0px'; return; }
+    e.preventDefault();
+    const h=Math.min(dy*0.5,90);
+    el.style.height=h+'px';
+    if(h>=DREMPEL){ label.textContent='Loslaten om te vernieuwen'; icon.classList.add('flip'); }
+    else { label.textContent='Trek om te vernieuwen'; icon.classList.remove('flip'); }
+  },{passive:false});
+
+  document.addEventListener('touchend',async()=>{
+    if(!pulling||startY===null){ startY=null; return; }
+    const h=parseInt(el.style.height||'0',10);
+    pulling=false; startY=null;
+    el.classList.remove('dragging');
+    if(h>=DREMPEL && !refreshing){
+      refreshing=true;
+      el.style.height='46px';
+      icon.classList.remove('flip'); icon.classList.add('spin');
+      icon.innerHTML='&#8635;'; label.textContent='Vernieuwen...';
+      try { await dbxRead(); showToast('✓ Vernieuwd'); }
+      finally {
+        icon.classList.remove('spin');
+        icon.innerHTML='&#8595;';
+        label.textContent='Trek om te vernieuwen';
+        el.style.height='0px';
+        refreshing=false;
+      }
+    } else {
+      el.style.height='0px';
+    }
+  });
+
+  document.addEventListener('touchcancel',()=>{
+    pulling=false; startY=null;
+    el.classList.remove('dragging');
+    if(!refreshing) el.style.height='0px';
+  });
+}
 </script>
 </body>
 </html>
