@@ -2567,7 +2567,7 @@ function showToast(msg,isErr){
 }
 
 // ── START ────────────────────────────────────────────────────
-window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); initPullToRefresh(); initPasteFoto(); });
+window.addEventListener('load',()=>{ init(); setTimeout(updateSigTekst,500); initPullToRefresh(); initPasteFoto(); initDropFoto(); });
 
 function eersteLegeFotoSlot(fotosObj){
   for(let i=0;i<4;i++){ if(!fotosObj.voor[i]) return {type:'voor',idx:i}; }
@@ -2575,52 +2575,91 @@ function eersteLegeFotoSlot(fotosObj){
   return null;
 }
 
+// Gedeelde plaatsingslogica voor zowel plakken (Ctrl+V) als slepen: zoekt het actieve
+// scherm (nieuw-formulier, bewerk-modal of detailscherm) en plaatst de foto in het
+// eerstvolgende lege foto-vak.
+function plaatsGeplakteFoto(file){
+  if(!file) return;
+  if(document.getElementById('editModal').classList.contains('open')){
+    const slot=eersteLegeFotoSlot(editFotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    const slotId='eSlot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+    handleEditFoto(file,slotId,slot.type,slot.idx);
+    showToast('📋 Foto toegevoegd');
+    return;
+  }
+  const panelNieuw=document.getElementById('panel-nieuw');
+  if(panelNieuw && panelNieuw.classList.contains('active')){
+    const slot=eersteLegeFotoSlot(newFotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    const slotId='slot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
+    handleFoto(file,slotId,slot.type,slot.idx);
+    showToast('📋 Foto toegevoegd');
+    return;
+  }
+  const panelDetail=document.getElementById('panel-detail');
+  if(panelDetail && panelDetail.classList.contains('active') && detailId){
+    const o=orders.find(x=>x.id===detailId);
+    if(!o) return;
+    if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
+    const slot=eersteLegeFotoSlot(o.fotos);
+    if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
+    handleDetailFoto(file,slot.type,slot.idx,detailId);
+    return;
+  }
+  showToast("Open eerst een opdracht (nieuw, bewerken of detail) om een foto te kunnen plaatsen",true);
+}
+
+// Herkent een afbeelding uit een DataTransferItemList (plakken) of FileList (slepen),
+// met een terugvaloptie op de bestandsextensie voor bronnen die geen duidelijk
+// image/...-type meegeven (zoals een bijlage die Outlook kopieert).
+function vindAfbeeldingUitItems(items){
+  let file=null, reserve=null;
+  for(let i=0;i<items.length;i++){
+    const item=items[i];
+    if(item.kind!=='file') continue;
+    const type=(item.type||'').toLowerCase();
+    if(type.indexOf('image/')===0){ file=item.getAsFile(); break; }
+    if(!reserve) reserve=item;
+  }
+  if(!file && reserve){
+    const f=reserve.getAsFile();
+    if(f && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) file=f;
+  }
+  return file;
+}
+function vindAfbeeldingUitBestanden(files){
+  let file=null, reserve=null;
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const type=(f.type||'').toLowerCase();
+    if(type.indexOf('image/')===0){ file=f; break; }
+    if(!reserve && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) reserve=f;
+  }
+  return file||reserve;
+}
+
 function initPasteFoto(){
   document.addEventListener('paste', (e)=>{
     const items=(e.clipboardData&&e.clipboardData.items)||[];
-    let file=null, reserve=null;
-    for(let i=0;i<items.length;i++){
-      const item=items[i];
-      if(item.kind!=='file') continue;
-      const type=(item.type||'').toLowerCase();
-      if(type.indexOf('image/')===0){ file=item.getAsFile(); break; }
-      if(!reserve) reserve=item; // bv. een bijlage die Outlook als generiek bestand aanlevert
-    }
-    if(!file && reserve){
-      const f=reserve.getAsFile();
-      if(f && /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name||'')) file=f;
-    }
+    const file=vindAfbeeldingUitItems(items);
     if(!file) return; // geen (herkenbare) afbeelding in het klembord -> normale paste (bv. tekst) gewoon laten doorgaan
     e.preventDefault();
+    plaatsGeplakteFoto(file);
+  });
+}
 
-    if(document.getElementById('editModal').classList.contains('open')){
-      const slot=eersteLegeFotoSlot(editFotos);
-      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
-      const slotId='eSlot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
-      handleEditFoto(file,slotId,slot.type,slot.idx);
-      showToast('📋 Foto geplakt');
-      return;
-    }
-    const panelNieuw=document.getElementById('panel-nieuw');
-    if(panelNieuw && panelNieuw.classList.contains('active')){
-      const slot=eersteLegeFotoSlot(newFotos);
-      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
-      const slotId='slot'+(slot.type==='voor'?'Voor':'Na')+slot.idx;
-      handleFoto(file,slotId,slot.type,slot.idx);
-      showToast('📋 Foto geplakt');
-      return;
-    }
-    const panelDetail=document.getElementById('panel-detail');
-    if(panelDetail && panelDetail.classList.contains('active') && detailId){
-      const o=orders.find(x=>x.id===detailId);
-      if(!o) return;
-      if(!o.fotos) o.fotos={voor:[null,null,null,null],na:[null,null,null,null]};
-      const slot=eersteLegeFotoSlot(o.fotos);
-      if(!slot){ showToast("Alle foto-vakken zijn al gevuld — verwijder eerst een foto",true); return; }
-      handleDetailFoto(file,slot.type,slot.idx,detailId);
-      return;
-    }
-    showToast("Open eerst een opdracht (nieuw, bewerken of detail) om een geplakte foto te kunnen plaatsen",true);
+function initDropFoto(){
+  // dragover ALTIJD onderscheppen: zonder dit navigeert de browser bij een per ongeluk
+  // gesleept bestand meteen weg van de app (en dus onopgeslagen wijzigingen kwijt) —
+  // dit is dus ook een stabiliteitsfix, los van het slepen van foto's zelf.
+  document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+  document.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    const files=(e.dataTransfer&&e.dataTransfer.files)||[];
+    const file=vindAfbeeldingUitBestanden(files);
+    if(!file) return;
+    plaatsGeplakteFoto(file);
   });
 }
 
