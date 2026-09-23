@@ -1701,6 +1701,8 @@ function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateS
 // Zelfde als fmtDate maar met Duitse datumnotatie wanneer taal='de' — gebruikt in de
 // afspraakbevestiging zodat een Duitstalige tekst niet toch een Nederlandse datum toont.
 function fmtDateTaal(d,taal){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString(taal==='de'?'de-DE':'nl-NL',{day:'numeric',month:'short',year:'numeric'});}
+// Voor Rolf's eigen status-aanduiding (wanneer een bevestiging is voorbereid/verstuurd) — altijd in het NL, ongeacht de taal van de opdracht zelf.
+function fmtDateTijd(iso){if(!iso)return '';const d=new Date(iso);return `${d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'})} om ${d.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}`;}
 
 // ── DETAIL ───────────────────────────────────────────────────
 let detailWijzigingen={};
@@ -2091,9 +2093,13 @@ async function showDetail(id){
     <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
     <div class="drow"><div class="drow-l">Datum afspraak</div><input type="date" value="${o.datum||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum',this.value)"></div>
     <div class="drow" style="display:flex;gap:8px">
-      <button onclick="mailAfspraak(${id})" style="flex:1;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">✉️ Afspraak bevestigen (mail)</button>
-      <button onclick="smsAfspraak(${id})" style="flex:1;background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">💬 Afspraak bevestigen (sms)</button>
+      <button onclick="mailAfspraak(${id})" style="flex:1;background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">✉️ ${o.afspraakMailOp?'Opnieuw mailen':'Afspraak bevestigen (mail)'}</button>
+      <button onclick="smsAfspraak(${id})" style="flex:1;background:var(--green-bg);color:var(--green);border:1px solid #b0ddc0;border-radius:var(--r);padding:10px 6px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:500">💬 ${o.afspraakSmsOp?'Opnieuw smsen':'Afspraak bevestigen (sms)'}</button>
     </div>
+    ${(o.afspraakMailOp||o.afspraakSmsOp)?`<div class="drow" style="padding-top:0;font-size:12px;color:var(--text2);line-height:1.6">
+      ${o.afspraakMailOp?`✓ Mail voorbereid op ${fmtDateTijd(o.afspraakMailOp)}<br>`:''}
+      ${o.afspraakSmsOp?`✓ Sms voorbereid op ${fmtDateTijd(o.afspraakSmsOp)}`:''}
+    </div>`:''}
     <div class="drow"><div class="drow-l">Uiterlijk klaar op</div><input type="date" value="${o.datum_deadline||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:15px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'datum_deadline',this.value)"></div>
     <div class="slbl">Agenda</div>
     <div class="drow" style="display:flex;align-items:center;gap:10px">
@@ -2496,6 +2502,7 @@ async function mailAfspraak(id){
   const {onderwerp,tekst}=bouwAfspraakBericht(o,false);
   const mailto=`mailto:${o.email}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(tekst)}`;
   window.location.href=mailto;
+  await registreerAfspraakActie(id,'afspraakMailOp');
   showToast('✓ Email geopend met afspraakbevestiging');
 }
 
@@ -2509,7 +2516,19 @@ async function smsAfspraak(id){
   const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
   const smsHref=isIOS?`sms:${nr}&body=${encodeURIComponent(tekst)}`:`sms:${nr}?body=${encodeURIComponent(tekst)}`;
   window.location.href=smsHref;
+  await registreerAfspraakActie(id,'afspraakSmsOp');
   showToast('✓ SMS-app geopend met tekst — werkt alleen op je telefoon');
+}
+
+// Zet een tijdstempel op de order zodra een afspraakbevestiging is voorbereid/geopend in mail of sms.
+// Let op: dit registreert wanneer Rolf de mail/sms heeft klaargezet, niet of hij 'm ook echt heeft
+// verstuurd — dat kan de app technisch niet weten (mailto:/sms: opent alleen de app, meer niet).
+async function registreerAfspraakActie(id,veld){
+  const idx=orders.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  orders[idx][veld]=new Date().toISOString();
+  await dbxWrite();
+  showDetail(id);
 }
 
 // ── PDF ──────────────────────────────────────────────────────
