@@ -300,7 +300,9 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
 
     <div id="f_og_extra" style="display:none">
       <input type="hidden" id="f_og_type" value="particulier">
-      <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
+      <div class="field"><label>Naam bedrijf</label><div style="position:relative"><input type="text" id="f_og_naam" list="klantenLijst" autocomplete="off" oninput="probeerKlantInvullen('f')" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_naam')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div>
+      <datalist id="klantenLijst"></datalist>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">Begin te typen voor eerder ingevoerde vaste klanten</div></div>
       <div class="field"><label>Contactpersoon</label><div style="position:relative"><input type="text" id="f_og_contact" autocomplete="off" style="padding-right:44px"><button type="button" onclick="startSpeech('f_og_contact')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 7px;font-size:15px;cursor:pointer;line-height:1">🎤</button></div></div>
       <div class="field"><label>Telefoon bedrijf</label><input type="tel" id="f_og_tel"></div>
       <div class="field"><label>Email bedrijf</label><input type="email" id="f_og_email"></div>
@@ -724,6 +726,7 @@ const DELETED_KEY = 'rj_deleted_v3';
 // ── STATE ────────────────────────────────────────────────────
 let token = localStorage.getItem('dbx_token') || null;
 let orders = [];
+let klanten = []; // vaste zakelijke opdrachtgevers (og_naam/contact/tel/email), voor autocomplete bij "Naam bedrijf"
 let selTypeVal = '';
 let selPrioVal = 'normaal';
 let editTypeVal = '';
@@ -752,7 +755,7 @@ function handleCallback() {
   return false;
 }
 function logout() {
-  localStorage.removeItem('dbx_token'); token = null; orders = [];
+  localStorage.removeItem('dbx_token'); token = null; orders = []; klanten = [];
   archiveIndex = null; laatsteNr = null;
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('newForm').style.display='none';
@@ -761,6 +764,16 @@ function logout() {
 }
 
 // ── DROPBOX API ──────────────────────────────────────────────
+// werkorders.json was ooit gewoon een array van orders. Sinds de klantenlijst (voor de
+// autocomplete bij "Naam bedrijf") is het bestand {orders:[...], klanten:[...]}. Deze
+// functie leest BEIDE vormen probleemloos, zodat een bestaand Dropbox-bestand van vóór
+// deze wijziging gewoon blijft werken — na de eerstvolgende opslag staat het automatisch
+// in de nieuwe vorm.
+function parseSyncData(text){
+  const parsed = JSON.parse(text);
+  if (Array.isArray(parsed)) return { orders: parsed, klanten: [] };
+  return { orders: parsed.orders||[], klanten: parsed.klanten||[] };
+}
 async function dbxRead() {
   setSyncStatus('laden...','busy');
   try {
@@ -771,10 +784,12 @@ async function dbxRead() {
       signal: controller.signal
     });
     clearTimeout(timeout);
-    if (r.status===409) { orders=[]; setSyncStatus('verbonden','ok'); renderList(); return; }
+    if (r.status===409) { orders=[]; klanten=[]; setSyncStatus('verbonden','ok'); renderList(); return; }
     if (!r.ok) throw new Error(r.status);
     const text = await r.text();
-    orders = JSON.parse(text);
+    const data = parseSyncData(text);
+    orders = data.orders;
+    klanten = data.klanten;
     // Migreer oude type benamingen
     orders = orders.map(o=>{
       if(!o.type) return o;
@@ -785,16 +800,20 @@ async function dbxRead() {
       return o;
     });
     setSyncStatus('gesynchroniseerd','ok');
+    vulKlantenDatalist();
     renderList();
   } catch(e) {
     setSyncStatus('offline — lokaal','err');
-    orders = JSON.parse(localStorage.getItem(BACKUP_KEY)||'[]');
+    const data = parseSyncData(localStorage.getItem(BACKUP_KEY)||'[]');
+    orders = data.orders;
+    klanten = data.klanten;
+    vulKlantenDatalist();
     renderList();
   }
 }
 async function dbxWrite() {
   setSyncStatus('opslaan...','busy');
-  const body = JSON.stringify(orders,null,2);
+  const body = JSON.stringify({orders,klanten},null,2);
   localStorage.setItem(BACKUP_KEY,body);
   if (!token) { addToQueue(); return; }
   try {
@@ -1220,6 +1239,45 @@ function selPrio(btn,prio){
   document.getElementById('prioNormaal').classList.remove('sel');
   btn.classList.add('sel'); selPrioVal=prio;
 }
+// ── VASTE ZAKELIJKE OPDRACHTGEVERS (autocomplete) ──────────────
+// Onthoudt bedrijfsnaam + contactpersoon/telefoon/email van elke "Bedrijf"-opdrachtgever,
+// zodat je bij een volgende opdracht voor dezelfde vaste klant niet alles opnieuw hoeft
+// in te typen. Losstaand van de orders zelf bewaard (niet alleen afgeleid uit de
+// actieve opdrachtenlijst), zodat een klant niet uit de lijst verdwijnt zodra zijn
+// laatste opdracht gearchiveerd wordt.
+function upsertKlant(og){
+  if(!og.naam) return;
+  const bestaand = klanten.find(k=>k.naam.toLowerCase()===og.naam.toLowerCase());
+  if(bestaand){
+    if(og.contact) bestaand.contact=og.contact;
+    if(og.tel) bestaand.tel=og.tel;
+    if(og.email) bestaand.email=og.email;
+  } else {
+    klanten.push({naam:og.naam, contact:og.contact||'', tel:og.tel||'', email:og.email||''});
+  }
+  vulKlantenDatalist();
+}
+
+function vulKlantenDatalist(){
+  const dl=document.getElementById('klantenLijst');
+  if(!dl) return;
+  dl.innerHTML = klanten.slice().sort((a,b)=>a.naam.localeCompare(b.naam)).map(k=>`<option value="${k.naam.replace(/"/g,'&quot;')}">`).join('');
+}
+
+// Wordt aangeroepen terwijl je in "Naam bedrijf" typt/kiest. Bij een EXACTE match (dus
+// na het kiezen van een voorstel uit de lijst, niet bij elke losse letter) worden
+// contactpersoon/telefoon/email van die vaste klant automatisch ingevuld.
+function probeerKlantInvullen(prefix){
+  const naamVeld=document.getElementById(prefix+'_og_naam');
+  const naam=naamVeld.value.trim();
+  const klant=klanten.find(k=>k.naam.toLowerCase()===naam.toLowerCase());
+  if(!klant) return;
+  document.getElementById(prefix+'_og_contact').value=klant.contact||'';
+  document.getElementById(prefix+'_og_tel').value=klant.tel||'';
+  document.getElementById(prefix+'_og_email').value=klant.email||'';
+  showToast('✓ Gegevens van vaste klant ingevuld');
+}
+
 function toggleOG(){
   document.getElementById('f_og_extra').style.display=document.getElementById('f_og_type').value==='aannemer'?'block':'none';
 }
@@ -1404,6 +1462,15 @@ async function saveOrder(){
     btwterug:document.getElementById('f_btwterug').value,
     aangemaakt:new Date().toISOString()
   });
+
+  if(ogType==='aannemer' && ogNaam){
+    upsertKlant({
+      naam:ogNaam,
+      contact:document.getElementById('f_og_contact').value.trim(),
+      tel:document.getElementById('f_og_tel').value.trim(),
+      email:document.getElementById('f_og_email').value.trim()
+    });
+  }
 
   await dbxWrite();
 
@@ -1631,6 +1698,9 @@ function renderList(){
 }
 
 function fmtDate(d){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
+// Zelfde als fmtDate maar met Duitse datumnotatie wanneer taal='de' — gebruikt in de
+// afspraakbevestiging zodat een Duitstalige tekst niet toch een Nederlandse datum toont.
+function fmtDateTaal(d,taal){if(!d)return '';return new Date(d+'T12:00:00').toLocaleDateString(taal==='de'?'de-DE':'nl-NL',{day:'numeric',month:'short',year:'numeric'});}
 
 // ── DETAIL ───────────────────────────────────────────────────
 let detailWijzigingen={};
@@ -1880,6 +1950,48 @@ async function openBijlage(pad){
   else showToast('Bijlage niet beschikbaar',true);
 }
 
+// Voegt een PDF-opdrachtbevestiging toe aan een BESTAANDE order (of vervangt de huidige),
+// rechtstreeks vanuit het detailscherm — bij het aanmaken van een nieuwe order kon dit al,
+// maar achteraf nog niet. Zelfde directe-upload-aanpak als handleDetailFoto: meteen uploaden
+// en opslaan zodra een bestand gekozen wordt, in plaats van te wachten op "Opslaan".
+async function handleDetailBijlage(input,id){
+  const f=(input&&input.files)?input.files[0]:input; if(!f) return;
+  if(f.type!=='application/pdf' && !/\.pdf$/i.test(f.name||'')){ showToast('Alleen PDF-bestanden zijn toegestaan',true); return; }
+  const o=orders.find(x=>x.id===id); if(!o) return;
+  if(!token){ showToast('Niet ingelogd bij Dropbox',true); return; }
+  showToast('📎 Bijlage uploaden...');
+  setSyncStatus('bijlage uploaden...','busy');
+  const mapPad=o.fotoMap||`/Fotos/${o.nr}`;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const b64=e.target.result.split(',')[1],bin=atob(b64),arr=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`${mapPad}/opdrachtbevestiging.pdf`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:arr
+      });
+      if(r.ok){
+        o.fotoMap=mapPad;
+        o.bijlage=`${mapPad}/opdrachtbevestiging.pdf`;
+        // eventuele onopgeslagen tekstveldwijzigingen meteen meenemen, zelfde patroon als handleDetailFoto
+        if(Object.keys(detailWijzigingen).length>0){
+          const idx=orders.findIndex(x=>x.id===id);
+          if(idx>=0) Object.assign(orders[idx],detailWijzigingen);
+          detailWijzigingen={};
+        }
+        await dbxWrite();
+        showToast('✅ Bijlage opgeslagen');
+        showDetail(id);
+      } else {
+        showToast('❌ Bijlage uploaden mislukt',true);
+      }
+    }catch(err){ showToast('❌ Bijlage uploaden mislukt',true); }
+    setSyncStatus('gesynchroniseerd','ok');
+  };
+  reader.onerror=()=>showToast('❌ Bijlage lezen mislukt',true);
+  reader.readAsDataURL(f);
+}
+
 async function showDetail(id){
   const o=orders.find(x=>x.id===id); if(!o)return;
   detailId=id; detailWijzigingen={};
@@ -1960,7 +2072,13 @@ async function showDetail(id){
       <div class="drow"><div class="drow-l">Email</div><input type="email" value="${o.og_email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_email',this.value)"></div>
       <div class="drow"><div class="drow-l">Referentie</div><input type="text" value="${o.og_ref||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'og_ref',this.value)"></div>
     </div>
-    ${o.bijlage?`<div class="drow"><div class="drow-l">📎 Bijlage</div><div class="drow-v"><button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button></div></div>`:''}
+    <div class="drow"><div class="drow-l">📎 Opdrachtbevestiging</div><div class="drow-v" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      ${o.bijlage?`<button onclick="openBijlage('${o.bijlage}')" style="background:var(--blue-bg);color:var(--blue);border:1px solid #c0d0f0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">📄 Openen</button>`:''}
+      <label style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">
+        ${o.bijlage?'🔄 Vervangen':'📎 Toevoegen'}
+        <input type="file" accept=".pdf" style="display:none" onchange="handleDetailBijlage(this,${id})">
+      </label>
+    </div></div>
     <div class="slbl">Locatie & klant</div>
     <div class="drow"><div class="drow-l">Naam bewoner</div><input type="text" value="${o.naam||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'naam',this.value)"></div>
     <div class="drow"><div class="drow-l">Adres</div><input type="text" value="${o.adres||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'adres',this.value)"></div>
@@ -2333,17 +2451,23 @@ function bouwAfspraakBericht(o,kort){
   const tijd=o.agenda_tijd||'08:00';
   if((o.cessie_taal||'nl')==='de'){
     const onderwerp=`Terminbestätigung — ${type} — ${o.nr}`;
-    const kern=`Sehr geehrte(r) ${o.naam||'Kunde/Kundin'},\n\nhiermit bestätigen wir den Termin für folgende Arbeiten:\n\nArt der Arbeiten: ${type}\nAdresse:          ${o.adres||'-'}\nDatum:            ${fmtDate(o.datum)}\nUhrzeit:          ab ${tijd} Uhr`;
+    const kern=`Sehr geehrte(r) ${o.naam||'Kunde/Kundin'},\n\nhiermit bestätigen wir den Termin für folgende Arbeiten:\n\nArt der Arbeiten: ${type}\nAdresse:          ${o.adres||'-'}\nDatum:            ${fmtDateTaal(o.datum,'de')}\nUhrzeit:          ab ca. ${tijd} Uhr`;
+    const annulering=kort
+      ? 'Absagen/verschieben? Bitte mindestens 24 Stunden vorher, wegen Kosten und Planung.'
+      : 'Sollten Sie nicht anwesend sein können, sagen Sie den Termin bitte mindestens 24 Stunden im Voraus ab oder verschieben Sie ihn — so vermeiden wir unnötige Kosten und können die Zeit einem anderen Kunden anbieten.';
     const tekst=kort
-      ? `${kern}\n\nMit freundlichen Grüßen,\nRolf Jurgen — REPAFIN`
-      : `${kern}\n\nSollte dieser Termin nicht mehr passen, geben Sie uns bitte rechtzeitig Bescheid.\n\nMit freundlichen Grüßen,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
+      ? `${kern}\n\n${annulering}\n\nMit freundlichen Grüßen,\nRolf Jurgen — REPAFIN`
+      : `${kern}\n\n${annulering}\n\nMit freundlichen Grüßen,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
     return {onderwerp,tekst};
   }
   const onderwerp=`Bevestiging afspraak — ${type} — ${o.nr}`;
-  const kern=`Beste ${o.naam||'klant'},\n\nHierbij bevestigen wij de afspraak voor de volgende werkzaamheden:\n\nType werkzaamheden: ${type}\nAdres:              ${o.adres||'-'}\nDatum:              ${fmtDate(o.datum)}\nTijd:               vanaf ${tijd} uur`;
+  const kern=`Beste ${o.naam||'klant'},\n\nHierbij bevestigen wij de afspraak voor de volgende werkzaamheden:\n\nType werkzaamheden: ${type}\nAdres:              ${o.adres||'-'}\nDatum:              ${fmtDateTaal(o.datum,'nl')}\nTijd:               vanaf ca. ${tijd} uur`;
+  const annulering=kort
+    ? 'Annuleren/verzetten? Graag minimaal 24 uur van tevoren i.v.m. kosten en planning.'
+    : 'Kunt u onverhoopt niet aanwezig zijn? Annuleer of verzet de afspraak dan minimaal 24 uur van tevoren — zo voorkomen we onnodige kosten en kunnen we de tijd nog aan een andere klant aanbieden.';
   const tekst=kort
-    ? `${kern}\n\nMet vriendelijke groet,\nRolf Jurgen — REPAFIN`
-    : `${kern}\n\nMocht deze datum of tijd onverhoopt niet meer uitkomen, laat het ons dan tijdig weten.\n\nMet vriendelijke groet,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
+    ? `${kern}\n\n${annulering}\n\nMet vriendelijke groet,\nRolf Jurgen — REPAFIN`
+    : `${kern}\n\n${annulering}\n\nMet vriendelijke groet,\n\nRolf Jurgen\nREPAFIN by Rolf Jurgen\nT: +31(0)45-5350200\nmail@repafin.nl`;
   return {onderwerp,tekst};
 }
 
