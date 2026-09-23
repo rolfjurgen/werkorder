@@ -2843,6 +2843,42 @@ function vindAfbeeldingUitBestanden(files){
   }
   return file||reserve;
 }
+function vindPdfUitBestanden(files){
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const type=(f.type||'').toLowerCase();
+    if(type==='application/pdf' || /\.pdf$/i.test(f.name||'')) return f;
+  }
+  return null;
+}
+
+// Plaatst een gesleepte PDF als opdrachtbevestiging — zelfde soort scherm-herkenning als
+// plaatsGeplakteFoto, maar dan voor het "📎 Opdrachtbevestiging"-veld. In het nieuw-formulier
+// wordt het bestand alleen aan het (bestaande) bestandsveld gekoppeld — de echte upload
+// gebeurt pas bij "Opslaan", net als wanneer je het bestand zelf via dat veld kiest. In het
+// detailscherm van een bestaande order wordt meteen geüpload, zoals bij "Toevoegen"/"Vervangen".
+function plaatsGesleeptePdf(file){
+  if(document.getElementById('editModal').classList.contains('open')){
+    showToast('PDF-bijlage toevoegen kan nog niet in het bewerkscherm — gebruik het detailscherm of een nieuwe opdracht',true);
+    return;
+  }
+  const panelNieuw=document.getElementById('panel-nieuw');
+  if(panelNieuw && panelNieuw.classList.contains('active')){
+    const input=document.getElementById('f_og_bijlage');
+    const dt=new DataTransfer();
+    dt.items.add(file);
+    input.files=dt.files;
+    toonBijlageNaam();
+    showToast('📎 PDF gekoppeld — wordt bij opslaan geüpload');
+    return;
+  }
+  const panelDetail=document.getElementById('panel-detail');
+  if(panelDetail && panelDetail.classList.contains('active') && detailId){
+    handleDetailBijlage(file,detailId);
+    return;
+  }
+  showToast('Open eerst een opdracht (nieuw of detail) om een PDF-bijlage te kunnen toevoegen',true);
+}
 
 // Bepaalt of we op een scherm zitten waar een geplakte/gesleepte foto ergens naartoe
 // zou kunnen (nieuw-formulier, bewerk-modal of detailscherm) — gebruikt om de
@@ -2923,11 +2959,13 @@ function initDropFoto(){
   document.addEventListener('drop', (e)=>{
     e.preventDefault();
     const files=(e.dataTransfer&&e.dataTransfer.files)||[];
+    const pdf=vindPdfUitBestanden(files);
+    if(pdf){ plaatsGesleeptePdf(pdf); return; }
     const file=vindAfbeeldingUitBestanden(files);
     if(!file){
-      // een drop op deze app heeft geen ander legitiem doel dan een foto toevoegen,
-      // dus hier tonen we altijd precies wat ontvangen werd als het geen foto bleek te zijn.
-      showToast('Slepen: geen foto herkend. Ontvangen: '+beschrijfDataTransfer(e.dataTransfer),true,7000);
+      // een drop op deze app heeft geen ander legitiem doel dan een foto of PDF-bijlage toevoegen,
+      // dus hier tonen we altijd precies wat ontvangen werd als geen van beide herkend werd.
+      showToast('Slepen: geen foto of PDF herkend. Ontvangen: '+beschrijfDataTransfer(e.dataTransfer),true,7000);
       return;
     }
     plaatsGeplakteFoto(file);
