@@ -89,15 +89,21 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 .sig-top { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .sig-top span { font-size: 12px; color: var(--text3); }
 .sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: inherit; }
-canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: auto; cursor: crosshair; background: #fafaf8; }
+canvas.sigpad { display: block; width: 100%; height: 190px; touch-action: auto; cursor: crosshair; background: #fafaf8; }
 @media (min-width: 700px) {
   canvas.sigpad { height: 90px; }
 }
 .sig-canvas-wrap { position: relative; }
 .sig-lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(245,247,248,.95); cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2); text-align: center; padding: 10px; line-height: 1.4; }
 .sig-lock-hint { font-size: 11px; font-weight: 400; color: var(--text3); }
+
+/* Onopgeslagen-wijzigingen-banner: knippert kort rood als je probeert terug te gaan
+   zonder eerst op te slaan (zie probeerTerug/flashOpslaanBanner). */
+@keyframes opslaanAlertFlash { 0%, 100% { background: var(--accent-bg); border-color: #e8d090; } 25%, 75% { background: #fbdada; border-color: #d9787a; } }
+.opslaan-alert { animation: opslaanAlertFlash 0.6s ease-in-out 2; }
+.opslaan-alert span { color: #a02020 !important; font-weight: 600; }
 .sig-hint { padding: 6px 12px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
-.sig-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
+.sig-preview { width: 100%; max-height: 190px; object-fit: contain; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
 @media (min-width: 700px) {
   .sig-preview { max-height: 90px; }
 }
@@ -1754,31 +1760,34 @@ function markeerWijziging(id,veld,waarde){
   detailWijzigingen[veld]=waarde;
   const banner=document.getElementById('opslaanBanner');
   if(banner) banner.style.display='flex';
+  const bannerBottom=document.getElementById('opslaanBannerBottom');
+  if(bannerBottom) bannerBottom.style.display='flex';
   const knopTop=document.getElementById('opslaanKnopTop');
   if(knopTop) knopTop.style.display='block';
   const knopBottom=document.getElementById('opslaanKnopBottom');
   if(knopBottom) knopBottom.style.display='block';
 }
 
-// Type werkzaamheden wijzigen in het detailscherm — zelfde pending-wijziging-mechanisme
-// als de andere velden (pas definitief na "Wijzigingen opslaan"), maar toont/verbergt
-// er ook het "Omschrijving overig"-veld bij zonder het hele scherm opnieuw op te bouwen
-// (dat zou andere nog niet opgeslagen wijzigingen op het scherm ongedaan maken).
-function wijzigDetailType(id,waarde){
-  const wrap=document.getElementById('detailOverigWrap');
-  if(waarde==='Overige werkzaamheden'){
-    if(wrap) wrap.style.display='block';
-    const inp=document.getElementById('detailOverigInput');
-    const tekst=inp?inp.value.trim():'';
-    markeerWijziging(id,'type',tekst?`Overige werkzaamheden: ${tekst}`:'Overige werkzaamheden');
-  } else {
-    if(wrap) wrap.style.display='none';
-    markeerWijziging(id,'type',waarde);
+// Terugknop (boven én onder) mag het detailscherm alleen verlaten als er geen
+// onopgeslagen wijzigingen openstaan — anders gingen die eerder stilzwijgend verloren.
+// Bij een geblokkeerde poging lichten beide "Onopgeslagen wijzigingen"-banners kort rood
+// op (boven én onder, dus zichtbaar ongeacht waar je op het scherm staat).
+function probeerTerug(id){
+  if(Object.keys(detailWijzigingen).length>0){
+    flashOpslaanBanner();
+    showToast('⚠️ Sla eerst je wijzigingen op voordat je teruggaat',true);
+    return;
   }
+  goTab('overzicht');
 }
-function wijzigDetailOverigTekst(id,tekst){
-  tekst=tekst.trim();
-  markeerWijziging(id,'type',tekst?`Overige werkzaamheden: ${tekst}`:'Overige werkzaamheden');
+function flashOpslaanBanner(){
+  ['opslaanBanner','opslaanBannerBottom'].forEach(bid=>{
+    const el=document.getElementById(bid); if(!el) return;
+    el.classList.remove('opslaan-alert');
+    void el.offsetWidth; // reflow, zodat de animatie ook bij een herhaalde poging opnieuw start
+    el.classList.add('opslaan-alert');
+    el.addEventListener('animationend',()=>el.classList.remove('opslaan-alert'),{once:true});
+  });
 }
 
 async function slaDetailOp(id){
@@ -2105,7 +2114,7 @@ async function showDetail(id){
 
   document.getElementById('detailContent').innerHTML=`
     <div class="det-hdr">
-      <button class="back-btn" onclick="goTab('overzicht')">← Terug</button>
+      <button class="back-btn" onclick="probeerTerug(${id})">← Terug</button>
       <div style="flex:1"><div style="font-family:monospace;font-size:10px;color:var(--text3)">${o.nr}</div>
       <div style="font-size:15px;font-weight:600">${hoofdNaam||'Opdracht'}</div></div>
       <div style="display:flex;gap:6px">
@@ -2150,15 +2159,7 @@ async function showDetail(id){
     <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'tel',this.value)"></div>
     <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'email',this.value)"></div>
     <div class="slbl">Opdracht</div>
-    <div class="drow"><div class="drow-l">Type</div>
-      <select id="detailTypeSel" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="wijzigDetailType(${id},this.value)">
-        ${['Inbraakschade','Keuken/Tegel','Opleverpunt','(Lak)schade deur/poort','Sanitair','Overige werkzaamheden'].map(t=>`<option value="${t}" ${basisType(o.type)===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-    </div>
-    <div class="drow" id="detailOverigWrap" style="display:${isOverigType(o.type)?'block':'none'}">
-      <div class="drow-l">Omschrijving overig</div>
-      <input type="text" id="detailOverigInput" value="${overigTekst(o.type)}" placeholder="bijv. garagepoort, sanitair..." style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="wijzigDetailOverigTekst(${id},this.value)">
-    </div>
+    <div class="drow"><div class="drow-l">Type</div><input type="text" value="${o.type||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'type',this.value)"></div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     <div class="drow"><div class="drow-l">Omschrijving</div><textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea></div>
     <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
@@ -2229,6 +2230,9 @@ async function showDetail(id){
       ${(o.schadebedrag&&o.btw)?`<div class="drow"><div class="drow-l"><strong>Totaal incl. BTW</strong></div><div class="drow-v"><strong>€ ${(parseFloat(o.schadebedrag)+parseFloat(o.btw)).toFixed(2)}</strong></div></div>`:''}
       ${o.eigenrisico?`<div class="drow"><div class="drow-l">Af: eigen risico</div><div class="drow-v">€ ${parseFloat(o.eigenrisico).toFixed(2)}</div></div>`:''}
     `:''}
+    <div id="opslaanBannerBottom" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
+    </div>
     <button id="opslaanKnopBottom" onclick="slaDetailOp(${id})" style="display:none;width:100%;margin-bottom:14px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">💾 Wijzigingen opslaan</button>
     <div class="divider"></div>
     ${o.verzekering?`<button class="btn-compact btn-compact-green" onclick="saveCessiePDF(${id})" style="width:100%;margin-bottom:7px">📋 Akte van Cessie PDF</button>`:''}
@@ -2239,7 +2243,7 @@ async function showDetail(id){
       <button class="btn-compact btn-compact-blue" onclick="mailOrder(${id})">✉️ Mailen</button>
       ${o.status==='klaar'?`<button class="btn-compact btn-compact-accent" onclick="archiveerOrder(${id})">📦 Archiveren</button>`:''}
       <button class="btn-compact btn-compact-danger" onclick="deleteOrder(${id})">🗑️ Verwijderen</button>
-      <button class="btn-compact btn-compact-edit" onclick="goTab('overzicht')"${o.status!=='klaar'?' style="grid-column:span 2"':''}>← Terug</button>
+      <button class="btn-compact btn-compact-edit" onclick="probeerTerug(${id})"${o.status!=='klaar'?' style="grid-column:span 2"':''}>← Terug</button>
     </div>`;
 
   goDetail();
