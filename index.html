@@ -89,10 +89,13 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, 'S
 .sig-top { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .sig-top span { font-size: 12px; color: var(--text3); }
 .sig-clr { font-size: 12px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-family: inherit; }
-canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair; background: #fafaf8; }
+canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: auto; cursor: crosshair; background: #fafaf8; }
 @media (min-width: 700px) {
   canvas.sigpad { height: 90px; }
 }
+.sig-canvas-wrap { position: relative; }
+.sig-lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(245,247,248,.95); cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2); text-align: center; padding: 10px; line-height: 1.4; }
+.sig-lock-hint { font-size: 11px; font-weight: 400; color: var(--text3); }
 .sig-hint { padding: 6px 12px; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); }
 .sig-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: var(--r); border: 1px solid var(--border); background: #fafaf8; display: block; }
 @media (min-width: 700px) {
@@ -426,8 +429,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
       <div id="sigTekstDE" style="margin-top:4px"></div>
     </div>
     <div class="sig-wrap">
-      <div class="sig-top"><span>Teken hieronder</span><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></div>
-      <canvas id="sigCanvas" class="sigpad"></canvas>
+      <div class="sig-top"><span>Teken hieronder</span><span style="display:flex;gap:6px"><button class="sig-clr" id="sigCanvas_lockbtn" style="display:none" onclick="vergrendelSig('sigCanvas')">🔒 Vergrendel</button><button class="sig-clr" onclick="clearSig('sigCanvas')">Wissen</button></span></div>
+      <div class="sig-canvas-wrap">
+        <canvas id="sigCanvas" class="sigpad"></canvas>
+        <div class="sig-lock-overlay" id="sigCanvas_lock" onclick="activeerSig('sigCanvas')">🔓 Tik om te activeren<div class="sig-lock-hint">voorkomt per ongeluk tekenen tijdens scrollen</div></div>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="saveOrder()">Opdracht opslaan & synchroniseren</button>
   </div>
@@ -692,8 +698,11 @@ canvas.sigpad { display: block; width: 100%; height: 140px; touch-action: none; 
     </div>
     <div id="e_sig_new">
       <div class="sig-wrap">
-        <div class="sig-top"><span>Nieuwe handtekening</span><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></div>
-        <canvas id="editSigCanvas" class="sigpad"></canvas>
+        <div class="sig-top"><span>Nieuwe handtekening</span><span style="display:flex;gap:6px"><button class="sig-clr" id="editSigCanvas_lockbtn" style="display:none" onclick="vergrendelSig('editSigCanvas')">🔒 Vergrendel</button><button class="sig-clr" onclick="clearSig('editSigCanvas')">Wissen</button></span></div>
+        <div class="sig-canvas-wrap">
+          <canvas id="editSigCanvas" class="sigpad"></canvas>
+          <div class="sig-lock-overlay" id="editSigCanvas_lock" onclick="activeerSig('editSigCanvas')">🔓 Tik om te activeren<div class="sig-lock-hint">voorkomt per ongeluk tekenen tijdens scrollen</div></div>
+        </div>
         <div class="sig-hint">Laat leeg om bestaande te behouden</div>
       </div>
     </div>
@@ -1056,6 +1065,11 @@ function goArchiefDetail() {
 }
 
 // ── SIGNATURE ────────────────────────────────────────────────
+// Handtekeningveld start altijd VERGRENDELD (actief:false): zolang het vergrendeld is,
+// laat het veld gewoon scrollen door (touch-action:auto, geen preventDefault), zodat er
+// nooit per ongeluk een streep getekend wordt tijdens het scrollen door een opdracht.
+// Pas na een expliciete tik op "Tik om te activeren" (activeerSig) wordt het een echt
+// tekenveld (touch-action:none + preventDefault, zodat de streep niet ook nog scrollt).
 function initSigPad(id) {
   const c=document.getElementById(id); if(!c)return;
   const dpr=window.devicePixelRatio||1, rect=c.getBoundingClientRect();
@@ -1063,15 +1077,32 @@ function initSigPad(id) {
   c.width=(rect.width||320)*dpr; c.height=sigH*dpr;
   const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
   ctx.strokeStyle='#1c1916'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
-  sigStates[id]={ctx,drawing:false,hasSig:false};
+  sigStates[id]={ctx,drawing:false,hasSig:false,actief:false};
+  c.style.touchAction='auto';
+  const overlay=document.getElementById(id+'_lock'); if(overlay) overlay.style.display='flex';
+  const lockBtn=document.getElementById(id+'_lockbtn'); if(lockBtn) lockBtn.style.display='none';
   const pos=(e)=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
-  c.addEventListener('mousedown',e=>{sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
-  c.addEventListener('mousemove',e=>{if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
+  c.addEventListener('mousedown',e=>{if(!sigStates[id].actief)return;sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  c.addEventListener('mousemove',e=>{if(!sigStates[id].actief||!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
   c.addEventListener('mouseup',()=>sigStates[id].drawing=false);
   c.addEventListener('mouseleave',()=>sigStates[id].drawing=false);
-  c.addEventListener('touchstart',e=>{e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
-  c.addEventListener('touchmove',e=>{e.preventDefault();if(!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
+  c.addEventListener('touchstart',e=>{if(!sigStates[id].actief)return;e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove',e=>{if(!sigStates[id].actief||!sigStates[id].drawing)return;e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
   c.addEventListener('touchend',()=>sigStates[id].drawing=false);
+}
+function activeerSig(id){
+  const s=sigStates[id]; if(!s) return;
+  s.actief=true;
+  const c=document.getElementById(id); if(c) c.style.touchAction='none';
+  const overlay=document.getElementById(id+'_lock'); if(overlay) overlay.style.display='none';
+  const lockBtn=document.getElementById(id+'_lockbtn'); if(lockBtn) lockBtn.style.display='inline-block';
+}
+function vergrendelSig(id){
+  const s=sigStates[id]; if(!s) return;
+  s.actief=false; s.drawing=false;
+  const c=document.getElementById(id); if(c) c.style.touchAction='auto';
+  const overlay=document.getElementById(id+'_lock'); if(overlay) overlay.style.display='flex';
+  const lockBtn=document.getElementById(id+'_lockbtn'); if(lockBtn) lockBtn.style.display='none';
 }
 function clearSig(id){const s=sigStates[id];if(!s)return;const c=document.getElementById(id);s.ctx.clearRect(0,0,c.width,c.height);s.hasSig=false;}
 function getSig(id){const s=sigStates[id];return s&&s.hasSig?document.getElementById(id).toDataURL('image/png'):null;}
@@ -1227,11 +1258,21 @@ function typeKleur(type){
   return 'overig';
 }
 
+// Type "Overige werkzaamheden" wordt intern altijd opgeslagen als de exacte tekst
+// "Overige werkzaamheden" of, met omschrijving, "Overige werkzaamheden: <tekst>" —
+// deze drie helpers zijn de ene plek die dat weet, zodat nieuw-formulier, bewerk-modal
+// en het detailscherm allemaal dezelfde conventie gebruiken.
+function isOverigType(type){ return !!type && type.startsWith('Overige werkzaamheden'); }
+function basisType(type){ return isOverigType(type) ? 'Overige werkzaamheden' : (type||'Inbraakschade'); }
+function overigTekst(type){
+  if(!isOverigType(type) || type==='Overige werkzaamheden') return '';
+  return type.replace(/^Overige werkzaamheden:\s*/,'');
+}
 function selType(btn,type){
   document.querySelectorAll('#newForm .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); selTypeVal=type;
-  document.getElementById('f_overig_wrap').style.display=type==='Overig'?'block':'none';
-  if(type!=='Overig') document.getElementById('f_overig').value='';
+  document.getElementById('f_overig_wrap').style.display=type==='Overige werkzaamheden'?'block':'none';
+  if(type!=='Overige werkzaamheden') document.getElementById('f_overig').value='';
 }
 function selPrio(btn,prio){
   document.getElementById('prioSpoed').classList.remove('sel');
@@ -1362,7 +1403,8 @@ async function bulkVerwijder(){
 function selEditType(btn,type){
   document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); editTypeVal=type;
-  document.getElementById('e_overig_wrap').style.display=type==='Overig'?'block':'none';
+  document.getElementById('e_overig_wrap').style.display=type==='Overige werkzaamheden'?'block':'none';
+  if(type!=='Overige werkzaamheden') document.getElementById('e_overig').value='';
 }
 function selEditPrio(btn,prio){
   document.getElementById('eprioSpoed').classList.remove('sel');
@@ -1716,6 +1758,27 @@ function markeerWijziging(id,veld,waarde){
   if(knopTop) knopTop.style.display='block';
   const knopBottom=document.getElementById('opslaanKnopBottom');
   if(knopBottom) knopBottom.style.display='block';
+}
+
+// Type werkzaamheden wijzigen in het detailscherm — zelfde pending-wijziging-mechanisme
+// als de andere velden (pas definitief na "Wijzigingen opslaan"), maar toont/verbergt
+// er ook het "Omschrijving overig"-veld bij zonder het hele scherm opnieuw op te bouwen
+// (dat zou andere nog niet opgeslagen wijzigingen op het scherm ongedaan maken).
+function wijzigDetailType(id,waarde){
+  const wrap=document.getElementById('detailOverigWrap');
+  if(waarde==='Overige werkzaamheden'){
+    if(wrap) wrap.style.display='block';
+    const inp=document.getElementById('detailOverigInput');
+    const tekst=inp?inp.value.trim():'';
+    markeerWijziging(id,'type',tekst?`Overige werkzaamheden: ${tekst}`:'Overige werkzaamheden');
+  } else {
+    if(wrap) wrap.style.display='none';
+    markeerWijziging(id,'type',waarde);
+  }
+}
+function wijzigDetailOverigTekst(id,tekst){
+  tekst=tekst.trim();
+  markeerWijziging(id,'type',tekst?`Overige werkzaamheden: ${tekst}`:'Overige werkzaamheden');
 }
 
 async function slaDetailOp(id){
@@ -2087,7 +2150,15 @@ async function showDetail(id){
     <div class="drow"><div class="drow-l">Telefoon</div><input type="tel" value="${o.tel||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'tel',this.value)"></div>
     <div class="drow"><div class="drow-l">E-mail</div><input type="email" value="${o.email||''}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="markeerWijziging(${id},'email',this.value)"></div>
     <div class="slbl">Opdracht</div>
-    <div class="drow"><div class="drow-l">Type</div><div class="drow-v">${o.type}</div></div>
+    <div class="drow"><div class="drow-l">Type</div>
+      <select id="detailTypeSel" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" onchange="wijzigDetailType(${id},this.value)">
+        ${['Inbraakschade','Keuken/Tegel','Opleverpunt','(Lak)schade deur/poort','Sanitair','Overige werkzaamheden'].map(t=>`<option value="${t}" ${basisType(o.type)===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="drow" id="detailOverigWrap" style="display:${isOverigType(o.type)?'block':'none'}">
+      <div class="drow-l">Omschrijving overig</div>
+      <input type="text" id="detailOverigInput" value="${overigTekst(o.type)}" placeholder="bijv. garagepoort, sanitair..." style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit" oninput="wijzigDetailOverigTekst(${id},this.value)">
+    </div>
     ${o.locatie?`<div class="drow"><div class="drow-l">Locatie</div><div class="drow-v">${o.locatie==='buiten'?'🌤️ Buiten':'🏠 Binnen'}</div></div>`:''}
     <div class="drow"><div class="drow-l">Omschrijving</div><textarea style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);outline:none;font-size:14px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'omschr',this.value)">${o.omschr||''}</textarea></div>
     <div class="drow" style="background:var(--surface2)"><div class="drow-l">🔒 Intern (niet op werkbon)</div><textarea style="width:100%;background:transparent;border:none;outline:none;font-size:13px;color:var(--text);padding:4px 0;font-family:inherit;resize:none;min-height:60px;line-height:1.5" oninput="markeerWijziging(${id},'intern',this.value)">${o.intern||''}</textarea></div>
@@ -2141,8 +2212,11 @@ async function showDetail(id){
              <strong style="color:#0F1B2A">DE:</strong> Der Kunde bestätigt die ordnungsgemäße Ausführung der Arbeiten und erkennt die Zahlungsverpflichtung an.`
         }
       </div>
-      <div class="sig-top"><span>Teken hieronder / Unterschrift</span><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></div>
-      <canvas id="detailSigCanvas" class="sigpad"></canvas>
+      <div class="sig-top"><span>Teken hieronder / Unterschrift</span><span style="display:flex;gap:6px"><button class="sig-clr" id="detailSigCanvas_lockbtn" style="display:none" onclick="vergrendelSig('detailSigCanvas')">🔒 Vergrendel</button><button class="sig-clr" onclick="clearSig('detailSigCanvas')">Wissen</button></span></div>
+      <div class="sig-canvas-wrap">
+        <canvas id="detailSigCanvas" class="sigpad"></canvas>
+        <div class="sig-lock-overlay" id="detailSigCanvas_lock" onclick="activeerSig('detailSigCanvas')">🔓 Tik om te activeren<div class="sig-lock-hint">voorkomt per ongeluk tekenen tijdens scrollen</div></div>
+      </div>
     </div>
     <button onclick="slaHandtekeningOp(${id})" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:7px">✅ Handtekening opslaan</button>`}
     ${o.verzekering?`<div class="slbl">Verzekeringsgeval — Akte van Cessie</div>
@@ -2246,13 +2320,13 @@ async function openEdit(id){
   document.getElementById('e_og_ref').value=o.og_ref||'';
 
   editTypeVal=o.type||'';
-  const isOverig=editTypeVal.startsWith('Overig');
+  const isOverig=isOverigType(editTypeVal);
   document.querySelectorAll('#editModal .type-grid .tbtn').forEach(b=>{
     const bType=b.getAttribute('onclick').match(/'([^']+)'/)?.[1];
-    b.classList.toggle('sel',isOverig?bType==='Overig':bType===editTypeVal);
+    b.classList.toggle('sel',isOverig?bType==='Overige werkzaamheden':bType===editTypeVal);
   });
   document.getElementById('e_overig_wrap').style.display=isOverig?'block':'none';
-  if(isOverig) document.getElementById('e_overig').value=editTypeVal.replace('Overig: ','').replace('Overig','');
+  if(isOverig) document.getElementById('e_overig').value=overigTekst(editTypeVal);
 
   editLocVal=o.locatie||'binnen';
   document.getElementById('elocBinnen').classList.toggle('sel',editLocVal==='binnen');
@@ -2321,7 +2395,7 @@ async function saveEdit(){
   orders[idx].og_ref=document.getElementById('e_og_ref').value.trim();
   orders[idx].prioriteit=editPrioVal;
   orders[idx].locatie=editLocVal;
-  if(editTypeVal) orders[idx].type=(editTypeVal==='Overig'&&eOverig)?`Overig: ${eOverig}`:editTypeVal;
+  if(editTypeVal) orders[idx].type=(editTypeVal==='Overige werkzaamheden'&&eOverig)?`Overige werkzaamheden: ${eOverig}`:editTypeVal;
 
   // Nieuwe fotos
   orders[idx].intern=document.getElementById('e_intern').value.trim();
