@@ -459,6 +459,10 @@ canvas.sigpad { display: block; width: 100%; height: 190px; touch-action: auto; 
       <button onclick="bulkVerwijder()" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🗑️ Verwijderen</button>
     </div>
   </div>
+  <div id="factCheckBanner" style="display:none;background:var(--red-bg);border:1px solid #e8b0ac;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;align-items:center;justify-content:space-between;cursor:pointer" onclick="statFilter('factcheck')">
+    <span style="font-size:13px;color:var(--red);font-weight:600">⏰ <span id="factCheckCount">0</span> opdracht(en): datum verstreken, al gefactureerd?</span>
+    <span style="font-size:12px;color:var(--red);white-space:nowrap">Bekijken →</span>
+  </div>
   <div class="stats">
     <div class="stat" id="stat-totaal" onclick="statFilter('alle')">
       <div class="stat-n" id="s-totaal" style="color:var(--text)">0</div>
@@ -1607,7 +1611,9 @@ function statFilter(type){
   });
   // Bij "Gepland" staat de volgorde anders standaard door elkaar (bv. nog op aanmaakdatum
   // gesorteerd) — handiger is dan altijd op datum afspraak, eerstvolgende afspraak bovenaan.
-  if(type==='gepland'){
+  // Bij de facturatie-check tegel is "oudste (meest verstreken) datum eerst" om dezelfde reden
+  // handiger — dat is dan ook meteen de opdracht die het langst al aandacht nodig heeft.
+  if(type==='gepland'||type==='factcheck'){
     document.getElementById('sortOrder').value='datum';
     sortRichting='asc';
     document.getElementById('sortRichtingBtn').textContent='↑';
@@ -1618,6 +1624,17 @@ function statFilter(type){
 
 function isNogTePlannen(o){ return o.status==='nieuw' && (!o.datum||o.datum===''); }
 function isGepland(o){ return o.status==='nieuw' && o.datum && o.datum!==''; }
+// Gepland, maar de afspraakdatum is al (minstens) een dag voorbij, en de status staat nog
+// steeds op "nieuw" (dus niet handmatig op Onderhanden/Klaar gezet) — vermoedelijk vergeten
+// om te factureren. Bewust NIET van toepassing op "Onderhanden": die status gebruikt Rolf
+// juist voor opdrachten die over meerdere dagen/weken lopen, waar de ingevulde datum alleen
+// de startdatum is — daar zou "datum voorbij" voortdurend valse meldingen geven.
+function isTeFacturenCheck(o){
+  if(!isGepland(o)) return false;
+  const vandaag=new Date(); vandaag.setHours(0,0,0,0);
+  const afspraak=new Date(o.datum+'T00:00:00');
+  return afspraak < vandaag;
+}
 
 // Sorteersleutel voor "Alfabetisch": bij een bedrijf (via aannemer) het eerste woord
 // van de bedrijfsnaam, bij een particulier het laatste woord van de naam (de achternaam,
@@ -1636,12 +1653,18 @@ function renderList(){
   const gepland = orders.filter(o=>isGepland(o)).length;
   const bezig = orders.filter(o=>o.status==='bezig').length;
   const klaar = orders.filter(o=>o.status==='klaar').length;
+  const teFactureren = orders.filter(o=>isTeFacturenCheck(o)).length;
 
   document.getElementById('s-totaal').textContent=orders.length;
   document.getElementById('s-nieuw').textContent=nogTeP;
   document.getElementById('s-gepland').textContent=gepland;
   document.getElementById('s-bezig').textContent=bezig;
   document.getElementById('s-klaar').textContent=klaar;
+  const factBanner=document.getElementById('factCheckBanner');
+  if(factBanner){
+    factBanner.style.display=teFactureren>0?'flex':'none';
+    document.getElementById('factCheckCount').textContent=teFactureren;
+  }
 
   const fStatus=document.getElementById('filterStatus').value;
   const fPrio=document.getElementById('filterPrio').value;
@@ -1658,6 +1681,8 @@ function renderList(){
     filtered=filtered.filter(o=>o.status==='bezig');
   } else if(currentStatFilter==='klaar'){
     filtered=filtered.filter(o=>o.status==='klaar');
+  } else if(currentStatFilter==='factcheck'){
+    filtered=filtered.filter(o=>isTeFacturenCheck(o));
   } else {
     // Dropdown filter
     if(fStatus==='nogteplannen') filtered=filtered.filter(o=>isNogTePlannen(o));
@@ -1733,6 +1758,7 @@ function renderList(){
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-right:28px">
           <span class="badge ${badgeCls(o)}">${statusLabel(o.status,o)}</span>
           ${pBadge(o)}
+          ${isTeFacturenCheck(o)?'<span class="badge" style="background:var(--red-bg);color:var(--red);border:1px solid #e8b0ac">⏰ Check facturatie</span>':''}
         </div>
       </div>
       <div class="ometa">
@@ -2136,6 +2162,10 @@ async function showDetail(id){
         <button id="opslaanKnopTop" onclick="slaDetailOp(${id})" style="display:none;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">💾 Opslaan</button>
       </div>
     </div>
+    ${isTeFacturenCheck(o)?`<div style="background:var(--red-bg);border:1px solid #e8b0ac;border-radius:var(--r);padding:10px 12px;margin-bottom:8px">
+      <div style="font-size:13px;color:var(--red);font-weight:600;margin-bottom:8px">⏰ Geplande datum (${fmtDate(o.datum)}) is voorbij — deze opdracht al afgehandeld en klaar om te factureren?</div>
+      <button onclick="changeStatus(${id},'klaar')" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">✓ Ja, zet op Klaar voor facturatie</button>
+    </div>`:''}
     <div id="opslaanBanner" style="display:none;background:var(--accent-bg);border:1px solid #e8d090;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;align-items:center;justify-content:space-between">
       <span style="font-size:12px;color:var(--accent)">⚠️ Onopgeslagen wijzigingen</span>
     </div>
