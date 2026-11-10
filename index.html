@@ -775,6 +775,7 @@ function handleCallback() {
 }
 function logout() {
   localStorage.removeItem('dbx_token'); token = null; orders = []; klanten = [];
+  baseData = null; localStorage.removeItem(STAAT_KEY);
   archiveIndex = null; laatsteNr = null;
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('newForm').style.display='none';
@@ -793,68 +794,293 @@ function parseSyncData(text){
   if (Array.isArray(parsed)) return { orders: parsed, klanten: [] };
   return { orders: parsed.orders||[], klanten: parsed.klanten||[] };
 }
-async function dbxRead() {
+// ── VEILIGE SYNCHRONISATIE (samenvoegen i.p.v. overschrijven) ───────────────
+// Probleem dat hiermee is opgelost: vroeger stuurde elk apparaat bij opslaan zijn HELE
+// opdrachtenlijst naar Dropbox en overschreef daarmee alles. Stond de app op de pc nog
+// open met een oude stand (bv. van vóór een handtekening die op de telefoon was gezet),
+// dan wiste de eerstvolgende opslag op de pc dat werk van de telefoon.
+//
+// Nu werkt het zo:
+//  - BASIS = de laatst bekende stand in Dropbox (wat dit apparaat het laatst heeft gelezen
+//    of geschreven). Wordt ook in localStorage bewaard.
+//  - LOKAAL = de opdrachten zoals ze nu op dit apparaat staan.
+//  - DROPBOX = wat er op dit moment echt in Dropbox staat (wordt vlak vóór elke opslag
+//    opnieuw opgehaald).
+//  Per opdracht en per veld geldt: alleen wat op DIT apparaat t.o.v. de basis is veranderd,
+//  wordt over Dropbox heen gezet. Al het andere (bv. een handtekening of foto die op een
+//  ander apparaat is toegevoegd) blijft staan.
+//  - Bij het wegschrijven wordt Dropbox' versienummer (rev) meegestuurd: heeft een ander
+//    apparaat precies tussendoor opgeslagen, dan weigert Dropbox en wordt opnieuw
+//    opgehaald en samengevoegd (nooit blind overschrijven).
+const BASE_KEY = 'rj_base_v4';
+const PENDING_KEY = 'rj_ongesynct_v4';
+let baseData = null;          // {orders,klanten} = laatst bekende Dropbox-stand
+let laatsteLeesMoment = 0;
+let syncKetting = Promise.resolve();   // lees/schrijf-acties strikt na elkaar
+
+function kloon(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
+function isObj(x){ return x!==null && typeof x==='object' && !Array.isArray(x); }
+function gelijk(a,b){
+  if(a===b) return true;
+  if(a===undefined||b===undefined||a===null||b===null) return false;
+  if(Array.isArray(a)){
+    if(!Array.isArray(b)||a.length!==b.length) return false;
+    for(let i=0;i<a.length;i++) if(!gelijk(a[i],b[i])) return false;
+    return true;
+  }
+  if(isObj(a)){
+    if(!isObj(b)) return false;
+    const ka=Object.keys(a).filter(k=>a[k]!==undefined), kb=Object.keys(b).filter(k=>b[k]!==undefined);
+    if(ka.length!==kb.length) return false;
+    for(const k of ka) if(!gelijk(a[k],b[k])) return false;
+    return true;
+  }
+  return false;
+}
+// Drieweg-samenvoeging van één waarde. b=basis, l=lokaal, r=Dropbox.
+function merge3(b,l,r){
+  if(gelijk(l,b)) return kloon(r);     // lokaal niets veranderd → Dropbox-stand
+  if(gelijk(r,b)) return kloon(l);     // elders niets veranderd → lokale wijziging
+  if(gelijk(l,r)) return kloon(l);     // beide hetzelfde gedaan
+  if(isObj(l)&&isObj(r)){              // beide veranderd → per veld bekijken
+    const bb=isObj(b)?b:{};
+    const out={};
+    const sleutels=new Set([...Object.keys(l),...Object.keys(r)]);
+    sleutels.forEach(k=>{ const v=merge3(bb[k],l[k],r[k]); if(v!==undefined) out[k]=v; });
+    return out;
+  }
+  if(Array.isArray(l)&&Array.isArray(r)&&Array.isArray(b)&&l.length===r.length&&b.length===l.length){
+    return l.map((_,i)=>merge3(b[i],l[i],r[i]));
+  }
+  return kloon(l);                     // echt hetzelfde veld op 2 plekken anders: dit apparaat wint
+}
+// Samenvoegen van een lijst (opdrachten of klanten) op basis van een sleutel.
+function mergeLijst(base,lokaal,remote,sleutel){
+  const mB=new Map((base||[]).map(x=>[sleutel(x),x]));
+  const mL=new Map((lokaal||[]).map(x=>[sleutel(x),x]));
+  const mR=new Map((remote||[]).map(x=>[sleutel(x),x]));
+  const uit=[], gezien=new Set();
+  const doe=k=>{
+    if(gezien.has(k)) return; gezien.add(k);
+    const b=mB.get(k), l=mL.get(k), r=mR.get(k);
+    if(l&&r) uit.push(merge3(b,l,r));
+    else if(l&&!r){
+      // Alleen lokaal: nieuw op dit apparaat → toevoegen. Elders verwijderd/gearchiveerd
+      // maar hier intussen gewijzigd → bewaren (liever dubbel dan kwijt).
+      if(!b||!gelijk(l,b)) uit.push(kloon(l));
+    } else if(!l&&r){
+      // Alleen in Dropbox: nieuw van ander apparaat → toevoegen. Hier verwijderd/gearchiveerd
+      // terwijl een ander apparaat 'm intussen wijzigde → bewaren (liever dubbel dan kwijt).
+      if(!b||!gelijk(r,b)) uit.push(kloon(r));
+    }
+  };
+  (lokaal||[]).forEach(x=>doe(sleutel(x)));
+  (remote||[]).forEach(x=>doe(sleutel(x)));
+  return uit;
+}
+const orderSleutel = o => (o&&o.id!=null) ? 'id:'+o.id : 'nr:'+(o&&o.nr);
+const klantSleutel = k => ((k&&k.naam)||'').toLowerCase();
+function voegSamen(base,lokaal,remote){
+  const b=base||{orders:[],klanten:[]};
+  return {
+    orders: mergeLijst(b.orders,lokaal.orders,remote.orders,orderSleutel),
+    klanten: mergeLijst(b.klanten,lokaal.klanten,remote.klanten,klantSleutel)
+  };
+}
+function migreerTypes(lijst){
+  return lijst.map(o=>{
+    if(!o||!o.type) return o;
+    if(o.type==='Overig'||o.type==='Overig werkzaamheden') o.type='Overige werkzaamheden';
+    if(o.type==='Inbraakschade kozijn/deur') o.type='Inbraakschade';
+    if(o.type==='Keukenblad herstellen') o.type='Keuken/Tegel';
+    if(o.type==='Opleverpunt herstellen') o.type='Opleverpunt';
+    return o;
+  });
+}
+// Zet de samengevoegde stand in de bestaande arrays/objecten (zelfde objecten blijven
+// bestaan), zodat code die net een opdracht 'vasthoudt' (bv. tijdens een foto-upload)
+// niet ineens met een losgekoppelde kopie werkt.
+function pasToeInPlaats(nieuw){
+  const oud=new Map(orders.map(o=>[orderSleutel(o),o]));
+  const res=nieuw.orders.map(n=>{
+    const o=oud.get(orderSleutel(n));
+    if(o){ Object.keys(o).forEach(k=>{ if(!(k in n)) delete o[k]; }); Object.assign(o,n); return o; }
+    return n;
+  });
+  orders.length=0; res.forEach(o=>orders.push(o));
+  klanten.length=0; nieuw.klanten.forEach(k=>klanten.push(k));
+}
+// Basis en lokale stand worden SAMEN in één keer bewaard (alles-of-niets), zodat ze nooit
+// uit de pas kunnen lopen. Lokaal wordt alleen apart bewaard als het afwijkt van de basis
+// (= wijzigingen die Dropbox nog niet heeft), dat spaart ruimte in de browseropslag.
+const STAAT_KEY = 'rj_staat_v4';
+let opslagVolGemeld = false;
+function bewaarStaat(){
+  try {
+    const lokaal={orders,klanten};
+    const rec={base:baseData, lokaal: (baseData&&gelijk(lokaal,baseData)) ? null : lokaal};
+    localStorage.setItem(STAAT_KEY, JSON.stringify(rec));
+  } catch(e){
+    try { localStorage.removeItem(STAAT_KEY); } catch(e2){}
+    if(!opslagVolGemeld){ opslagVolGemeld=true; showToast('⚠️ Browseropslag vol — werk alleen met internetverbinding',true); }
+  }
+}
+function bewaarLokaal(){ bewaarStaat(); }
+function bewaarBase(d){ baseData=kloon(d); bewaarStaat(); }
+function laadLokaleStart(){
+  // Bij het opstarten: basis + lokale stand uit de browser halen.
+  baseData=null;
+  try {
+    const s=localStorage.getItem(STAAT_KEY);
+    if(s){
+      const rec=JSON.parse(s);
+      if(rec && rec.base && Array.isArray(rec.base.orders)){
+        baseData=rec.base;
+        const l=rec.lokaal||rec.base;
+        orders=migreerTypes(kloon(l.orders||[])); klanten=kloon(l.klanten||[]);
+      }
+    }
+  } catch(e){ baseData=null; }
+  if(!baseData){
+    // Eerste start met deze versie: oude lokale reservekopie alleen tonen (voor als je
+    // offline bent). Bij verbinding wordt gewoon de Dropbox-stand overgenomen.
+    try {
+      const l=localStorage.getItem(BACKUP_KEY);
+      if(l){ const d=parseSyncData(l); orders=migreerTypes(d.orders); klanten=d.klanten; }
+    } catch(e){}
+  }
+  // Opruimen van de vorige versie: de oude wachtrij bevatte een VOLLEDIGE oude kopie van
+  // alle opdrachten; die terugzetten zou juist gegevens wissen. Veilig opzij zetten.
+  const oudeQ=localStorage.getItem(QUEUE_KEY);
+  if(oudeQ){
+    try { localStorage.setItem('rj_queue_oud_bewaard', oudeQ); } catch(e){}
+    localStorage.removeItem(QUEUE_KEY);
+  }
+}
+// Haalt de actuele Dropbox-stand op, inclusief versienummer (rev).
+async function haalRemote(){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),30000);
+  try {
+    const r=await fetch('https://content.dropboxapi.com/2/files/download',{
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})},
+      signal:controller.signal
+    });
+    if(r.status===409) return {bestaat:false, rev:null, data:{orders:[],klanten:[]}};
+    if(!r.ok) throw new Error(r.status);
+    let rev=null;
+    try { const h=r.headers.get('Dropbox-API-Result'); if(h) rev=JSON.parse(h).rev||null; } catch(e){}
+    const text=await r.text();
+    const data=parseSyncData(text);
+    data.orders=migreerTypes(data.orders);
+    return {bestaat:true, rev, data};
+  } finally { clearTimeout(timeout); }
+}
+function zetOngesynct(aan){
+  if(aan) localStorage.setItem(PENDING_KEY,'1'); else localStorage.removeItem(PENDING_KEY);
+  renderQueueBanner();
+}
+function inKetting(fn){
+  const p=syncKetting.then(fn);
+  syncKetting=p.catch(()=>{});
+  return p;
+}
+function dbxRead(){ return inKetting(dbxReadIntern); }
+function dbxWrite(){ return inKetting(dbxWriteIntern); }
+
+async function dbxReadIntern() {
   setSyncStatus('laden...','busy');
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 30000);
-    const r = await fetch('https://content.dropboxapi.com/2/files/download', {
-      method:'POST', headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})},
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    if (r.status===409) { orders=[]; klanten=[]; setSyncStatus('verbonden','ok'); renderList(); return; }
-    if (!r.ok) throw new Error(r.status);
-    const text = await r.text();
-    const data = parseSyncData(text);
-    orders = data.orders;
-    klanten = data.klanten;
-    // Migreer oude type benamingen
-    orders = orders.map(o=>{
-      if(!o.type) return o;
-      if(o.type==='Overig'||o.type==='Overig werkzaamheden') o.type='Overige werkzaamheden';
-      if(o.type==='Inbraakschade kozijn/deur') o.type='Inbraakschade';
-      if(o.type==='Keukenblad herstellen') o.type='Keuken/Tegel';
-      if(o.type==='Opleverpunt herstellen') o.type='Opleverpunt';
-      return o;
-    });
-    setSyncStatus('gesynchroniseerd','ok');
+    const remote=await haalRemote();
+    laatsteLeesMoment=Date.now();
+    const heeftOngesynct = !!localStorage.getItem(PENDING_KEY);
+    let samen;
+    if(baseData){
+      samen=voegSamen(baseData,{orders,klanten},remote.data);
+    } else if(heeftOngesynct){
+      // Geen basis, maar wel offline gemaakte wijzigingen: niets weggooien, samenvoegen
+      samen=voegSamen(null,{orders,klanten},remote.data);
+    } else {
+      // Geen betrouwbare basis (eerste keer met deze versie / net ingelogd):
+      // Dropbox-stand overnemen, net als vroeger.
+      samen=kloon(remote.data);
+    }
+    // Melding als de opdracht die nu open staat elders is gewijzigd
+    const detailOpen=document.getElementById('panel-detail')?.classList.contains('active');
+    let openGewijzigd=false;
+    if(detailOpen && detailId!=null){
+      const voor=orders.find(o=>o.id===detailId);
+      const na=samen.orders.find(o=>o.id===detailId);
+      openGewijzigd = !!voor && !gelijk(voor,na);
+    }
+    pasToeInPlaats(samen);
+    bewaarBase(remote.data);
+    try { localStorage.removeItem(BACKUP_KEY); localStorage.removeItem(BASE_KEY); } catch(e){}
     vulKlantenDatalist();
     renderList();
+    if(openGewijzigd) showToast('ℹ️ Deze opdracht is op een ander apparaat gewijzigd — ga terug en open hem opnieuw',true);
+    if(!gelijk(samen,remote.data) || heeftOngesynct){
+      // Er staan op dit apparaat nog wijzigingen die Dropbox nog niet heeft → meteen wegschrijven
+      await dbxWriteIntern();
+    } else {
+      setSyncStatus('gesynchroniseerd','ok');
+    }
   } catch(e) {
+    // Offline: met de lokale stand verder werken (die staat al in 'orders').
     setSyncStatus('offline — lokaal','err');
-    const data = parseSyncData(localStorage.getItem(BACKUP_KEY)||'[]');
-    orders = data.orders;
-    klanten = data.klanten;
     vulKlantenDatalist();
     renderList();
   }
 }
-async function dbxWrite() {
+async function dbxWriteIntern() {
   setSyncStatus('opslaan...','busy');
-  const body = JSON.stringify({orders,klanten},null,2);
-  localStorage.setItem(BACKUP_KEY,body);
-  if (!token) { addToQueue(); return; }
+  bewaarLokaal();
+  if (!token) { zetOngesynct(true); setSyncStatus('offline — lokaal','err'); return; }
   try {
     const vandaag=new Date().toISOString().slice(0,10);
     const lastBackup=localStorage.getItem('rj_last_backup');
     if(lastBackup!==vandaag){
       try {
         const rb=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE})}});
-        if(rb.ok){const data=await rb.text();await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Backup/werkorders_${vandaag}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:data});}
+        if(rb.ok){
+          const data=await rb.text();
+          // Eén reservekopie per dag per apparaat (overschrijft niet de kopie van het andere apparaat)
+          const app=/Mobi|Android/i.test(navigator.userAgent)?'telefoon':'pc';
+          await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+token,'Dropbox-API-Arg':JSON.stringify({path:`/Backup/werkorders_${vandaag}_${app}.json`,mode:'overwrite'}),'Content-Type':'application/octet-stream'},body:data});
+        }
       } catch(e){}
       localStorage.setItem('rj_last_backup',vandaag);
     }
-    const r = await fetch('https://content.dropboxapi.com/2/files/upload',{
-      method:'POST', headers:{
-        'Authorization':'Bearer '+token,
-        'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE,mode:'overwrite',autorename:false}),
-        'Content-Type':'application/octet-stream'
-      }, body
-    });
-    if (!r.ok) throw new Error(r.status);
-    setSyncStatus('gesynchroniseerd','ok');
-  } catch(e) { setSyncStatus('offline — lokaal','err'); addToQueue(); }
+    for(let poging=0; poging<5; poging++){
+      const remote=await haalRemote();
+      const samen=voegSamen(baseData||{orders:[],klanten:[]},{orders,klanten},remote.data);
+      const body=JSON.stringify(samen,null,2);
+      let mode;
+      if(!remote.bestaat) mode={'.tag':'add'};
+      else if(remote.rev) mode={'.tag':'update','update':remote.rev};
+      else mode={'.tag':'overwrite'}; // rev onleesbaar: samenvoegen beschermt nog steeds
+      const r=await fetch('https://content.dropboxapi.com/2/files/upload',{
+        method:'POST', headers:{
+          'Authorization':'Bearer '+token,
+          'Dropbox-API-Arg':JSON.stringify({path:DBX_FILE,mode,autorename:false}),
+          'Content-Type':'application/octet-stream'
+        }, body
+      });
+      if(r.status===409){ await new Promise(res=>setTimeout(res,400+poging*400)); continue; } // tussendoor gewijzigd → opnieuw
+      if(!r.ok) throw new Error(r.status);
+      const andersDanLokaal=!gelijk(samen,{orders,klanten});
+      pasToeInPlaats(samen);
+      bewaarBase(samen);
+      bewaarLokaal();
+      laatsteLeesMoment=Date.now();
+      if(andersDanLokaal) renderList();
+      zetOngesynct(false);
+      setSyncStatus('gesynchroniseerd','ok');
+      vulKlantenDatalist();
+      return;
+    }
+    throw new Error('conflict');
+  } catch(e) { setSyncStatus('offline — lokaal','err'); zetOngesynct(true); }
 }
 async function dbxUploadFoto(path,dataUrl) {
   if (!token||!dataUrl) return null;
@@ -962,16 +1188,19 @@ function setSyncStatus(msg,type) {
   el.className = type==='ok'?'sync-ok':type==='err'?'sync-err':'sync-busy';
 }
 
-// ── QUEUE ────────────────────────────────────────────────────
-function addToQueue() { localStorage.setItem(QUEUE_KEY,JSON.stringify(orders)); renderQueueBanner(); }
+// ── NIET-GESYNCHRONISEERDE WIJZIGINGEN ───────────────────────
+// (vroeger een volledige kopie van alle opdrachten; nu alleen een vlag — de wijzigingen
+// zelf staan veilig in de lokale stand en worden bij synchroniseren samengevoegd)
+function addToQueue() { zetOngesynct(true); }
 function renderQueueBanner() {
   const b=document.getElementById('queueBanner');
-  b.classList.toggle('hidden',!localStorage.getItem(QUEUE_KEY)||!token);
+  b.classList.toggle('hidden',!localStorage.getItem(PENDING_KEY)||!token);
 }
 async function syncQueue() {
-  const q=localStorage.getItem(QUEUE_KEY); if(!q||!token) return;
-  orders=JSON.parse(q); await dbxWrite();
-  localStorage.removeItem(QUEUE_KEY); renderQueueBanner(); showToast('✓ Gesynchroniseerd'); renderList();
+  if(!token) return;
+  await dbxWrite();
+  if(!localStorage.getItem(PENDING_KEY)){ showToast('✓ Gesynchroniseerd'); renderList(); }
+  else showToast('❌ Synchroniseren mislukt — controleer de internetverbinding',true);
 }
 
 // ── NUMMERING (permanente teller, voorkomt dubbele RJ-nummers na archiveren) ──
@@ -1008,6 +1237,13 @@ async function zorgTeller(){
 }
 async function volgendNr(){
   await zorgTeller();
+  // Altijd de actuele teller uit Dropbox meenemen: een ander apparaat kan intussen een
+  // nummer hebben uitgegeven (anders dubbele RJ-nummers én dezelfde fotomap!).
+  if (token) {
+    const d = await dbxReadJSON(DBX_TELLER);
+    if (d && typeof d.laatsteNr==='number') laatsteNr = Math.max(laatsteNr, d.laatsteNr);
+  }
+  laatsteNr = Math.max(laatsteNr, orders.reduce((m,o)=>Math.max(m,nrGetal(o.nr)),0));
   laatsteNr = laatsteNr + 1;
   localStorage.setItem(TELLER_LOCAL_KEY, String(laatsteNr));
   if (token) await dbxWriteJSON(DBX_TELLER, {laatsteNr});
@@ -1022,10 +1258,17 @@ async function init() {
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('newForm').style.display='block';
     document.getElementById('logoutBtn').style.display='inline-block';
+    laadLokaleStart();
     await dbxRead();
     goTab('overzicht');
     renderQueueBanner();
-    setInterval(async()=>{ if(token){await dbxRead();renderList();} }, 45*60*1000);
+    // Regelmatig verversen, en direct zodra het venster/de app weer in beeld komt,
+    // zodat een venster dat lang open staat nooit met een oude stand blijft werken.
+    setInterval(()=>{ if(token && !document.hidden) dbxRead(); }, 5*60*1000);
+    const verversBijTerugkomst=()=>{ if(token && !document.hidden && Date.now()-laatsteLeesMoment>20000) dbxRead(); };
+    document.addEventListener('visibilitychange',verversBijTerugkomst);
+    window.addEventListener('focus',verversBijTerugkomst);
+    window.addEventListener('online',()=>{ if(token) dbxRead(); });
   } else {
     document.getElementById('loginScreen').style.display='flex';
   }
