@@ -1337,11 +1337,22 @@ function initSigPad(id) {
   const pos=(e)=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
   c.addEventListener('mousedown',e=>{if(!sigStates[id].actief)return;sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
   c.addEventListener('mousemove',e=>{if(!sigStates[id].actief||!sigStates[id].drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;});
-  c.addEventListener('mouseup',()=>sigStates[id].drawing=false);
-  c.addEventListener('mouseleave',()=>sigStates[id].drawing=false);
+  c.addEventListener('mouseup',()=>{ if(sigStates[id].drawing) sigStreekKlaar(id); sigStates[id].drawing=false; });
+  c.addEventListener('mouseleave',()=>{ if(sigStates[id].drawing) sigStreekKlaar(id); sigStates[id].drawing=false; });
   c.addEventListener('touchstart',e=>{if(!sigStates[id].actief)return;e.preventDefault();sigStates[id].drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
   c.addEventListener('touchmove',e=>{if(!sigStates[id].actief||!sigStates[id].drawing)return;e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigStates[id].hasSig=true;},{passive:false});
-  c.addEventListener('touchend',()=>sigStates[id].drawing=false);
+  c.addEventListener('touchend',()=>{ if(sigStates[id].drawing) sigStreekKlaar(id); sigStates[id].drawing=false; });
+}
+// Een handtekening in het detailscherm telt direct als 'onopgeslagen wijziging' (net als een
+// getypt veld). Vroeger bestond hij alleen op het scherm tot je op "Handtekening opslaan"
+// drukte: voegde je daarna eerst een foto toe of drukte je op "Wijzigingen opslaan", dan werd
+// het scherm opnieuw opgebouwd en was de handtekening stilzwijgend weg. Nu gaat hij mee met
+// élke opslagactie in het detailscherm, en kun je het scherm niet verlaten zonder op te slaan.
+function sigStreekKlaar(id){
+  if(id!=='detailSigCanvas' || detailId==null) return;
+  const s=sigStates[id]; if(!s||!s.hasSig) return;
+  const c=document.getElementById(id); if(!c) return;
+  markeerWijziging(detailId,'sig',c.toDataURL('image/png'));
 }
 function activeerSig(id){
   const s=sigStates[id]; if(!s) return;
@@ -1357,7 +1368,7 @@ function vergrendelSig(id){
   const overlay=document.getElementById(id+'_lock'); if(overlay) overlay.style.display='flex';
   const lockBtn=document.getElementById(id+'_lockbtn'); if(lockBtn) lockBtn.style.display='none';
 }
-function clearSig(id){const s=sigStates[id];if(!s)return;const c=document.getElementById(id);s.ctx.clearRect(0,0,c.width,c.height);s.hasSig=false;}
+function clearSig(id){const s=sigStates[id];if(!s)return;const c=document.getElementById(id);s.ctx.clearRect(0,0,c.width,c.height);s.hasSig=false;if(id==='detailSigCanvas'&&typeof detailWijzigingen!=='undefined') delete detailWijzigingen.sig;}
 function getSig(id){const s=sigStates[id];return s&&s.hasSig?document.getElementById(id).toDataURL('image/png'):null;}
 
 // ── FOTO ─────────────────────────────────────────────────────
@@ -2114,6 +2125,9 @@ async function slaHandtekeningOp(id){
   const sig=getSig('detailSigCanvas');
   if(!sig){showToast('Teken eerst een handtekening',true);return;}
   const idx=orders.findIndex(x=>x.id===id); if(idx<0)return;
+  // Andere onopgeslagen wijzigingen in dit scherm ook meenemen (gingen eerder verloren)
+  if(Object.keys(detailWijzigingen).length>0) Object.assign(orders[idx],detailWijzigingen);
+  detailWijzigingen={};
   orders[idx].sig=sig;
   showToast('✓ Handtekening opgeslagen');
   goTab('overzicht');
